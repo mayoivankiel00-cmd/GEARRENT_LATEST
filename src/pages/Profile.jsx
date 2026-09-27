@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { useCart } from '../CartContext';
 import { useNotifications } from '../NotificationContext';
-import { currentUser as defaultUser, formatPeso } from '../mockData';
+import { formatPeso } from '../mockData';
 import AccountSidebar from '../components/AccountSidebar';
 import './Account.css';
 
@@ -13,8 +13,8 @@ export default function Profile() {
   const { refreshNotifications } = useNotifications();
   const [transferring, setTransferring] = useState(false);
   const profileUser = user && typeof user === 'object'
-    ? { ...defaultUser, ...user }
-    : { ...defaultUser, name: 'New Member', email: '', tier: 'Gear Renter' };
+    ? { tier: 'Gear Renter', ...user }
+    : { name: '', email: '', tier: 'Gear Renter' };
   const [isEditing, setIsEditing] = useState(false);
   const [isTransferOpen, setIsTransferOpen] = useState(false);
   const [transferAmount, setTransferAmount] = useState('');
@@ -22,10 +22,10 @@ export default function Profile() {
   const [transferMessage, setTransferMessage] = useState('');
   const displayName = typeof profileUser.name === 'string' && profileUser.name.trim()
     ? profileUser.name.trim()
-    : defaultUser.name;
+    : 'New Member';
   const displayEmail = typeof profileUser.email === 'string' && profileUser.email.trim()
     ? profileUser.email.trim()
-    : defaultUser.email;
+    : 'No email on file';
   const memberSince = profileUser.createdAt
     ? new Date(profileUser.createdAt).toLocaleDateString('en-US', { dateStyle: 'medium' })
     : 'Not available';

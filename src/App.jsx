@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { Link, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -39,6 +39,17 @@ function SiteLayout({ children }) {
       <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>{children}</main>
       <Footer />
     </>
+  );
+}
+
+function NotFound() {
+  return (
+    <div className="container" style={{ padding: '4rem 2rem', textAlign: 'center' }}>
+      <div className="eyebrow">404</div>
+      <h1 style={{ fontSize: '2rem', margin: '0.5rem 0 0.8rem' }}>Page not found</h1>
+      <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>The page you were looking for doesn't exist or has moved.</p>
+      <Link to="/" className="btn btn-primary">Back to home</Link>
+    </div>
   );
 }
 
@@ -135,6 +146,7 @@ export default function App() {
               <Route path="/rental-agreement" element={<InfoPage type="agreement" />} />
               <Route path="/contact" element={<InfoPage type="contact" />} />
               <Route path="/locations" element={<InfoPage type="locations" />} />
+              <Route path="*" element={<NotFound />} />
             </Routes>
           </SiteLayout>
         }

@@ -9,6 +9,7 @@ import {
   supabase,
 } from './supabaseClient';
 import { isRateLimitError } from './rateLimit';
+import { isGearProvider } from './providerAccess';
 
 const AuthContext = createContext(null);
 const PENDING_SIGNUP_KEY = 'gearRentPendingSignup';
@@ -391,7 +392,8 @@ export function AuthProvider({ children }) {
 
     // The `on_auth_user_created` trigger creates the profile row; once it
     // exists we can also save the chosen membership tier.
-    if (userData.tier && data.user && data.session) {
+    // The provider tier is bought after sign-up, never set here.
+    if (userData.tier && !isGearProvider({ tier: userData.tier }) && data.user && data.session) {
       await supabase.from('profiles').update({ tier: userData.tier }).eq('id', data.user.id);
     }
 
@@ -459,6 +461,24 @@ export function AuthProvider({ children }) {
     return { ok: true, error: null, balance, amount: Number(data?.amount) || Number(amount) };
   }, []);
 
+  // The Gear Provider tier can only be granted by the database after the
+  // (still simulated) card payment. Returns { ok, error, periodEnd }.
+  const purchaseProviderMembership = useCallback(async (cardLast4) => {
+    const { data, error } = await supabase.rpc('purchase_provider_membership', {
+      p_card_last4: /^\d{4}$/.test(cardLast4 || '') ? cardLast4 : null,
+    });
+    if (error) {
+      return {
+        ok: false,
+        error: isRateLimitError(error)
+          ? 'Too many payment attempts. Please wait a while and try again.'
+          : error.message || 'The payment could not be completed.',
+      };
+    }
+    setUser((prev) => (prev ? { ...prev, tier: data?.tier || 'Gear Provider' } : prev));
+    return { ok: true, error: null, periodEnd: data?.period_end || null };
+  }, []);
+
   // Signs out everywhere (all tabs, browsers and devices), invalidates the
   // refresh tokens server-side and redirects to the sign-in screen.
   const logout = useCallback(() => endSession({ scope: 'global', reason: 'manual' }), [endSession]);
@@ -466,12 +486,14 @@ export function AuthProvider({ children }) {
 
   // Merges and persists partial updates to the signed-in user's own profile.
   // Applies the change to local state immediately (optimistic update) and
-  // writes it to Supabase in the background. `balance` and `role` are not
-  // writable from here — the database rejects them.
+  // writes it to Supabase in the background. `balance`, `role` and the
+  // provider tier are not writable from here — the database rejects them
+  // (use purchaseProviderMembership for the tier).
   const updateUser = useCallback(async (rawUpdates) => {
     const updates = { ...(rawUpdates || {}) };
     delete updates.balance;
     delete updates.role;
+    if (isGearProvider({ tier: updates.tier })) delete updates.tier;
     setUser((prev) => (prev ? { ...prev, ...updates } : prev));
 
     const { data: { session } } = await supabase.auth.getSession();
@@ -516,6 +538,7 @@ export function AuthProvider({ children }) {
     logout,
     refreshProfile,
     requestWithdrawal,
+    purchaseProviderMembership,
     signOut,
     updateUser,
     setPendingSignup,

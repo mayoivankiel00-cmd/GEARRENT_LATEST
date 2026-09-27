@@ -1,63 +1,71 @@
-import { useEffect, useState } from 'react';
-import { categories, products, formatPeso } from '../mockData';
+import { useCallback, useEffect, useState } from 'react';
+import { supabase } from '../supabaseClient';
+import { isGearProvider } from '../providerAccess';
+import { categories, formatPeso } from '../mockData';
 
-const ACCOUNTS_KEY = 'gearRentAccounts';
-const PROVIDER_PRODUCTS_PREFIX = 'gearRentProviderProducts:';
-const RENTED_ITEMS_PREFIX = 'gearRentRentedItems:';
-const RENTAL_HISTORY_PREFIX = 'gearRentRentalHistory:';
+// All admin pages read one snapshot from admin_dashboard_snapshot() (see
+// gearrent_integrity_update.sql). The function refuses non-admins, so this
+// data never reaches other accounts.
+const REFRESH_INTERVAL_MS = 30 * 1000;
 
-function readJson(key, fallback) {
-  try {
-    const value = JSON.parse(window.localStorage.getItem(key) || 'null');
-    return value ?? fallback;
-  } catch {
-    return fallback;
-  }
+function toTime(value) {
+  const time = value ? new Date(value).getTime() : 0;
+  return Number.isFinite(time) ? time : 0;
 }
 
-function readAccounts() {
-  const accounts = readJson(ACCOUNTS_KEY, []);
-  return Array.isArray(accounts) ? accounts : [];
+function normalizeEmail(email) {
+  return typeof email === 'string' ? email.trim().toLowerCase() : '';
 }
 
-function readScopedArrays(prefix) {
-  const records = [];
-  for (let index = 0; index < window.localStorage.length; index += 1) {
-    const key = window.localStorage.key(index);
-    if (!key?.startsWith(prefix)) continue;
-    const value = readJson(key, []);
-    if (!Array.isArray(value)) continue;
-    records.push(...value.map((record) => ({
-      ...record,
-      accountEmail: key.slice(prefix.length),
-    })));
-  }
-  return records;
+function normalizeAccount(row) {
+  return {
+    id: row.id,
+    email: normalizeEmail(row.email),
+    name: row.name || '',
+    tier: row.tier || 'Gear Renter',
+    role: row.role || 'customer',
+    balance: Number(row.balance) || 0,
+    createdAt: toTime(row.created_at),
+  };
 }
 
-function getAllProviderProducts() {
-  return readScopedArrays(PROVIDER_PRODUCTS_PREFIX).map((product) => ({
-    ...product,
-    providerEmail: product.providerEmail || product.accountEmail,
-  }));
+// Database statuses are active / returned / finished; the admin pages use
+// active / overdue / completed.
+function normalizeRental(row) {
+  const returnAt = toTime(row.return_at);
+  const status = row.status === 'active'
+    ? (returnAt && returnAt < Date.now() ? 'overdue' : 'active')
+    : 'completed';
+  return {
+    id: String(row.id),
+    accountEmail: normalizeEmail(row.email),
+    product: { id: row.product_id, name: row.product_name, category: row.category_id },
+    days: Number(row.days) || 0,
+    status,
+    rentedAt: toTime(row.rented_at),
+    paidAt: toTime(row.paid_at),
+    returnAt,
+    finishedAt: toTime(row.finished_at),
+    amount: Number(row.rental_amount) || 0,
+    securityDeposit: Number(row.security_deposit) || 0,
+    depositStatus: row.deposit_status,
+  };
 }
 
-function getAllRentals() {
-  const active = readScopedArrays(RENTED_ITEMS_PREFIX).map((rental) => ({
-    ...rental,
-    status: rental.returnAt && rental.returnAt < Date.now() ? 'overdue' : 'active',
-  }));
-  const completed = readScopedArrays(RENTAL_HISTORY_PREFIX).map((rental) => ({
-    ...rental,
-    status: 'completed',
-  }));
-  return [...active, ...completed].sort((left, right) => (
-    Number(right.rentedAt || right.finishedAt || 0) - Number(left.rentedAt || left.finishedAt || 0)
-  ));
+function normalizeProduct(row) {
+  return {
+    id: row.id,
+    name: row.name,
+    price: Number(row.price) || 0,
+    status: row.status,
+    category: row.category_id,
+    approvalStatus: row.approval_status || 'approved',
+    providerEmail: normalizeEmail(row.provider_email),
+  };
 }
 
 function getRentalAmount(rental) {
-  return Number(rental.product?.price || 0) * Math.max(1, Number(rental.days) || 1);
+  return rental.amount;
 }
 
 function getProductName(rental) {
@@ -65,11 +73,11 @@ function getProductName(rental) {
 }
 
 function getCategoryName(rental) {
-  return rental.product?.category || 'Uncategorized';
+  return categories.find((category) => category.id === rental.product?.category)?.name || 'Uncategorized';
 }
 
 function getAccountName(email, accounts) {
-  return accounts.find((account) => account.email?.trim().toLowerCase() === email)?.name || email || 'Unknown account';
+  return accounts.find((account) => account.email === email)?.name || email || 'Unknown account';
 }
 
 function formatPeriod(rental) {
@@ -80,8 +88,10 @@ function formatPeriod(rental) {
   return `${formatDate(start)}${end ? ` - ${formatDate(end)}` : ''}`;
 }
 
-function getOrderId(rental, index) {
-  return rental.id || `RENT-${String(index + 1).padStart(4, '0')}`;
+function formatJoined(createdAt) {
+  return createdAt
+    ? new Date(createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+    : 'Date unavailable';
 }
 
 function getWeekLabel(index) {
@@ -92,7 +102,7 @@ function buildRevenueTrend(rentals) {
   const now = Date.now();
   const weekValues = Array.from({ length: 10 }, () => 0);
   rentals.forEach((rental) => {
-    const timestamp = Number(rental.paidAt || rental.rentedAt || rental.finishedAt || 0);
+    const timestamp = rental.paidAt || rental.rentedAt || rental.finishedAt;
     const weeksAgo = Math.floor((now - timestamp) / (7 * 86400000));
     if (weeksAgo >= 0 && weeksAgo < weekValues.length) weekValues[weekValues.length - 1 - weeksAgo] += getRentalAmount(rental);
   });
@@ -114,7 +124,7 @@ function buildMonthlyVolume(rentals) {
 }
 
 function buildUserDistribution(accounts) {
-  const providerCount = accounts.filter((account) => account.tier === 'provider').length;
+  const providerCount = accounts.filter(isGearProvider).length;
   const renterCount = Math.max(0, accounts.length - providerCount);
   const total = providerCount + renterCount;
   if (!total) return [{ label: 'Gear Renters', pct: 0 }, { label: 'Gear Providers', pct: 0 }];
@@ -124,16 +134,18 @@ function buildUserDistribution(accounts) {
   ];
 }
 
-export function readAdminData() {
-  const accounts = readAccounts();
-  const rentals = getAllRentals();
-  const providerProducts = getAllProviderProducts();
+export function buildAdminData(snapshot) {
+  const accounts = (snapshot?.accounts || []).map(normalizeAccount);
+  const rentals = (snapshot?.rentals || []).map(normalizeRental);
+  const allProducts = (snapshot?.products || []).map(normalizeProduct);
+  // Pending / rejected listings aren't part of the public catalog.
+  const catalogProducts = allProducts.filter((product) => product.approvalStatus === 'approved');
+
   const totalRevenue = rentals.reduce((total, rental) => total + getRentalAmount(rental), 0);
   const activeRentals = rentals.filter((rental) => rental.status === 'active' || rental.status === 'overdue');
-  const catalogProducts = [...products, ...providerProducts];
   const availableCatalogProducts = catalogProducts.filter((product) => product.status === 'available');
-  const recentTransactions = rentals.slice(0, 6).map((rental, index) => ({
-    id: getOrderId(rental, index),
+  const recentTransactions = rentals.slice(0, 6).map((rental) => ({
+    id: rental.id,
     item: getProductName(rental),
     account: getAccountName(rental.accountEmail, accounts),
     status: rental.status === 'completed' ? 'returned' : rental.status === 'overdue' ? 'overdue' : 'on-set',
@@ -164,22 +176,21 @@ export function readAdminData() {
     });
   const catalogSize = catalogProducts.length;
   const utilization = catalogSize ? Math.round((activeRentals.length / catalogSize) * 100) : 0;
-  const newUsers = accounts.filter((account) => Date.now() - Number(account.createdAt || 0) <= 30 * 86400000).length;
+  const isRecent = (account) => Date.now() - account.createdAt <= 30 * 86400000;
+  const newUsers = accounts.filter(isRecent).length;
   const recentUsers = accounts
-    .filter((account) => Date.now() - Number(account.createdAt || 0) <= 30 * 86400000)
-    .sort((left, right) => Number(right.createdAt || 0) - Number(left.createdAt || 0))
+    .filter(isRecent)
+    .sort((left, right) => right.createdAt - left.createdAt)
     .map((account) => ({
       name: account.name || 'Unnamed account',
       email: account.email || 'No email provided',
-      tier: account.tier || 'Gear Renter',
-      joined: account.createdAt
-        ? new Date(account.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-        : 'Date unavailable',
+      tier: account.tier,
+      joined: formatJoined(account.createdAt),
     }));
   const availableGear = availableCatalogProducts.map((product) => ({
     name: product.name,
     category: categories.find((category) => category.id === product.category)?.name || 'General gear',
-    price: formatPeso(Number(product.price) || 0),
+    price: formatPeso(product.price),
   }));
   const utilizationByCategory = categories.map((category) => {
     const categoryProducts = catalogProducts.filter((product) => product.category === category.id);
@@ -192,9 +203,9 @@ export function readAdminData() {
     };
   }).filter((category) => category.total > 0);
   const accountDetails = accounts.reduce((details, account) => {
-    const email = account.email?.trim().toLowerCase() || '';
+    const { email } = account;
     const accountRentals = rentals.filter((rental) => rental.accountEmail === email);
-    const accountProducts = providerProducts.filter((product) => product.accountEmail === email);
+    const accountProducts = allProducts.filter((product) => product.providerEmail === email);
     const now = new Date();
     const monthlySpend = Array.from({ length: 6 }, (_, index) => new Date(now.getFullYear(), now.getMonth() - 5 + index, 1)).map((month) => ({
       label: month.toLocaleDateString('en-US', { month: 'short' }),
@@ -208,23 +219,21 @@ export function readAdminData() {
     details[email] = {
       name: account.name || 'Unnamed renter',
       email: account.email || 'No email provided',
-      tier: account.tier || 'Gear Renter',
-      balance: Number(account.balance) || 0,
-      joined: account.createdAt
-        ? new Date(account.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-        : 'Date unavailable',
+      tier: account.tier,
+      balance: account.balance,
+      joined: formatJoined(account.createdAt),
       totalSpend: accountRentals.reduce((total, rental) => total + getRentalAmount(rental), 0),
       activeRentals: accountRentals.filter((rental) => rental.status === 'active' || rental.status === 'overdue').length,
       completedRentals: accountRentals.filter((rental) => rental.status === 'completed').length,
-      depositsHeld: accountRentals.reduce((total, rental) => total + (rental.depositStatus === 'held' ? Number(rental.securityDeposit) || 0 : 0), 0),
+      depositsHeld: accountRentals.reduce((total, rental) => total + (rental.depositStatus === 'held' ? rental.securityDeposit : 0), 0),
       monthlySpend,
       uploadedGears: accountProducts.map((product) => ({
         name: product.name,
-        status: product.status || 'available',
-        price: formatPeso(Number(product.price) || 0),
+        status: product.approvalStatus === 'approved' ? product.status || 'available' : product.approvalStatus,
+        price: formatPeso(product.price),
       })),
-      rentals: accountRentals.map((rental, index) => ({
-        id: getOrderId(rental, index),
+      rentals: accountRentals.map((rental) => ({
+        id: rental.id,
         item: getProductName(rental),
         status: rental.status,
         amount: getRentalAmount(rental),
@@ -234,20 +243,17 @@ export function readAdminData() {
     return details;
   }, {});
   const renters = accounts
-    .filter((account) => account.tier !== 'Gear Provider' && account.tier !== 'provider')
+    .filter((account) => !isGearProvider(account) && account.role !== 'admin')
     .map((account) => {
-      const email = account.email?.trim().toLowerCase() || '';
-      const accountRentals = rentals.filter((rental) => rental.accountEmail === email);
+      const accountRentals = rentals.filter((rental) => rental.accountEmail === account.email);
       return {
-        id: email || account.name,
+        id: account.email || account.id,
         name: account.name || 'Unnamed renter',
         email: account.email || 'No email provided',
-        tier: account.tier || 'Gear Renter',
-        balance: formatPeso(Number(account.balance) || 0),
+        tier: account.tier,
+        balance: formatPeso(account.balance),
         rentalCount: accountRentals.length,
-        joined: account.createdAt
-          ? new Date(account.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-          : 'Date unavailable',
+        joined: formatJoined(account.createdAt),
         activeRentals: accountRentals.filter((rental) => rental.status === 'active' || rental.status === 'overdue').length,
       };
     })
@@ -260,6 +266,7 @@ export function readAdminData() {
       newUsers: { value: String(newUsers), change: `${accounts.length} total account${accounts.length === 1 ? '' : 's'}`, trend: newUsers ? 'up' : 'flat' },
       gearUtilization: { value: `${Math.min(100, utilization)}%`, change: `${catalogSize} catalog item${catalogSize === 1 ? '' : 's'}`, trend: utilization >= 80 ? 'warn' : 'flat' },
     },
+    membershipRevenue: Number(snapshot?.membership_revenue) || 0,
     revenueTrend: buildRevenueTrend(rentals),
     recentTransactions,
     userRentalVolume: buildMonthlyVolume(rentals),
@@ -269,8 +276,8 @@ export function readAdminData() {
     accountDetails,
     renters,
     dashboardDetails: {
-      revenueTransactions: rentals.slice(0, 12).map((rental, index) => ({
-        id: getOrderId(rental, index),
+      revenueTransactions: rentals.slice(0, 12).map((rental) => ({
+        id: rental.id,
         item: getProductName(rental),
         account: getAccountName(rental.accountEmail, accounts),
         amount: formatPeso(getRentalAmount(rental)),
@@ -282,10 +289,10 @@ export function readAdminData() {
       catalogSize,
       activeGearCount: activeRentals.length,
     },
-    rentalLog: rentals.map((rental, index) => ({
-      id: getOrderId(rental, index),
+    rentalLog: rentals.map((rental) => ({
+      id: rental.id,
       account: getAccountName(rental.accountEmail, accounts),
-      accountType: accounts.find((account) => account.email?.trim().toLowerCase() === rental.accountEmail)?.tier === 'provider' ? 'Gear Provider' : 'Gear Renter',
+      accountType: isGearProvider(accounts.find((account) => account.email === rental.accountEmail)) ? 'Gear Provider' : 'Gear Renter',
       items: [getProductName(rental)],
       period: formatPeriod(rental),
       status: rental.status,
@@ -294,18 +301,37 @@ export function readAdminData() {
   };
 }
 
-export function useAdminData() {
-  const [data, setData] = useState(readAdminData);
+const EMPTY_DATA = buildAdminData(null);
 
-  useEffect(() => {
-    const refresh = () => setData(readAdminData());
-    window.addEventListener('storage', refresh);
-    const timer = window.setInterval(refresh, 2000);
-    return () => {
-      window.removeEventListener('storage', refresh);
-      window.clearInterval(timer);
-    };
+export function useAdminData() {
+  const [data, setData] = useState(EMPTY_DATA);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  const refresh = useCallback(async () => {
+    const { data: snapshot, error: rpcError } = await supabase.rpc('admin_dashboard_snapshot');
+    if (rpcError) {
+      console.error('admin_dashboard_snapshot failed', rpcError);
+      setError(rpcError.message || 'Could not load dashboard data.');
+    } else {
+      setData(buildAdminData(snapshot));
+      setError('');
+    }
+    setLoading(false);
   }, []);
 
-  return data;
+  useEffect(() => {
+    refresh();
+    const timer = window.setInterval(refresh, REFRESH_INTERVAL_MS);
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') refresh();
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => {
+      window.clearInterval(timer);
+      document.removeEventListener('visibilitychange', onVisible);
+    };
+  }, [refresh]);
+
+  return { ...data, loading, error, refresh };
 }

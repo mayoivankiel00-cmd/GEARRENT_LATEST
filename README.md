@@ -2,7 +2,7 @@
 
 This project now talks to a real Postgres database via [Supabase](https://supabase.com) instead of `localStorage`. Setup:
 
-1. **Create the schema.** In your Supabase project's SQL Editor, run these two files in order (from the chat where this project was generated):
+1. **Create the schema.** In your Supabase project's SQL Editor, run these two files in order (from the chat where this project was generated — ⚠️ **they are not in this repository yet**; see *Recovering the base schema* below):
    - `gearrent_supabase_schema.sql` — tables, RLS policies, auth trigger
    - `gearrent_supabase_schema_part2_seed.sql` — fixes id column types to match the app's slug-style ids, adds profile columns (`email`, `phone`, `address`, ...), adds the `credit_user_balance` RPC, and seeds categories/products/membership tiers from the original `mockData.js`
 2. **Copy `.env.example` to `.env`** and fill in `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` from Project Settings → API.
@@ -16,7 +16,30 @@ This project now talks to a real Postgres database via [Supabase](https://supaba
 6. **Run `gearrent_payments_update.sql`** (after step 5) — moves checkout, refunds, withdrawals and provider payouts into the database.
 7. **Run `gearrent_notifications_update.sql`** (after step 6) — due-rental alerts, links on notifications, and upload rules for photos.
    *Optional:* enable the `pg_cron` extension and run the `cron.schedule(...)` line at the bottom of section 3 of that file, so due/overdue alerts are created even when nobody has the app open.
-8. `npm install && npm run dev`.
+8. **Run `gearrent_integrity_update.sql`** (after step 7) — Gear Provider membership can only be bought (not self-assigned), only providers can list gear, a product can't be rented twice at once, and the admin dashboard data.
+9. `npm install && npm run dev`.
+
+## Recovering the base schema
+
+The two base files from step 1 were never saved into this project, so the database can't be rebuilt from the repo alone. Your live Supabase project still has everything, so export it once and commit the result:
+
+```sh
+# Database password: Project Settings → Database. Connection string: Connect → "Session pooler".
+npx supabase db dump --db-url "postgresql://postgres.<project-ref>:<password>@<host>:5432/postgres" -f supabase_schema_dump.sql
+```
+
+Or copy the original two files from the chat where they were generated.
+
+## Memberships and bookings
+
+| Rule | How it works |
+|---|---|
+| Gear Provider must be paid for | `profiles.tier` can't be set to a provider tier from the browser (trigger). The Memberships page shows a card form and calls `purchase_provider_membership()`, which records the ₱499 in `membership_payments` (1-month period) and upgrades the account. Downgrading to Gear Renter is still allowed. |
+| Only providers list gear | Inserting into `products` requires a provider tier (admins exempt). |
+| No double-booking | A rental can't be created for a product that already has an active rental (trigger + partial unique index). `products.status` switches to `booked` on checkout and back to `available` on return/finish, so the catalog shows "Booked". |
+| Admin dashboard | All admin analytics pages read `admin_dashboard_snapshot()` (admin-only) and refresh every 30 s. |
+
+The provider card form is still a simulation, and the monthly period isn't enforced yet (nothing downgrades an expired membership).
 
 ## Notification toasts
 
@@ -84,26 +107,8 @@ All money now moves inside Postgres functions; the browser only asks for an acti
 
 ### Known limitations (carried over from the migration report)
 - ~~Checkout pricing is computed client-side~~ — fixed, see *Server-side payments*.
-- Business rules worth a decision: an early return refunds unused days from Gear Rent's side while the provider keeps the full payout; the "10% off" Gear Renter perk and the ₱499 Gear Provider fee are advertised but not applied/charged; renting doesn't mark gear as booked, so the same item can be rented twice at once.
+- Business rules worth a decision: an early return refunds unused days from Gear Rent's side while the provider keeps the full payout; the "10% off" Gear Renter perk is advertised but not applied. (~~₱499 fee not charged~~ and ~~double-booking~~ — fixed, see *Memberships and bookings*.)
 - ~~The admin dashboard has no real admin login~~ — fixed. `/admin/*` requires `profiles.role = 'admin'`, and the role can only be granted by another admin.
-- Several admin analytics pages (`src/admin/adminData.js`) still read legacy `localStorage` data rather than Supabase.
+- ~~Several admin analytics pages still read legacy `localStorage` data~~ — fixed, they read `admin_dashboard_snapshot()`.
 - ~~Provider-uploaded photos are stored as base64 data URLs~~ — fixed. Both Admin → Add Equipment and Provider Gear now use a shared drag & drop uploader (`src/components/ImageDropzone.jsx`) that uploads files straight to the `gear-images` Supabase Storage bucket and stores the resulting public URLs in the `images` column. Run `gearrent_supabase_storage_setup.sql` to create the bucket before using these forms.
 
----
-
-# React + Vite
-
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
-
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.

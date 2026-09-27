@@ -14,8 +14,16 @@ const statusLabels = {
 export default function AdminRenterDetails() {
   const { email } = useParams();
   const navigate = useNavigate();
-  const { accountDetails } = useAdminData();
+  const { accountDetails, loading } = useAdminData();
   const account = accountDetails[decodeURIComponent(email || '')?.trim().toLowerCase()];
+
+  if (!account && loading) {
+    return (
+      <AdminLayout>
+        <p className="mono" role="status">Loading account…</p>
+      </AdminLayout>
+    );
+  }
 
   if (!account) {
     return (

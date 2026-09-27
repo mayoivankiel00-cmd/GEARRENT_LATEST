@@ -20,7 +20,7 @@ const statusLabels = {
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
-  const { stats, recentTransactions, revenueTrend, dashboardDetails } = useAdminData();
+  const { stats, recentTransactions, revenueTrend, dashboardDetails, error } = useAdminData();
   const [selectedMetric, setSelectedMetric] = useState(null);
   const selectedStat = statMeta.find((stat) => stat.key === selectedMetric);
 
@@ -60,6 +60,11 @@ export default function AdminDashboard() {
 
   return (
     <AdminLayout>
+      {error && (
+        <p className="card" role="alert" style={{ padding: '0.8rem 1rem', marginBottom: '1rem', borderColor: 'var(--accent)' }}>
+          Dashboard data could not be loaded: {error}. Make sure gearrent_integrity_update.sql has been run.
+        </p>
+      )}
       <h1 className="admin-title">
         Welcome, <span className="accent">Administrator</span>
       </h1>

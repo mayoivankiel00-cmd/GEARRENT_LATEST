@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { products } from '../mockData';
 import { useCart } from '../CartContext';
 import { formatRentalTimeRemaining, getRentalHistoryId } from '../rentalUtils';
 import AccountSidebar from '../components/AccountSidebar';
@@ -27,7 +26,7 @@ export default function History() {
   const completedHistory = rentalHistory
     .map((rental, index) => {
     const finishedAt = rental.finishedAt || rental.dates?.split(' - ').pop();
-    const product = rental.product || products.find((productRecord) => productRecord.id === rental.productId);
+    const { product } = rental;
     return {
       ...rental,
       id: getRentalHistoryId({ ...rental, product, finishedAt }, index),

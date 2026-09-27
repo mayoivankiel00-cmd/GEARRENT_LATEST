@@ -3,10 +3,16 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { formatPeso, membershipTiers } from '../mockData';
 import './Memberships.css';
+import './Payment.css';
 
 export default function Memberships() {
   const navigate = useNavigate();
-  const { isAuthenticated, user, pendingSignup, createAccount, updateUser, clearPendingSignup } = useAuth();
+  const {
+    isAuthenticated, user, pendingSignup, createAccount, updateUser, clearPendingSignup, purchaseProviderMembership,
+  } = useAuth();
+  const [checkoutTier, setCheckoutTier] = useState(null);
+  const [paying, setPaying] = useState(false);
+  const [paymentError, setPaymentError] = useState('');
 
   // While a signup is pending (user hasn't picked a tier yet), don't treat
   // them as having an active account.
@@ -22,13 +28,22 @@ export default function Memberships() {
   const chooseMembership = async (tier) => {
     if (tier.id === 'provider' && !canAccessProvider) return;
 
-    setSelectedTier(tier.id);
-
     if (isAuthenticated && currentUser) {
+      if (tier.name === currentTier) return;
+      if (tier.id === 'provider') {
+        // Paid tier: the database only grants it after payment.
+        setPaymentError('');
+        setCheckoutTier(tier);
+        return;
+      }
+      setCheckoutTier(null);
+      setSelectedTier(tier.id);
       await updateUser({ tier: tier.name });
       navigate('/catalog');
       return;
     }
+
+    setSelectedTier(tier.id);
 
     if (!pendingSignup || typeof pendingSignup.name !== 'string' || typeof pendingSignup.email !== 'string') {
       clearPendingSignup();
@@ -48,6 +63,28 @@ export default function Memberships() {
       return;
     }
     navigate('/catalog');
+  };
+
+  // The card form is still a simulation (see purchase_provider_membership).
+  const handleProviderPayment = async (event) => {
+    event.preventDefault();
+    if (paying) return;
+    const digits = String(new FormData(event.currentTarget).get('cardNumber') || '').replace(/\D/g, '');
+    if (digits.length < 12) {
+      setPaymentError('Enter a valid card number.');
+      return;
+    }
+    setPaying(true);
+    setPaymentError('');
+    const result = await purchaseProviderMembership(digits.slice(-4));
+    setPaying(false);
+    if (!result.ok) {
+      setPaymentError(result.error);
+      return;
+    }
+    setCheckoutTier(null);
+    setSelectedTier('provider');
+    navigate('/provider-gear');
   };
 
   return (
@@ -110,6 +147,28 @@ export default function Memberships() {
           </div>
         ))}
       </div>
+
+      {checkoutTier && (
+        <form className="card membership-payment" onSubmit={handleProviderPayment}>
+          <div className="payment-section">
+            <div className="eyebrow">Upgrade to {checkoutTier.name}</div>
+            <h2>{formatPeso(checkoutTier.price)} / month</h2>
+            <label>Cardholder name<input type="text" name="cardholder" placeholder="Full name" autoComplete="cc-name" required /></label>
+            <label>Card number<input type="text" name="cardNumber" inputMode="numeric" placeholder="0000 0000 0000 0000" autoComplete="cc-number" minLength="12" required /></label>
+            <div className="payment-fields-row">
+              <label>Expiry date<input type="text" name="expiry" placeholder="MM / YY" autoComplete="cc-exp" required /></label>
+              <label>Security code<input type="text" name="cvv" inputMode="numeric" placeholder="CVV" autoComplete="cc-csc" minLength="3" required /></label>
+            </div>
+          </div>
+          {paymentError && <p className="payment-error" role="alert">{paymentError}</p>}
+          <div className="membership-payment-actions">
+            <button type="button" className="btn btn-outline" onClick={() => setCheckoutTier(null)} disabled={paying}>Cancel</button>
+            <button type="submit" className="btn btn-primary payment-submit" disabled={paying}>
+              {paying ? 'Processing payment…' : `Pay ${formatPeso(checkoutTier.price)}`}
+            </button>
+          </div>
+        </form>
+      )}
     </div>
   );
 }
