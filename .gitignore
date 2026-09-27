@@ -1,0 +1,7 @@
+node_modules
+dist
+.env
+.env.local
+
+# Old duplicate copy of the project (contains a real .env) — safe to delete
+GearRentTest_supabase/

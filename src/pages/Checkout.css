@@ -1,0 +1,19 @@
+.checkout-page {
+  padding: 4rem 2rem;
+  text-align: center;
+}
+
+.checkout-icon {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.checkout-page h1 {
+  font-size: 1.8rem;
+  margin-bottom: 0.6rem;
+}
+
+.checkout-summary {
+  color: var(--text-muted);
+  margin-bottom: 2rem;
+}

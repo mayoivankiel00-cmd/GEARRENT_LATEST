@@ -1,0 +1,155 @@
+.memberships-page {
+  padding: 3rem 2rem 4rem;
+}
+
+.memberships-heading {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.memberships-heading h1 {
+  font-size: 2.2rem;
+  margin: 0 0 0.6rem;
+}
+
+.memberships-heading p {
+  color: var(--text-muted);
+}
+
+.current-membership {
+  max-width: 840px;
+  margin: 0 auto 2rem;
+  padding: 1rem 1.25rem;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.current-membership.free-account {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px rgba(224, 51, 42, 0.35), 0 0 18px rgba(224, 51, 42, 0.45);
+}
+
+.current-membership.provider-account {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px rgba(224, 51, 42, 0.25), 0 0 18px rgba(224, 51, 42, 0.3);
+}
+
+.current-membership strong {
+  display: block;
+  margin-top: 0.25rem;
+}
+
+.current-membership-tier {
+  text-align: right;
+}
+
+.current-membership-tier .mono {
+  display: block;
+  color: var(--text-dim);
+  font-size: 0.65rem;
+}
+
+.membership-success {
+  margin: 0.35rem 0 0;
+  color: var(--accent);
+  font-size: 0.8rem;
+}
+
+.membership-status {
+  display: block;
+  margin-top: 0.35rem;
+  color: var(--success);
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+}
+
+.tiers-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 420px));
+  gap: 1.5rem;
+  align-items: start;
+  justify-content: center;
+}
+
+.tier-card {
+  position: relative;
+  padding: 1.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.tier-card.featured {
+  border-color: var(--border);
+}
+
+.tier-card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 0 12px rgba(224, 51, 42, 0.42), 0 1rem 2rem rgba(0, 0, 0, 0.18);
+  transform: translateY(-3px);
+}
+
+.tier-card.selected {
+  border: 2px solid var(--accent);
+  box-shadow: 0 0 0 1px var(--accent), 0 1rem 2rem rgba(0, 0, 0, 0.18);
+  transform: translateY(-3px);
+}
+
+.tier-price {
+  font-family: var(--font-mono);
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.tier-price .unit {
+  font-size: 0.9rem;
+  color: var(--text-dim);
+  font-weight: 400;
+}
+
+.tier-desc {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  min-height: 3.6em;
+}
+
+.tier-perks {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  flex: 1;
+}
+
+.tier-perks li {
+  font-size: 0.88rem;
+  color: var(--text);
+  display: flex;
+  gap: 0.6rem;
+}
+
+.tier-perks .check {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+@media (max-width: 900px) {
+  .tiers-grid { grid-template-columns: 1fr; }
+
+  .current-membership {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .current-membership-tier {
+    text-align: left;
+  }
+}

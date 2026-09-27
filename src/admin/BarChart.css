@@ -1,0 +1,59 @@
+.line-chart {
+  position: relative;
+  width: 100%;
+}
+
+.line-chart svg {
+  display: block;
+  width: 100%;
+  height: calc(100% - 1.35rem);
+  overflow: visible;
+}
+
+.line-chart-gridline {
+  stroke: var(--border);
+  stroke-dasharray: 3 8;
+  stroke-width: 1;
+}
+
+.line-chart-area { fill: url(#line-chart-area); }
+
+.line-chart-line {
+  fill: none;
+  stroke: var(--accent);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 4;
+  vector-effect: non-scaling-stroke;
+}
+
+.line-chart-point {
+  fill: var(--bg-card);
+  stroke: var(--accent);
+  stroke-width: 3;
+  vector-effect: non-scaling-stroke;
+}
+
+.line-chart-point.highlighted { fill: var(--accent); }
+
+.line-chart-labels {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0 0.5rem;
+}
+
+.line-chart-label {
+  overflow: hidden;
+  color: var(--text-dim);
+  font-size: 0.68rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.line-chart-empty {
+  display: grid;
+  place-items: center;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}

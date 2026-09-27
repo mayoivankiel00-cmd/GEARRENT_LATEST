@@ -1,0 +1,117 @@
+.image-dropzone-wrap { display: flex; flex-direction: column; gap: 0.75rem; }
+
+.image-dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  padding: 1.6rem 1rem;
+  border: 1.5px dashed var(--border-hover);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text-muted);
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, transform 0.1s ease;
+}
+
+.image-dropzone:hover { border-color: var(--accent); }
+
+.image-dropzone.is-dragging {
+  border-color: var(--accent);
+  background: rgb(224 51 42 / 6%);
+  transform: scale(1.005);
+}
+
+.image-dropzone.is-uploading { cursor: progress; opacity: 0.75; }
+
+.image-dropzone-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.image-dropzone-icon {
+  font-size: 1.4rem;
+  color: var(--accent);
+}
+
+.image-dropzone.is-uploading .image-dropzone-icon { animation: image-dropzone-spin 0.9s linear infinite; }
+
+@keyframes image-dropzone-spin {
+  to { transform: rotate(360deg); }
+}
+
+.image-dropzone-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.image-dropzone-hint {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.image-dropzone-error {
+  margin: 0;
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+}
+
+.image-dropzone-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+  gap: 0.6rem;
+}
+
+.image-dropzone-thumb {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg-raised);
+}
+
+.image-dropzone-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.image-dropzone-primary {
+  position: absolute;
+  left: 0.3rem;
+  bottom: 0.3rem;
+  padding: 0.12rem 0.35rem;
+  background: rgb(0 0 0 / 65%);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  text-transform: uppercase;
+  border-radius: 3px;
+}
+
+.image-dropzone-remove {
+  position: absolute;
+  top: 0.25rem;
+  right: 0.25rem;
+  width: 1.3rem;
+  height: 1.3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  background: rgb(0 0 0 / 65%);
+  color: var(--text);
+  font-size: 0.65rem;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.image-dropzone-remove:hover { background: var(--accent); }

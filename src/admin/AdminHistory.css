@@ -1,0 +1,159 @@
+.history-subtitle {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin: 0 0 1.5rem;
+}
+
+.history-filters {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-end;
+  padding: 1.3rem;
+  margin-bottom: 1.3rem;
+  flex-wrap: wrap;
+  background: linear-gradient(145deg, color-mix(in srgb, var(--bg-card) 92%, #1c2925), var(--bg-card));
+}
+
+.filter-field {
+  flex: 1;
+  min-width: 160px;
+}
+
+.filter-field label {
+  display: block;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-dim);
+  margin-bottom: 0.4rem;
+}
+
+.filter-field select {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 0.75rem 0.9rem;
+  border-radius: 3px;
+  font-size: 0.85rem;
+}
+
+.apply-btn {
+  white-space: nowrap;
+  padding: 0.75rem 1.2rem;
+}
+
+.history-table-card {
+  padding: 0;
+  overflow: hidden;
+  box-shadow: 0 14px 30px rgb(0 0 0 / 10%);
+}
+
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.history-table th {
+  text-align: left;
+  color: var(--text-dim);
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.9rem 1rem;
+  border-bottom: 1px solid var(--border);
+  background: color-mix(in srgb, var(--bg-card) 86%, #1c2925);
+}
+
+.history-table td {
+  padding: 1rem;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.85rem;
+  vertical-align: top;
+}
+
+.history-table tr:last-child td {
+  border-bottom: none;
+}
+
+.history-table tbody tr:hover {
+  background: color-mix(in srgb, var(--accent) 5%, var(--bg-raised));
+}
+
+.row-flagged {
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.order-id {
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+.account-name {
+  font-weight: 700;
+}
+
+.account-type {
+  color: var(--text-dim);
+  font-size: 0.7rem;
+  margin-top: 0.2rem;
+}
+
+.gear-items {
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.period-cell {
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.revenue-cell {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.view-details-btn {
+  padding: 0.45rem 0.8rem;
+  font-size: 0.68rem;
+  white-space: nowrap;
+}
+
+.empty-row {
+  text-align: center;
+  color: var(--text-dim);
+  padding: 2.5rem 1rem;
+}
+
+.history-pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+  color: var(--text-dim);
+  font-size: 0.78rem;
+}
+
+.pagination-controls {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.pg-btn {
+  padding: 0.4rem 0.7rem;
+  font-size: 0.75rem;
+  min-width: 34px;
+}
+
+.pg-btn.active-page {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+@media (max-width: 760px) {
+  .history-table-card { overflow-x: auto; }
+  .history-table { min-width: 800px; }
+}

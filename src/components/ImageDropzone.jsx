@@ -1,0 +1,178 @@
+import { useCallback, useRef, useState } from 'react';
+import { supabase } from '../supabaseClient';
+import { ALLOWED_IMAGE_TYPES, IMAGE_BUCKET, MAX_IMAGE_BYTES, removeStoredImages } from '../imageStorage';
+import './ImageDropzone.css';
+
+const BUCKET = IMAGE_BUCKET;
+const MAX_FILE_BYTES = MAX_IMAGE_BYTES;
+
+function isImageFile(file) {
+  return ALLOWED_IMAGE_TYPES.includes(file.type);
+}
+
+function randomId() {
+  return (window.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(16).slice(2)}`);
+}
+
+async function uploadToStorage(file, folder) {
+  const extension = file.name.split('.').pop()?.toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg';
+  const path = `${folder}/${randomId()}.${extension}`;
+  const { error: uploadError } = await supabase.storage.from(BUCKET).upload(path, file, {
+    cacheControl: '3600',
+    upsert: false,
+    contentType: file.type || 'image/jpeg',
+  });
+  if (uploadError) throw uploadError;
+  const { data } = supabase.storage.from(BUCKET).getPublicUrl(path);
+  return data.publicUrl;
+}
+
+/**
+ * Drag-and-drop (or click-to-browse) image uploader. Files are uploaded
+ * straight to Supabase Storage and the resulting public URLs are handed
+ * back via onChange — no manual URL typing, no hardcoded image data.
+ *
+ * value: string[] of image URLs already attached
+ * onChange: (nextUrls: string[]) => void
+ * folder: storage path prefix, e.g. `products/${userId}`
+ */
+export default function ImageDropzone({ value = [], onChange, folder, maxFiles = 8, label = 'Drag photos here' }) {
+  const [isDragging, setIsDragging] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [error, setError] = useState('');
+  const inputRef = useRef(null);
+  const dragCounter = useRef(0);
+
+  const acceptFiles = useCallback(async (fileList) => {
+    setError('');
+    const incoming = Array.from(fileList || []);
+    if (!incoming.length) return;
+
+    const room = Math.max(0, maxFiles - value.length);
+    if (!room) {
+      setError(`You can attach up to ${maxFiles} photos.`);
+      return;
+    }
+
+    const validFiles = [];
+    for (const file of incoming.slice(0, room)) {
+      if (!isImageFile(file)) {
+        setError('Only JPG, PNG, WebP, GIF or AVIF photos are accepted.');
+        continue;
+      }
+      if (file.size > MAX_FILE_BYTES) {
+        setError('Each photo must be under 8MB.');
+        continue;
+      }
+      validFiles.push(file);
+    }
+    if (!validFiles.length) return;
+
+    setIsUploading(true);
+    // Keep whatever uploaded successfully even if some files fail.
+    const results = await Promise.allSettled(validFiles.map((file) => uploadToStorage(file, folder)));
+    setIsUploading(false);
+    const uploadedUrls = results.filter((result) => result.status === 'fulfilled').map((result) => result.value);
+    const failures = results.filter((result) => result.status === 'rejected');
+    if (uploadedUrls.length) onChange([...value, ...uploadedUrls]);
+    if (failures.length) {
+      failures.forEach((failure) => console.error('Image upload failed', failure.reason));
+      setError(failures.length === results.length
+        ? 'Upload failed. Please check your connection and try again.'
+        : `${failures.length} of ${results.length} photos failed to upload. Try those again.`);
+    }
+  }, [value, onChange, folder, maxFiles]);
+
+  const handleDragEnter = (event) => {
+    event.preventDefault();
+    dragCounter.current += 1;
+    setIsDragging(true);
+  };
+
+  const handleDragOver = (event) => {
+    event.preventDefault();
+  };
+
+  const handleDragLeave = (event) => {
+    event.preventDefault();
+    dragCounter.current -= 1;
+    if (dragCounter.current <= 0) {
+      dragCounter.current = 0;
+      setIsDragging(false);
+    }
+  };
+
+  const handleDrop = (event) => {
+    event.preventDefault();
+    dragCounter.current = 0;
+    setIsDragging(false);
+    acceptFiles(event.dataTransfer.files);
+  };
+
+  const handleBrowse = (event) => {
+    acceptFiles(event.target.files);
+    event.target.value = '';
+  };
+
+  // These photos aren't attached to a saved listing yet, so removing one
+  // also deletes the file from Storage instead of leaving it orphaned.
+  const removeImage = (urlToRemove) => {
+    onChange(value.filter((url) => url !== urlToRemove));
+    removeStoredImages([urlToRemove], folder);
+  };
+
+  return (
+    <div className="image-dropzone-wrap">
+      <div
+        className={`image-dropzone ${isDragging ? 'is-dragging' : ''} ${isUploading ? 'is-uploading' : ''}`}
+        onDragEnter={handleDragEnter}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        onClick={() => inputRef.current?.click()}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            inputRef.current?.click();
+          }
+        }}
+        aria-label="Upload gear photos by dragging them here or clicking to browse"
+      >
+        <input
+          ref={inputRef}
+          type="file"
+          accept={ALLOWED_IMAGE_TYPES.join(',')}
+          multiple
+          className="image-dropzone-input"
+          onChange={handleBrowse}
+        />
+        <span className="image-dropzone-icon" aria-hidden="true">{isUploading ? '⟳' : '⇪'}</span>
+        <span className="image-dropzone-label">{isUploading ? 'Uploading…' : label}</span>
+        <span className="image-dropzone-hint">or click to browse · JPG, PNG, WebP up to 8MB</span>
+      </div>
+
+      {error && <p className="image-dropzone-error" role="alert">{error}</p>}
+
+      {value.length > 0 && (
+        <div className="image-dropzone-grid">
+          {value.map((url, index) => (
+            <div className="image-dropzone-thumb" key={url}>
+              <img src={url} alt={`Upload ${index + 1}`} />
+              {index === 0 && <span className="image-dropzone-primary">Cover</span>}
+              <button
+                type="button"
+                className="image-dropzone-remove"
+                onClick={(event) => { event.stopPropagation(); removeImage(url); }}
+                aria-label={`Remove photo ${index + 1}`}
+              >
+                ✕
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}

@@ -1,0 +1,143 @@
+.analytics-top {
+  display: grid;
+  grid-template-columns: 1.7fr 1fr;
+  gap: 1.1rem;
+  margin-bottom: 1.1rem;
+  align-items: stretch;
+}
+
+.analytics-card,
+.distribution-card,
+.top-renters-card {
+  padding: 1.4rem;
+  box-shadow: 0 14px 30px rgb(0 0 0 / 10%);
+}
+
+.analytics-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.6rem;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.distribution-total {
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 1.4rem 0;
+  text-align: center;
+  margin-bottom: 1.4rem;
+}
+
+.distribution-total-value {
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 2.2rem;
+  font-weight: 800;
+}
+
+.distribution-total-label {
+  color: var(--text-dim);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  margin-top: 0.3rem;
+}
+
+.distribution-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.distribution-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.88rem;
+}
+
+.distribution-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.distribution-name {
+  flex: 1;
+}
+
+.distribution-pct {
+  color: var(--text-muted);
+}
+
+.top-renters-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.8rem;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.view-all-link {
+  color: var(--accent);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+}
+
+.top-renters-card {
+  overflow-x: auto;
+}
+
+.top-renters-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.top-renters-table th {
+  text-align: left;
+  color: var(--text-dim);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.7rem 0.6rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.top-renters-table td {
+  padding: 0.9rem 0.6rem;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.88rem;
+}
+
+.top-renters-table tr:last-child td {
+  border-bottom: none;
+}
+
+.rank-cell {
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-weight: 700;
+}
+
+.name-cell {
+  font-weight: 700;
+}
+
+.spend-cell {
+  font-weight: 700;
+}
+
+.text-muted {
+  color: var(--text-muted);
+}
+
+@media (max-width: 1000px) {
+  .analytics-top { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 700px) {
+  .top-renters-table { display: block; overflow-x: auto; white-space: nowrap; }
+}

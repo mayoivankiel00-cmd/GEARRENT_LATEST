@@ -1,0 +1,1059 @@
+.account-page {
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+  padding-top: 2rem;
+  padding-bottom: 4rem;
+}
+
+.account-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.account-main h1 {
+  font-size: 2rem;
+  margin: 0.3rem 0 1.5rem;
+}
+
+.empty-state {
+  margin: 0;
+  padding: 2rem;
+  border: 1px dashed var(--border);
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.rental-history-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 2.25rem;
+}
+
+.rental-history-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.rental-history-section-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 0.7rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.rental-history-section-heading h2 {
+  margin: 0.25rem 0 0;
+  font-size: 1.2rem;
+}
+
+.rental-history-count {
+  color: var(--text-dim);
+  font-size: 0.7rem;
+}
+
+.rental-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.rental-history-row {
+  display: grid;
+  grid-template-columns: 112px minmax(0, 1fr);
+  gap: 1.2rem;
+  padding: 1rem;
+}
+
+.rental-history-active-row {
+  border-left: 3px solid var(--accent);
+  background: rgba(224, 51, 42, 0.06);
+}
+
+.rental-history-active-row:hover {
+  background: rgba(224, 51, 42, 0.11);
+}
+
+.rental-history-past-row {
+  border-color: var(--border);
+}
+
+.rental-history-row img {
+  width: 112px;
+  height: 92px;
+  border-radius: 3px;
+  object-fit: cover;
+}
+
+.rental-history-details h2 {
+  margin: 0 0 0.35rem;
+  font-size: 1rem;
+}
+
+.rental-history-details p {
+  margin: 0 0 0.45rem;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.rental-history-details > .mono {
+  color: var(--text-dim);
+  font-size: 0.68rem;
+}
+
+.rental-history-footer {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+  color: var(--text-dim);
+  font-size: 0.68rem;
+}
+
+.rental-history-footer > .mono {
+  margin-left: auto;
+  text-align: right;
+}
+
+.rental-history-status {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+}
+
+.rental-history-status-current {
+  color: var(--accent);
+}
+
+.rental-history-status-returned {
+  color: var(--accent);
+}
+
+.rental-history-status-finished {
+  color: var(--success);
+}
+
+.rental-history-delete {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0.4rem;
+  border: 0;
+  background: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  font: inherit;
+  font-size: 1.05rem;
+}
+
+.rental-history-delete:hover {
+  color: var(--text);
+}
+
+.refund-message {
+  margin: 0 0 1rem;
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--success);
+  color: var(--success);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+}
+
+.rented-gears-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.rented-gear-row {
+  display: grid;
+  grid-template-columns: 112px minmax(0, 1fr) auto;
+  gap: 1.2rem;
+  padding: 1rem;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.rented-gear-row:hover,
+.rented-gear-row:focus-visible {
+  border-color: var(--border-hover);
+  background: var(--bg-raised);
+}
+
+.rented-gear-row img {
+  width: 112px;
+  height: 92px;
+  border-radius: 3px;
+  object-fit: cover;
+}
+
+.rented-gear-image-link {
+  display: block;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.rented-gear-row h2 {
+  margin: 0 0 0.35rem;
+  font-size: 1rem;
+}
+
+.rented-gear-name {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+  text-align: left;
+}
+
+.rented-gear-name:hover {
+  color: var(--accent);
+}
+
+.rented-gear-row p {
+  margin: 0 0 0.45rem;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.rented-gear-row .mono {
+  color: var(--text-dim);
+  font-size: 0.68rem;
+}
+
+.rented-gear-paid-date {
+  display: block;
+  margin-top: 0.25rem;
+}
+
+.rented-gear-status {
+  color: var(--success);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+}
+
+.rented-gear-return {
+  padding: 0.5rem 0.7rem;
+  border-color: var(--border);
+  background: transparent;
+  color: var(--text-dim);
+  font-size: 0.65rem;
+}
+
+.rented-gear-return:hover {
+  border-color: var(--border-hover);
+  background: var(--bg-raised);
+  color: var(--text);
+}
+
+.rented-gear-modal-return:hover,
+.rented-gear-finish:hover {
+  border-color: var(--accent-hover);
+  background: var(--accent);
+  color: var(--on-accent, #fff);
+}
+
+.rented-gear-finish {
+  padding: 0.5rem 0.7rem;
+  border-color: var(--accent);
+  background: rgba(224, 51, 42, 0.12);
+  color: var(--accent);
+  font-size: 0.65rem;
+}
+
+.rented-gear-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-top: 0.8rem;
+}
+
+.rented-gear-progress {
+  grid-column: 1 / -1;
+  padding-top: 0.8rem;
+  border-top: 1px solid var(--border);
+}
+
+.rented-gear-progress-label {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.45rem;
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+}
+
+.rented-gear-progress-label strong {
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.rented-gear-progress-track {
+  height: 6px;
+  overflow: hidden;
+  border-radius: 3px;
+  background: var(--bg-raised);
+}
+
+.rented-gear-progress-fill {
+  height: 100%;
+  background: var(--accent);
+  transition: width 1s linear;
+}
+
+.rented-gear-time-warning { color: var(--warn) !important; }
+.rented-gear-time-critical,
+.rented-gear-time-ended { color: var(--accent) !important; }
+.rented-gear-progress-warning { background: var(--warn); }
+.rented-gear-progress-critical,
+.rented-gear-progress-ended { background: var(--accent); }
+
+.rented-gear-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  overflow-y: auto;
+  background: rgba(5, 5, 5, 0.8);
+  overscroll-behavior: contain;
+}
+
+.rented-gear-modal {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(300px, 1.05fr) minmax(300px, 0.95fr);
+  width: min(900px, 100%);
+  max-height: min(720px, calc(100vh - 2.5rem));
+  overflow-y: auto;
+  overflow-x: hidden;
+  border-top: 3px solid var(--accent);
+  box-shadow: 0 1.5rem 4rem rgba(0, 0, 0, 0.5);
+}
+
+.rented-gear-modal-gallery {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  align-self: start;
+  min-width: 0;
+  padding: 1.2rem;
+  background: var(--bg-raised);
+}
+
+.rented-gear-modal-hero {
+  height: clamp(220px, 34vh, 300px);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: #0a0a0a;
+}
+
+.rented-gear-modal-hero img,
+.rented-gear-modal-thumbnails img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.rented-gear-modal-thumbnails {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.55rem;
+}
+
+.rented-gear-modal-thumbnails button {
+  padding: 0;
+  aspect-ratio: 1.3;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: #0a0a0a;
+  cursor: pointer;
+}
+
+.rented-gear-modal-thumbnails button.selected {
+  border-color: var(--accent);
+}
+
+.rented-gear-modal-thumbnails img {
+  opacity: 0.62;
+}
+
+.rented-gear-modal-thumbnails button:hover img,
+.rented-gear-modal-thumbnails button.selected img {
+  opacity: 1;
+}
+
+.rented-gear-modal-copy {
+  min-width: 0;
+  padding: 2.8rem 2rem 2rem;
+}
+
+.rented-gear-modal-copy h2 {
+  margin: 0.4rem 0 1rem;
+  font-size: 1.6rem;
+  line-height: 1.15;
+}
+
+.rented-gear-modal-copy > p {
+  margin: 0 0 1.4rem;
+  color: var(--text-muted);
+  line-height: 1.65;
+}
+
+.rented-gear-paid-date-modal {
+  margin: -0.5rem 0 1.3rem;
+  color: var(--accent);
+  font-size: 0.7rem;
+}
+
+.rented-gear-modal-specs {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.6rem;
+  margin: 1.3rem 0 1.6rem;
+}
+
+.rented-gear-modal-specs div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+}
+
+.rented-gear-modal-specs span {
+  color: var(--text-dim);
+  font-size: 0.62rem;
+  text-transform: uppercase;
+}
+
+.rented-gear-modal-specs strong {
+  font-size: 0.82rem;
+}
+
+.rented-gear-modal-copy h3 {
+  margin: 0 0 0.7rem;
+  font-size: 1rem;
+}
+
+.rented-gear-modal-features {
+  display: grid;
+  gap: 0.45rem;
+  margin: 0;
+  padding-left: 1.1rem;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
+.rented-gear-modal-return {
+  margin-top: 0;
+  border-color: var(--accent);
+  background: rgba(224, 51, 42, 0.12);
+  color: var(--accent);
+}
+
+.rented-gear-modal-timer {
+  margin: 0 1.2rem 1.2rem;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: var(--bg-raised);
+}
+
+.rented-gear-modal-countdown {
+  display: block;
+  margin: 0.45rem 0 0.8rem;
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 1rem;
+}
+
+.rented-gear-modal-close {
+  position: absolute;
+  top: 0.9rem;
+  right: 0.9rem;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--bg-raised);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+.rented-gear-modal-close:hover {
+  color: var(--accent);
+}
+
+.my-gears-summary {
+  display: flex;
+  gap: 2.5rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.2rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.my-gears-summary strong {
+  display: block;
+  margin-top: 0.3rem;
+  font-size: 1.25rem;
+}
+
+.my-gear-availability {
+  min-width: 100px;
+  text-align: right;
+}
+
+.my-gear-availability strong,
+.my-gear-availability span {
+  display: block;
+}
+
+.my-gear-availability strong {
+  color: var(--accent);
+  font-family: var(--font-mono);
+}
+
+.my-gear-availability span {
+  color: var(--text-dim);
+  font-size: 0.7rem;
+}
+
+.profile-card {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  padding: 1.3rem 1.5rem;
+  margin-bottom: 2.2rem;
+  flex-wrap: wrap;
+}
+
+.profile-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.profile-info h2 {
+  margin: 0 0 0.2rem;
+  font-size: 1.3rem;
+}
+
+.profile-info p {
+  color: var(--text-dim);
+  font-size: 0.78rem;
+}
+
+.profile-balance-panel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 2.2rem;
+  padding: 1rem 1.25rem;
+  border-left: 3px solid var(--accent);
+  background: var(--bg-raised);
+}
+
+.profile-balance-panel strong {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 1rem;
+}
+
+.profile-balance-value {
+  color: var(--accent);
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.profile-balance-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.profile-transfer-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.5rem 0.7rem;
+  font-size: 0.65rem;
+}
+
+.profile-transfer-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.profile-transfer-form {
+  width: min(520px, 100%);
+  padding: 0;
+  border-top: 3px solid var(--accent);
+  box-shadow: 0 1.5rem 4rem rgba(0, 0, 0, 0.45);
+  animation: profile-modal-rise 0.2s ease-out;
+}
+
+.profile-transfer-body {
+  padding: 1.25rem 1.5rem 0.25rem;
+}
+
+.profile-transfer-calculator {
+  width: min(300px, 100%);
+  margin: 0 auto;
+}
+
+.profile-transfer-display {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.7rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--border);
+  background: #0a0a0a;
+}
+
+.profile-transfer-display .mono {
+  color: var(--text-dim);
+  font-size: 0.62rem;
+  text-transform: uppercase;
+}
+
+.profile-transfer-display strong {
+  color: var(--accent);
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+}
+
+.profile-transfer-shortcuts {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.45rem;
+  margin-bottom: 0.45rem;
+}
+
+.profile-transfer-shortcuts button,
+.profile-transfer-keypad button {
+  min-height: 2.3rem;
+  border: 1px solid var(--border);
+  background: var(--bg-raised);
+  color: var(--text-muted);
+  cursor: pointer;
+  font: inherit;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+}
+
+.profile-transfer-shortcuts button:hover,
+.profile-transfer-keypad button:hover {
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.profile-transfer-keypad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.45rem;
+}
+
+.profile-transfer-keypad .profile-transfer-clear {
+  grid-column: 1 / -1;
+  color: var(--accent);
+}
+
+.profile-transfer-available {
+  display: block;
+  margin-top: 0.55rem;
+  color: var(--text-dim);
+  font-size: 0.68rem;
+}
+
+.profile-transfer-error {
+  margin: 0.7rem 0 0;
+  color: var(--accent);
+  font-size: 0.78rem;
+}
+
+.profile-rental-snapshot {
+  margin-bottom: 2.2rem;
+}
+
+.profile-rental-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.9rem;
+}
+
+.profile-rental-heading h2 {
+  margin: 0.25rem 0 0;
+  font-size: 1.2rem;
+}
+
+.profile-rental-heading .btn {
+  flex-shrink: 0;
+  padding: 0.5rem 0.7rem;
+  font-size: 0.65rem;
+}
+
+.profile-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.9rem;
+}
+
+.profile-stat {
+  display: flex;
+  flex-direction: column;
+  min-height: 116px;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  background: var(--bg-raised);
+}
+
+.profile-stat .mono {
+  color: var(--text-dim);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+}
+
+.profile-stat strong {
+  margin: 0.35rem 0 auto;
+  color: var(--accent);
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+}
+
+.profile-stat a,
+.profile-stat > span:last-child {
+  color: var(--text-muted);
+  font-size: 0.72rem;
+}
+
+.profile-stat a:hover {
+  color: var(--accent);
+}
+
+.tier-badge {
+  background: var(--accent);
+  color: var(--on-accent, #fff);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  padding: 0.4rem 0.7rem;
+  border-radius: 2px;
+  margin-left: auto;
+}
+
+.profile-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  overflow-y: auto;
+  background: rgba(5, 5, 5, 0.78);
+  animation: profile-modal-fade 0.18s ease-out;
+  overscroll-behavior: contain;
+}
+
+.profile-edit-form {
+  width: min(680px, 100%);
+  max-height: calc(100vh - 2.5rem);
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding: 0;
+  border-top: 3px solid var(--accent);
+  box-shadow: 0 1.5rem 4rem rgba(0, 0, 0, 0.45);
+  animation: profile-modal-rise 0.2s ease-out;
+}
+
+.profile-edit-heading h3 {
+  margin: 0.25rem 0 0.35rem;
+  font-size: 1.35rem;
+}
+
+.profile-edit-heading p {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.profile-edit-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.5rem 1.5rem 1.2rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.profile-modal-close {
+  align-self: flex-start;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: transparent;
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.profile-modal-close:hover {
+  color: var(--text);
+  border-color: var(--border-hover);
+  background: var(--bg-raised);
+}
+
+.profile-edit-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  padding: 1.4rem 1.5rem 0.4rem;
+}
+
+.profile-edit-grid .field {
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.profile-edit-grid .field input {
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.profile-edit-grid input {
+  display: block;
+  width: 100%;
+  margin-top: 0.4rem;
+  box-sizing: border-box;
+}
+
+.profile-edit-wide {
+  grid-column: 1 / -1;
+}
+
+.profile-edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.7rem;
+  padding: 1rem 1.5rem 1.5rem;
+  border-top: 1px solid var(--border);
+}
+
+@keyframes profile-modal-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes profile-modal-rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.section-heading {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  margin: 2rem 0 1rem;
+}
+
+.rental-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.rental-row {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+  padding: 1rem 1.2rem;
+  flex-wrap: wrap;
+}
+
+.rental-media {
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+  border-radius: 3px;
+  background: linear-gradient(150deg, #1c1c1c, #0a0a0a);
+}
+
+.rental-info {
+  flex: 1;
+  min-width: 180px;
+}
+
+.rental-info h4 {
+  margin: 0 0 0.25rem;
+  font-size: 1rem;
+}
+
+.rental-dates {
+  color: var(--text-dim);
+  font-size: 0.72rem;
+  margin-bottom: 0.3rem;
+}
+
+.rental-status {
+  font-size: 0.78rem;
+  margin: 0;
+  font-weight: 600;
+}
+
+.rental-status.due-soon { color: var(--accent); }
+.rental-status.due-urgent { color: var(--accent); }
+
+.extend-btn {
+  padding: 0.45rem 0.9rem;
+  font-size: 0.68rem;
+}
+
+.manage-link {
+  font-size: 0.8rem;
+  color: var(--accent);
+  text-decoration: underline;
+  white-space: nowrap;
+}
+
+.account-overview {
+  width: 300px;
+  flex-shrink: 0;
+  padding: 1.4rem;
+  position: sticky;
+  top: 88px;
+}
+
+.account-overview h2 {
+  margin: 0 0 1rem;
+  font-size: 1.15rem;
+}
+
+.overview-line {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.88rem;
+  color: var(--text-muted);
+}
+
+.overview-line .highlight {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.overview-address {
+  align-items: flex-start;
+}
+
+.overview-address span:last-child {
+  max-width: 170px;
+  text-align: right;
+}
+
+@media (max-width: 980px) {
+  .account-page { flex-direction: column; }
+  .account-overview { width: 100%; position: static; }
+}
+
+@media (max-width: 560px) {
+  .my-gears-summary { gap: 1.5rem; }
+  .my-gear-row { grid-template-columns: 64px minmax(0, 1fr); }
+  .my-gear-row img { width: 64px; height: 58px; }
+  .my-gear-status { grid-column: 2; justify-self: start; }
+  .my-gear-availability { grid-column: 2; text-align: left; }
+  .profile-edit-heading { padding: 1.25rem 1.1rem 1rem; }
+  .profile-edit-grid { padding: 1.1rem 1.1rem 0.25rem; }
+  .profile-edit-actions { padding: 0.9rem 1.1rem 1.1rem; }
+  .profile-edit-grid { grid-template-columns: 1fr; }
+  .profile-edit-wide { grid-column: auto; }
+  .rental-row { justify-content: center; text-align: center; }
+  .tier-badge { margin-left: 0; }
+  .rented-gear-row { grid-template-columns: 64px minmax(0, 1fr); }
+  .rented-gear-row img { width: 64px; height: 58px; }
+  .rented-gear-status { grid-column: 2; justify-self: start; }
+  .rented-gear-actions { grid-column: 2; }
+  .rented-gear-modal { grid-template-columns: 1fr; max-height: none; margin: auto 0; overflow: visible; }
+  .rented-gear-modal-gallery { padding: 0.8rem; }
+  .rented-gear-modal-hero { height: 220px; }
+  .rented-gear-modal-copy { padding: 1.5rem; }
+  .rented-gear-modal-close { top: 0.7rem; right: 0.7rem; }
+  .rental-history-row { grid-template-columns: 64px minmax(0, 1fr); }
+  .rental-history-row img { width: 64px; height: 58px; }
+  .rental-history-footer { flex-wrap: wrap; gap: 0.4rem 0.8rem; }
+  .rental-history-footer > .mono { margin-left: auto; }
+  .profile-rental-heading { align-items: flex-start; flex-direction: column; }
+  .profile-stat-grid { grid-template-columns: 1fr; }
+  .profile-balance-panel { align-items: flex-start; flex-direction: column; }
+  .profile-balance-actions { align-items: flex-start; flex-direction: column; }
+}
+
+.my-gears-message {
+  margin: 0 0 1rem;
+  padding: 0.65rem 0.8rem;
+  border-left: 3px solid var(--success);
+  background: var(--bg-raised);
+  color: var(--text);
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+.my-gears-message.error { border-left-color: var(--accent); }
+
+.rented-gear-actions .btn:disabled,
+.rented-gear-modal-return:disabled { opacity: 0.6; cursor: progress; }
