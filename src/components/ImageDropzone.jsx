@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { supabase } from '../supabaseClient';
 import { ALLOWED_IMAGE_TYPES, IMAGE_BUCKET, MAX_IMAGE_BYTES, removeStoredImages } from '../imageStorage';
 import './ImageDropzone.css';
@@ -6,8 +6,17 @@ import './ImageDropzone.css';
 const BUCKET = IMAGE_BUCKET;
 const MAX_FILE_BYTES = MAX_IMAGE_BYTES;
 
-function isImageFile(file) {
-  return ALLOWED_IMAGE_TYPES.includes(file.type);
+const EXTENSION_TYPES = {
+  jpg: 'image/jpeg', jpeg: 'image/jpeg', jfif: 'image/jpeg', pjpeg: 'image/jpeg',
+  png: 'image/png', webp: 'image/webp', gif: 'image/gif', avif: 'image/avif',
+};
+
+// Windows often reports an empty (or odd) MIME type for dragged files, so fall
+// back to the extension before deciding a photo isn't allowed.
+function imageTypeOf(file) {
+  if (ALLOWED_IMAGE_TYPES.includes(file.type)) return file.type;
+  const extension = file.name.split('.').pop()?.toLowerCase();
+  return EXTENSION_TYPES[extension] || null;
 }
 
 function randomId() {
@@ -20,7 +29,7 @@ async function uploadToStorage(file, folder) {
   const { error: uploadError } = await supabase.storage.from(BUCKET).upload(path, file, {
     cacheControl: '3600',
     upsert: false,
-    contentType: file.type || 'image/jpeg',
+    contentType: imageTypeOf(file) || 'image/jpeg',
   });
   if (uploadError) throw uploadError;
   const { data } = supabase.storage.from(BUCKET).getPublicUrl(path);
@@ -43,6 +52,20 @@ export default function ImageDropzone({ value = [], onChange, folder, maxFiles =
   const inputRef = useRef(null);
   const dragCounter = useRef(0);
 
+  // A drop that misses the box would make the browser open the image and
+  // throw away the half-filled form, so swallow stray file drops on the page.
+  useEffect(() => {
+    const blockStrayDrop = (event) => {
+      if (event.dataTransfer?.types?.includes('Files')) event.preventDefault();
+    };
+    window.addEventListener('dragover', blockStrayDrop);
+    window.addEventListener('drop', blockStrayDrop);
+    return () => {
+      window.removeEventListener('dragover', blockStrayDrop);
+      window.removeEventListener('drop', blockStrayDrop);
+    };
+  }, []);
+
   const acceptFiles = useCallback(async (fileList) => {
     setError('');
     const incoming = Array.from(fileList || []);
@@ -56,7 +79,7 @@ export default function ImageDropzone({ value = [], onChange, folder, maxFiles =
 
     const validFiles = [];
     for (const file of incoming.slice(0, room)) {
-      if (!isImageFile(file)) {
+      if (!imageTypeOf(file)) {
         setError('Only JPG, PNG, WebP, GIF or AVIF photos are accepted.');
         continue;
       }
@@ -91,6 +114,7 @@ export default function ImageDropzone({ value = [], onChange, folder, maxFiles =
 
   const handleDragOver = (event) => {
     event.preventDefault();
+    event.dataTransfer.dropEffect = 'copy';
   };
 
   const handleDragLeave = (event) => {
@@ -106,6 +130,13 @@ export default function ImageDropzone({ value = [], onChange, folder, maxFiles =
     event.preventDefault();
     dragCounter.current = 0;
     setIsDragging(false);
+    if (isUploading) return;
+    // Images dragged out of a web page or the Photos app arrive as links,
+    // not files, so there's nothing we can upload.
+    if (!event.dataTransfer.files?.length) {
+      setError('That drop had no photo file. Drag the image file from your computer\'s folders, or click to browse.');
+      return;
+    }
     acceptFiles(event.dataTransfer.files);
   };
 
