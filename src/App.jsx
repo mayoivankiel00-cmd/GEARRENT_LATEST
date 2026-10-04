@@ -1,5 +1,7 @@
+import { useEffect, useRef } from 'react';
 import { Link, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { useAuth } from './AuthContext';
+import { useNotifications } from './NotificationContext';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Landing from './pages/Landing';
@@ -28,9 +30,12 @@ import AdminRevenue from './admin/AdminRevenue';
 import AdminUsers from './admin/AdminUsers';
 import AdminUtilization from './admin/AdminUtilization';
 import AdminApprovals from './admin/AdminApprovals';
+import AdminReturns from './admin/AdminReturns';
+import AdminCategories from './admin/AdminCategories';
 import AdminAdmins from './admin/AdminAdmins';
 import { isGearProvider } from './providerAccess';
 import ToastStack from './components/ToastStack';
+import ErrorBoundary from './components/ErrorBoundary';
 
 function SiteLayout({ children }) {
   return (
@@ -60,15 +65,39 @@ function AuthGate() {
 // Everything behind sign-in. While the session is still being verified we
 // render nothing sensitive; once signed out, every protected URL (including
 // ones reached with the browser's Back button) bounces to the sign-in screen.
+// Admin accounts don't rent gear, so they are kept in the dashboard.
 function ProtectedRoute({ children }) {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, isAdmin, loading } = useAuth();
   const location = useLocation();
 
   if (loading) return <AuthGate />;
   if (!isAuthenticated) {
     return <Navigate to="/signin" replace state={{ from: location.pathname + location.search }} />;
   }
+  if (isAdmin) return <Navigate to="/admin" replace />;
   return children;
+}
+
+// Tells the user when their role changes mid-session (granted or revoked by
+// another admin). The route guards take care of moving them.
+function RoleChangeNotice() {
+  const { user } = useAuth();
+  const { pushToast } = useNotifications();
+  const previousRef = useRef(null);
+
+  useEffect(() => {
+    const previous = previousRef.current;
+    previousRef.current = user ? { id: user.id, role: user.role } : null;
+    if (!user || !previous || previous.id !== user.id || previous.role === user.role) return;
+
+    if (user.role === 'admin') {
+      pushToast({ id: `role-${Date.now()}`, type: 'success', message: 'You have been given admin access.', link: '/admin' });
+    } else if (previous.role === 'admin') {
+      pushToast({ id: `role-${Date.now()}`, type: 'warning', message: 'Your admin access was removed.' });
+    }
+  }, [user, pushToast]);
+
+  return null;
 }
 
 function ProviderRoute({ children }) {
@@ -90,6 +119,7 @@ function AdminRoute({ children }) {
 
 // Sign-in / sign-up are for signed-out visitors only.
 // After signing in, continue to the page the user originally asked for.
+// Admins always land in the dashboard unless they were heading to an admin page.
 function GuestRoute({ children }) {
   const { isAuthenticated, user, loading } = useAuth();
   const location = useLocation();
@@ -97,15 +127,21 @@ function GuestRoute({ children }) {
   if (isAuthenticated) {
     const from = typeof location.state?.from === 'string' && location.state.from.startsWith('/')
       && !location.state.from.startsWith('//') ? location.state.from : null;
-    return <Navigate to={from || (user?.role === 'admin' ? '/admin' : '/catalog')} replace />;
+    if (user?.role === 'admin') {
+      return <Navigate to={from?.startsWith('/admin') ? from : '/admin'} replace />;
+    }
+    return <Navigate to={from || '/catalog'} replace />;
   }
   return children;
 }
 
 export default function App() {
+  const { pathname } = useLocation();
   return (
     <>
     <ToastStack />
+    <RoleChangeNotice />
+    <ErrorBoundary resetKey={pathname}>
     <Routes>
       {/* Admin routes use their own sidebar/topbar layout */}
       <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
@@ -119,6 +155,8 @@ export default function App() {
       <Route path="/admin/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />
       <Route path="/admin/utilization" element={<AdminRoute><AdminUtilization /></AdminRoute>} />
       <Route path="/admin/approvals" element={<AdminRoute><AdminApprovals /></AdminRoute>} />
+      <Route path="/admin/returns" element={<AdminRoute><AdminReturns /></AdminRoute>} />
+      <Route path="/admin/categories" element={<AdminRoute><AdminCategories /></AdminRoute>} />
       <Route path="/admin/admins" element={<AdminRoute><AdminAdmins /></AdminRoute>} />
 
       {/* Customer-facing routes use the shared site navbar/footer */}
@@ -126,6 +164,8 @@ export default function App() {
         path="*"
         element={
           <SiteLayout>
+            {/* Inner boundary keeps the navbar/footer usable when a page crashes */}
+            <ErrorBoundary resetKey={pathname}>
             <Routes>
               <Route path="/" element={<Landing />} />
               <Route path="/catalog" element={<ProtectedRoute><Catalog /></ProtectedRoute>} />
@@ -148,10 +188,12 @@ export default function App() {
               <Route path="/locations" element={<InfoPage type="locations" />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
+            </ErrorBoundary>
           </SiteLayout>
         }
       />
     </Routes>
+    </ErrorBoundary>
     </>
   );
 }

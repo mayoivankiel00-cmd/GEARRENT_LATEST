@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { formatPeso, categories, calculateSecurityDeposit } from '../mockData';
+import { formatPeso, calculateSecurityDeposit } from '../pricing';
 import { useCart } from '../CartContext';
+import { useCategories } from '../CategoryContext';
 import { useProviderCatalog } from '../ProviderContext';
 import ProductCard from '../components/ProductCard';
 import './ProductDetail.css';
@@ -13,6 +14,7 @@ export default function ProductDetail() {
   const navigate = useNavigate();
   const { addItem } = useCart();
   const { catalogProducts } = useProviderCatalog();
+  const { categories } = useCategories();
   const product = catalogProducts.find((p) => p.id === id);
 
   const [pickup, setPickup] = useState(null);
@@ -112,7 +114,7 @@ export default function ProductDetail() {
               <button
                 type="button"
                 className={`product-thumb ${index === selectedImage ? 'selected' : ''}`}
-                key={image}
+                key={`${index}-${image}`}
                 onClick={() => setSelectedImage(index)}
                 aria-label={`View photo ${index + 1} of ${product.name}`}
               >

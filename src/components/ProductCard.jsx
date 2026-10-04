@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { formatPeso } from '../mockData';
+import { formatPeso } from '../pricing';
 import './ProductCard.css';
 
 export default function ProductCard({ product, featured = false, showActions = true, showStatus = true }) {
@@ -110,7 +110,7 @@ export default function ProductCard({ product, featured = false, showActions = t
             {productImages.map((image, index) => (
               <button
                 type="button"
-                key={image}
+                key={`${index}-${image}`}
                 className={index === previewImage ? 'active' : ''}
                 onClick={(event) => {
                   event.preventDefault();

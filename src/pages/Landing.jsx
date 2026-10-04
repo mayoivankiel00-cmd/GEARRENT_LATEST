@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
-import { categories } from '../mockData';
+import { useCategories } from '../CategoryContext';
 import { useProviderCatalog } from '../ProviderContext';
 import ProductCard from '../components/ProductCard';
 import './Landing.css';
@@ -13,17 +13,17 @@ const heroSlides = [
     label: 'Capture the moment',
   },
   {
-    image: categories[0].image,
+    image: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=1200&q=85',
     alt: 'Professional camera equipment',
     label: 'Cameras for every shoot',
   },
   {
-    image: categories[1].image,
+    image: 'https://waldo.pro/wp-content/uploads/2024/03/Lighting-Equipment-1-564x317.jpg',
     alt: 'Studio lighting equipment',
     label: 'Shape the light',
   },
   {
-    image: categories[2].image,
+    image: 'https://images.unsplash.com/photo-1524678606370-a47ad25cb82a?auto=format&fit=crop&w=1200&q=85',
     alt: 'Audio recording equipment',
     label: 'Make it sound right',
   },
@@ -31,6 +31,7 @@ const heroSlides = [
 
 export default function Landing() {
   const { isAuthenticated } = useAuth();
+  const { categories } = useCategories();
   const { catalogProducts } = useProviderCatalog();
   const [activeSlide, setActiveSlide] = useState(0);
   const productsTrackRef = useRef(null);

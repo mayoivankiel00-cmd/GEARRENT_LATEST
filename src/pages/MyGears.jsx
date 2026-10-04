@@ -2,13 +2,13 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../CartContext';
 import { useNotifications } from '../NotificationContext';
-import { formatPeso } from '../mockData';
+import { formatPeso } from '../pricing';
 import { formatRentalTimeRemaining, getRentalEndTime, getRentalTimeRemaining } from '../rentalUtils';
 import AccountSidebar from '../components/AccountSidebar';
 import './Account.css';
 
 export default function MyGears() {
-  const { rentedItems, returnRental, finishRental } = useCart();
+  const { rentedItems, requestReturn, refreshRentals } = useCart();
   const { refreshNotifications } = useNotifications();
   const [busyRentalId, setBusyRentalId] = useState(null);
   const [actionMessage, setActionMessage] = useState({ type: '', text: '' });
@@ -20,6 +20,15 @@ export default function MyGears() {
     const timer = window.setInterval(() => setNow(Date.now()), 1000);
     return () => window.clearInterval(timer);
   }, []);
+
+  // While a return is waiting for the owner's inspection, keep checking so
+  // the rental moves to history once it is confirmed.
+  const awaitingInspection = rentedItems.some((rental) => rental.returnRequestedAt);
+  useEffect(() => {
+    if (!awaitingInspection) return undefined;
+    const timer = window.setInterval(refreshRentals, 30000);
+    return () => window.clearInterval(timer);
+  }, [awaitingInspection, refreshRentals]);
 
   const formatPaidDate = (timestamp) => timestamp
     ? new Date(timestamp).toLocaleString('en-US', {
@@ -33,41 +42,25 @@ export default function MyGears() {
     setSelectedImage(0);
   };
 
-  // Refunds are calculated and credited by the database (return_rental /
-  // finish_rental); the page only reports the result.
+  // Handing the gear back only starts the return: refunds are settled by the
+  // database once the owner (or an admin) has checked the gear.
   const handleReturnRental = async (rentalIndex) => {
     const rental = rentedItems[rentalIndex];
-    if (!rental || busyRentalId) return;
+    if (!rental || busyRentalId || rental.returnRequestedAt) return;
     setBusyRentalId(rental.id);
-    const result = await returnRental(rentalIndex);
+    const result = await requestReturn(rentalIndex);
     setBusyRentalId(null);
     setSelectedRental(null);
     if (!result.ok) {
       setActionMessage({ type: 'error', text: result.error });
       return;
     }
-    const { refundableAmount, refundedSecurityDeposit, product } = result.rental;
+    const lateNote = result.lateDays > 0
+      ? ` It is ${result.lateDays} day${result.lateDays === 1 ? '' : 's'} late so far (about ${formatPeso(result.lateFee)}). The final late fee is counted up to when the owner confirms they have the gear, and comes out of your deposit.`
+      : '';
     setActionMessage({
-      type: 'success',
-      text: `${product.name} was returned. ${formatPeso(refundableAmount)} was added to your account balance, including your ${formatPeso(refundedSecurityDeposit)} security deposit.`,
-    });
-    refreshNotifications({ silent: true });
-  };
-
-  const handleFinishRental = async (rentalIndex) => {
-    const rental = rentedItems[rentalIndex];
-    if (!rental || busyRentalId) return;
-    setBusyRentalId(rental.id);
-    const result = await finishRental(rentalIndex);
-    setBusyRentalId(null);
-    setSelectedRental(null);
-    if (!result.ok) {
-      setActionMessage({ type: 'error', text: result.error });
-      return;
-    }
-    setActionMessage({
-      type: 'success',
-      text: `${rental.product.name} was moved to rental history. Your ${formatPeso(result.rental.refundedSecurityDeposit)} security deposit was returned to your balance.`,
+      type: result.lateDays > 0 ? 'error' : 'success',
+      text: `Return requested for ${rental.product.name}. The owner will check the gear and then release your ${formatPeso(rental.securityDeposit)} security deposit to your balance.${lateNote}`,
     });
     refreshNotifications({ silent: true });
   };
@@ -119,7 +112,7 @@ export default function MyGears() {
                   <span className="mono">{days} day rental</span>
                   <span className="mono rented-gear-paid-date">Paid {formatPaidDate(rental.paidAt || rental.rentedAt)}</span>
                 </div>
-                <strong className="rented-gear-status">Paid</strong>
+                <strong className="rented-gear-status">{rental.returnRequestedAt ? 'Returning' : 'Paid'}</strong>
                 <div className="rented-gear-progress">
                   <div className="rented-gear-progress-label">
                     <span>Rental time remaining</span>
@@ -129,28 +122,23 @@ export default function MyGears() {
                     <div className={`rented-gear-progress-fill rented-gear-progress-${urgency}`} style={{ width: `${progress}%` }} />
                   </div>
                   <div className="rented-gear-actions">
-                    <button
-                      type="button"
-                      className="btn btn-outline rented-gear-return"
-                      disabled={Boolean(busyRentalId)}
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        handleReturnRental(index);
-                      }}
-                    >
-                      Return / Refund
-                    </button>
-                    <button
-                      type="button"
-                      className="btn btn-outline rented-gear-finish"
-                      disabled={Boolean(busyRentalId)}
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        handleFinishRental(index);
-                      }}
-                    >
-                      Finished renting
-                    </button>
+                    {rental.returnRequestedAt ? (
+                      <span className="mono rented-gear-paid-date">
+                        Returned {formatPaidDate(rental.returnRequestedAt)} · waiting for the owner to check the gear
+                      </span>
+                    ) : (
+                      <button
+                        type="button"
+                        className="btn btn-outline rented-gear-return"
+                        disabled={Boolean(busyRentalId)}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          handleReturnRental(index);
+                        }}
+                      >
+                        {busyRentalId === rental.id ? 'Processing…' : 'Return gear'}
+                      </button>
+                    )}
                   </div>
                 </div>
               </article>
@@ -176,7 +164,7 @@ export default function MyGears() {
               </div>
               <div className="rented-gear-modal-thumbnails" aria-label="Product photos">
                 {selectedRental.product.images.map((image, index) => (
-                  <button type="button" className={index === selectedImage ? 'selected' : ''} key={image} onClick={() => setSelectedImage(index)} aria-label={`View photo ${index + 1}`}>
+                  <button type="button" className={index === selectedImage ? 'selected' : ''} key={`${index}-${image}`} onClick={() => setSelectedImage(index)} aria-label={`View photo ${index + 1}`}>
                     <img src={image} alt="" />
                   </button>
                 ))}
@@ -197,8 +185,10 @@ export default function MyGears() {
                   );
                 })()}
               </div>
-              <button type="button" className="btn btn-outline btn-block rented-gear-modal-return" disabled={Boolean(busyRentalId)} onClick={() => handleReturnRental(selectedRental.rentalIndex)}>
-                {busyRentalId === selectedRental.id ? 'Processing…' : <>Return Product &amp; Request Refund</>}
+              <button type="button" className="btn btn-outline btn-block rented-gear-modal-return" disabled={Boolean(busyRentalId) || Boolean(selectedRental.returnRequestedAt)} onClick={() => handleReturnRental(selectedRental.rentalIndex)}>
+                {busyRentalId === selectedRental.id
+                  ? 'Processing…'
+                  : selectedRental.returnRequestedAt ? 'Waiting for inspection' : 'Return gear'}
               </button>
             </div>
             <div className="rented-gear-modal-copy">
@@ -211,6 +201,9 @@ export default function MyGears() {
               <div className="rented-gear-paid-date-modal mono">
                 Security deposit held by Gear Rent: {formatPeso(Number(selectedRental.securityDeposit) || 0)}
               </div>
+              <p className="rented-gear-paid-date-modal mono">
+                Returned late? One day&apos;s rate per late day comes out of the deposit, and the owner can keep part of it for damage.
+              </p>
               <div className="rented-gear-modal-specs">
                 {Object.entries(selectedRental.product.specs).map(([label, value]) => (
                   <div key={label}><span className="mono">{label}</span><strong>{value}</strong></div>

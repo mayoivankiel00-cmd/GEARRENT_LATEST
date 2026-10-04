@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
-import { formatPeso, membershipTiers } from '../mockData';
+import { formatPeso, membershipTiers } from '../pricing';
 import './Memberships.css';
 import './Payment.css';
 

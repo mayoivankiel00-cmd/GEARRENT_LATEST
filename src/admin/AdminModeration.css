@@ -176,6 +176,42 @@
 
 .review-reject-btn { background: var(--accent); }
 
+/* ---- Categories ---- */
+.category-admin-new { margin-bottom: 1rem; }
+
+.category-admin-row {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr) auto auto;
+  gap: 1rem;
+  align-items: center;
+  padding: 0.9rem;
+}
+
+.category-admin-image {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: 4px;
+  background: var(--bg-raised);
+  color: var(--text-dim);
+  font-size: 0.65rem;
+}
+
+.category-admin-image img { width: 100%; height: 100%; object-fit: cover; }
+.category-admin-copy { display: flex; flex-direction: column; gap: 0.2rem; min-width: 0; }
+.category-admin-copy .mono { color: var(--text-dim); font-size: 0.68rem; }
+.category-admin-copy p { margin: 0; color: var(--text-muted); font-size: 0.8rem; }
+.category-admin-count { color: var(--text-muted); font-size: 0.72rem; }
+.moderation-link-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+@media (max-width: 640px) {
+  .category-admin-row { grid-template-columns: 72px minmax(0, 1fr); }
+}
+
+/* ---- Return inspections (admin + provider pages) ---- */
+.return-inspections { margin-bottom: 1.5rem; }
+
 .review-empty {
   display: flex;
   flex-direction: column;

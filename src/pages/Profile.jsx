@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { useCart } from '../CartContext';
 import { useNotifications } from '../NotificationContext';
-import { formatPeso } from '../mockData';
+import { formatPeso } from '../pricing';
 import AccountSidebar from '../components/AccountSidebar';
 import './Account.css';
 

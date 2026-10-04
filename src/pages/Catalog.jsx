@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useSearchParams } from 'react-router-dom';
-import { categories } from '../mockData';
+import { useCategories } from '../CategoryContext';
 import { useProviderCatalog } from '../ProviderContext';
 import ProductCard from '../components/ProductCard';
 import AccountSidebar from '../components/AccountSidebar';
@@ -10,10 +10,15 @@ import './Catalog.css';
 export default function Catalog() {
   const productsPerPage = 12;
   const { catalogProducts } = useProviderCatalog();
+  const { categories } = useCategories();
   const advertisingProducts = catalogProducts.slice(0, 8);
   const featuredTrackRef = useRef(null);
   const featuredPausedRef = useRef(false);
   const [advertisingSlide, setAdvertisingSlide] = useState(0);
+  // The catalog can be empty (still loading, failed, or nothing approved) or
+  // shrink below the current slide, so never index past the end.
+  const adIndex = advertisingProducts.length ? advertisingSlide % advertisingProducts.length : 0;
+  const adProduct = advertisingProducts[adIndex] || null;
   const [searchParams, setSearchParams] = useSearchParams();
   const activeCategory = searchParams.get('category');
   const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
@@ -42,7 +47,7 @@ export default function Catalog() {
       }
       return true;
     });
-  }, [catalogProducts, checkedCategories, availableOnly, searchTerm]);
+  }, [catalogProducts, categories, checkedCategories, availableOnly, searchTerm]);
 
   const categoryCounts = useMemo(() => {
     const query = searchTerm.trim().toLowerCase();
@@ -58,7 +63,7 @@ export default function Catalog() {
       }).length;
       return counts;
     }, {});
-  }, [catalogProducts, availableOnly, searchTerm]);
+  }, [catalogProducts, categories, availableOnly, searchTerm]);
 
   const pageCount = Math.max(1, Math.ceil(filtered.length / productsPerPage));
   const paginatedProducts = filtered.slice(
@@ -90,6 +95,7 @@ export default function Catalog() {
   }, []);
 
   useEffect(() => {
+    if (advertisingProducts.length === 0) return undefined;
     const advertisingTimer = window.setInterval(() => {
       setAdvertisingSlide((slide) => (slide + 1) % advertisingProducts.length);
     }, 5000);
@@ -163,18 +169,19 @@ export default function Catalog() {
       </div>
 
       <div className="catalog-results">
+        {adProduct && (
         <section className="catalog-ad" aria-label="Featured product promotion">
           <img
             className="catalog-ad-image"
-            src={advertisingProducts[advertisingSlide].image}
-            alt={advertisingProducts[advertisingSlide].name}
+            src={adProduct.image}
+            alt={adProduct.name}
           />
           <div className="catalog-ad-overlay" />
           <div className="catalog-ad-copy">
             <div className="eyebrow">Available for rent</div>
-            <h2>{advertisingProducts[advertisingSlide].name}</h2>
-            <p>{advertisingProducts[advertisingSlide].blurb}</p>
-            <Link to={`/product/${advertisingProducts[advertisingSlide].id}`} className="btn btn-primary">
+            <h2>{adProduct.name}</h2>
+            <p>{adProduct.blurb}</p>
+            <Link to={`/product/${adProduct.id}`} className="btn btn-primary">
               View Product
             </Link>
           </div>
@@ -191,10 +198,10 @@ export default function Catalog() {
                 <button
                   type="button"
                   key={product.id}
-                  className={index === advertisingSlide ? 'active' : ''}
+                  className={index === adIndex ? 'active' : ''}
                   onClick={() => setAdvertisingSlide(index)}
                   aria-label={`Show ${product.name}`}
-                  aria-current={index === advertisingSlide ? 'true' : undefined}
+                  aria-current={index === adIndex ? 'true' : undefined}
                 />
               ))}
             </div>
@@ -207,6 +214,7 @@ export default function Catalog() {
             </button>
           </div>
         </section>
+        )}
 
         <div className="catalog-results-header">
           <span className="mono">

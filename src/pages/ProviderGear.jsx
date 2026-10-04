@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { categories, formatPeso } from '../mockData';
+import { formatPeso } from '../pricing';
+import { useCategories } from '../CategoryContext';
 import { useProviderCatalog } from '../ProviderContext';
 import { useNotifications } from '../NotificationContext';
 import { useAuth } from '../AuthContext';
 import AccountSidebar from '../components/AccountSidebar';
 import ImageDropzone from '../components/ImageDropzone';
+import ReturnInspections from '../components/ReturnInspections';
 import './ProviderGear.css';
 
 const approvalLabels = {
@@ -16,7 +18,7 @@ const approvalLabels = {
 
 const initialForm = {
   name: '',
-  category: categories[0].id,
+  category: '', // empty = first category in the list
   price: '',
   condition: 'Good',
   capacity: '',
@@ -31,7 +33,9 @@ export default function ProviderGear() {
   const { providerProducts, addProviderProduct, removeProviderProduct } = useProviderCatalog();
   const { addNotification } = useNotifications();
   const { user } = useAuth();
+  const { categories, getCategoryName } = useCategories();
   const [form, setForm] = useState(initialForm);
+  const selectedCategory = form.category || categories[0]?.id || '';
   const [message, setMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const liveCount = providerProducts.filter((product) => product.approvalStatus === 'approved').length;
@@ -56,6 +60,7 @@ export default function ProviderGear() {
     setSubmitting(true);
     const { product, error } = await addProviderProduct({
       ...form,
+      category: selectedCategory,
       price: Number(form.price),
       image: form.images[0],
       images: form.images,
@@ -93,6 +98,9 @@ export default function ProviderGear() {
           <div><span className="mono">Not approved</span><strong>{String(rejectedCount).padStart(2, '0')}</strong></div>
         </div>
 
+        {/* Only shows up when a renter has handed back this provider's gear. */}
+        <ReturnInspections hideWhenEmpty title="Returned gear to check" />
+
         <form className="card provider-listing-form" onSubmit={handleSubmit}>
           <div className="provider-form-heading">
             <div><div className="eyebrow">New listing</div><h2>Add your gear</h2></div>
@@ -104,7 +112,7 @@ export default function ProviderGear() {
                 <div className="provider-form-section-label">Identity</div>
                 <label className="field">Product name<input name="name" value={form.name} onChange={handleChange} placeholder="Sony FX3 Cinema Camera" required /></label>
                 <label className="field">Category
-                  <select name="category" value={form.category} onChange={handleChange}>
+                  <select name="category" value={selectedCategory} onChange={handleChange} required>
                     {categories.map((category) => <option value={category.id} key={category.id}>{category.name}</option>)}
                   </select>
                 </label>
@@ -180,7 +188,7 @@ export default function ProviderGear() {
                 >
                   <div className="provider-listing-image"><img src={product.images[0]} alt={product.name} /><span className={`provider-approval ${approval.cls}`}>{approval.text}</span></div>
                   <div className="provider-listing-copy">
-                    <div className="provider-listing-head"><h3>{product.name}</h3><span className="provider-listing-category">{categories.find((category) => category.id === product.category)?.name || 'Gear'}</span></div>
+                    <div className="provider-listing-head"><h3>{product.name}</h3><span className="provider-listing-category">{getCategoryName(product.category)}</span></div>
                     <strong className="provider-listing-price">{formatPeso(product.price)} <span>/ day</span></strong>
                     <div className="provider-listing-specs">
                       {['capacity', 'weight', 'sensor'].map((spec) => product.specs?.[spec[0].toUpperCase() + spec.slice(1)] && (

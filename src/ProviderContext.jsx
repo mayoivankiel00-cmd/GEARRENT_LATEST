@@ -49,7 +49,7 @@ function mapProductRow(row) {
 export function ProviderProvider({ children }) {
   const { user } = useAuth();
   const [providerProducts, setProviderProducts] = useState([]);
-  // The full public catalog — mockData's static products plus every
+  // The full public catalog — the static products plus every
   // provider's listings all now live in the same `products` table, so
   // there's no more "merge static + provider arrays" step.
   const [catalogProducts, setCatalogProducts] = useState([]);

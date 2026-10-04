@@ -1,12 +1,14 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { categories, formatPeso } from '../mockData';
+import { formatPeso } from '../pricing';
+import { useCategories } from '../CategoryContext';
 import { useProviderCatalog } from '../ProviderContext';
 import AdminLayout from './AdminLayout';
 import './AdminGear.css';
 
 export default function AdminGear() {
   const { catalogProducts } = useProviderCatalog();
+  const { categories } = useCategories();
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
 

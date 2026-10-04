@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '../AuthContext';
 import AdminLayout from './AdminLayout';
-import { MIN_ADMIN_PASSWORD_LENGTH, createAdminAccount, listAdmins, setUserRole } from './adminAccounts';
+import { MIN_ADMIN_PASSWORD_LENGTH, createAdminAccount, isDefaultAdmin, listAdmins, setUserRole } from './adminAccounts';
 import './AdminMetricPages.css';
 import './AdminModeration.css';
 
@@ -165,11 +165,12 @@ export default function AdminAdmins() {
         <div className="metric-ledger">
           {loadingAdmins && admins.length === 0 ? <p className="metric-page-empty">Loading…</p> : admins.map((admin) => {
             const isSelf = admin.id === user?.id;
+            const isDefault = isDefaultAdmin(admin.email);
             return (
               <div className="metric-ledger-row" key={admin.id}>
                 <div><strong>{admin.name || admin.email}{isSelf && <span className="moderation-you"> (you)</span>}</strong><span className="mono">{admin.email}</span></div>
                 <span className="mono metric-user-date">Since {formatDate(admin.created_at)}</span>
-                {isSelf ? <span className="metric-user-tier">Admin</span> : (
+                {isDefault ? <span className="metric-user-tier">Default admin</span> : isSelf ? <span className="metric-user-tier">Admin</span> : (
                   <button
                     type="button"
                     className={`moderation-link-btn ${confirmRevoke === admin.id ? 'danger' : ''}`}

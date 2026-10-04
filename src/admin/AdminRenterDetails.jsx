@@ -2,7 +2,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import AdminLayout from './AdminLayout';
 import BarChart from './BarChart';
 import { useAdminData } from './adminData';
-import { formatPeso } from '../mockData';
+import { formatPeso } from '../pricing';
 import './AdminRenterDetails.css';
 
 const statusLabels = {

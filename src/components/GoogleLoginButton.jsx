@@ -10,7 +10,8 @@ export default function GoogleLoginButton({ text = 'signin_with' }) {
           setRememberSession(true);
           supabase.auth.signInWithOAuth({
             provider: 'google',
-            options: { redirectTo: window.location.origin },
+            // Come back through /signin so GuestRoute sends admins to /admin.
+            options: { redirectTo: `${window.location.origin}/signin` },
           });
         }}
       >

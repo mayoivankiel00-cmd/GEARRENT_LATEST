@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { supabase } from '../supabaseClient';
 import { isGearProvider } from '../providerAccess';
-import { categories, formatPeso } from '../mockData';
+import { formatPeso } from '../pricing';
+import { useCategories } from '../CategoryContext';
 
 // All admin pages read one snapshot from admin_dashboard_snapshot() (see
 // gearrent_integrity_update.sql). The function refuses non-admins, so this
@@ -72,7 +73,7 @@ function getProductName(rental) {
   return rental.product?.name || rental.product?.id || 'Unknown gear';
 }
 
-function getCategoryName(rental) {
+function getCategoryName(rental, categories) {
   return categories.find((category) => category.id === rental.product?.category)?.name || 'Uncategorized';
 }
 
@@ -134,7 +135,7 @@ function buildUserDistribution(accounts) {
   ];
 }
 
-export function buildAdminData(snapshot) {
+export function buildAdminData(snapshot, categories = []) {
   const accounts = (snapshot?.accounts || []).map(normalizeAccount);
   const rentals = (snapshot?.rentals || []).map(normalizeRental);
   const allProducts = (snapshot?.products || []).map(normalizeProduct);
@@ -161,7 +162,7 @@ export function buildAdminData(snapshot) {
     .map(([email, items], index) => {
       const accountRentals = rentals.filter((rental) => rental.accountEmail === email);
       const categoryCounts = accountRentals.reduce((counts, rental) => {
-        const category = getCategoryName(rental);
+        const category = getCategoryName(rental, categories);
         counts[category] = (counts[category] || 0) + 1;
         return counts;
       }, {});
@@ -301,20 +302,20 @@ export function buildAdminData(snapshot) {
   };
 }
 
-const EMPTY_DATA = buildAdminData(null);
-
 export function useAdminData() {
-  const [data, setData] = useState(EMPTY_DATA);
+  const { categories } = useCategories();
+  const [snapshot, setSnapshot] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const data = useMemo(() => buildAdminData(snapshot, categories), [snapshot, categories]);
 
   const refresh = useCallback(async () => {
-    const { data: snapshot, error: rpcError } = await supabase.rpc('admin_dashboard_snapshot');
+    const { data: nextSnapshot, error: rpcError } = await supabase.rpc('admin_dashboard_snapshot');
     if (rpcError) {
       console.error('admin_dashboard_snapshot failed', rpcError);
       setError(rpcError.message || 'Could not load dashboard data.');
     } else {
-      setData(buildAdminData(snapshot));
+      setSnapshot(nextSnapshot);
       setError('');
     }
     setLoading(false);

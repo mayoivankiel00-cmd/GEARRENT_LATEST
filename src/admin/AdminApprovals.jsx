@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { categories, formatPeso } from '../mockData';
+import { formatPeso } from '../pricing';
+import { useCategories } from '../CategoryContext';
 import { useProviderCatalog } from '../ProviderContext';
 import AdminLayout from './AdminLayout';
 import './AdminMetricPages.css';
@@ -16,6 +17,7 @@ function ReviewCard({ product, onReview }) {
   const [note, setNote] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const { categories } = useCategories();
   const category = categories.find((item) => item.id === product.category);
   const images = product.images?.length ? product.images : [product.image].filter(Boolean);
 
@@ -40,7 +42,7 @@ function ReviewCard({ product, onReview }) {
         {images.length > 1 && (
           <div className="review-media-thumbs">
             {images.map((src, index) => (
-              <button type="button" key={src} className={index === activeImage ? 'active' : ''} onClick={() => setActiveImage(index)} aria-label={`Show photo ${index + 1}`}>
+              <button type="button" key={`${index}-${src}`} className={index === activeImage ? 'active' : ''} onClick={() => setActiveImage(index)} aria-label={`Show photo ${index + 1}`}>
                 <img src={src} alt="" />
               </button>
             ))}

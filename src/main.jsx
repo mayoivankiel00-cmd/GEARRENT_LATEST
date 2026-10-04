@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import './index.css';
 import App from './App.jsx';
 import { AuthProvider } from './AuthContext.jsx';
+import { CategoryProvider } from './CategoryContext.jsx';
 import { CartProvider } from './CartContext.jsx';
 import { ProviderProvider } from './ProviderContext.jsx';
 import { NotificationProvider } from './NotificationContext.jsx';
@@ -12,13 +13,15 @@ createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
       <AuthProvider>
-        <CartProvider>
-          <ProviderProvider>
-            <NotificationProvider>
-              <App />
-            </NotificationProvider>
-          </ProviderProvider>
-        </CartProvider>
+        <CategoryProvider>
+          <CartProvider>
+            <ProviderProvider>
+              <NotificationProvider>
+                <App />
+              </NotificationProvider>
+            </ProviderProvider>
+          </CartProvider>
+        </CategoryProvider>
       </AuthProvider>
     </BrowserRouter>
   </StrictMode>,

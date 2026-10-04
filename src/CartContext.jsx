@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { supabase } from './supabaseClient';
-import { calculateSecurityDeposit } from './mockData';
+import { SERVICE_FEE, calculateSecurityDeposit } from './pricing';
 import { getRentalHistoryId } from './rentalUtils';
 import { useAuth } from './AuthContext';
 
@@ -8,8 +8,6 @@ const CartContext = createContext(null);
 const DEFAULT_DAYS = 3;
 export const MIN_RENTAL_DAYS = 1;
 export const MAX_RENTAL_DAYS = 90; // matches the cart_items_days_range constraint
-// Display only — the database (checkout_cart) computes the amount charged.
-export const SERVICE_FEE = 500;
 
 function clampDays(days) {
   const value = Math.round(Number(days) || DEFAULT_DAYS);
@@ -30,6 +28,9 @@ function describeMoneyError(error, fallback) {
 // `providerName` keep working exactly like they did against mockData.js.
 const PRODUCT_SELECT =
   'id, name, price, status, blurb, description, specs, features, images, category_id, provider_id, provider:profiles(email, name)';
+
+// Added by gearrent_returns_update.sql.
+const RETURN_COLUMNS = 'return_requested_at, late_days, late_fee, damage_charge, return_note, ';
 
 function mapProductRow(row) {
   if (!row) return null;
@@ -72,11 +73,18 @@ function mapRentalRow(row) {
     depositHeldAt: toMillis(row.deposit_held_at),
     depositRefundedAt: toMillis(row.deposit_refunded_at),
     refundableAmount: row.refundable_amount != null ? Number(row.refundable_amount) : null,
+    // Set when the renter hands the gear back; the rental stays active until
+    // the owner (or an admin) confirms the return.
+    returnRequestedAt: toMillis(row.return_requested_at),
+    lateDays: Number(row.late_days) || 0,
+    lateFee: Number(row.late_fee) || 0,
+    damageCharge: Number(row.damage_charge) || 0,
+    returnNote: row.return_note || '',
   };
 }
 
 export function CartProvider({ children }) {
-  const { user, isAuthenticated, refreshProfile } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const [items, setItems] = useState([]);
   const [rentedItems, setRentedItems] = useState([]);
   const [rentalHistory, setRentalHistory] = useState([]);
@@ -105,15 +113,23 @@ export function CartProvider({ children }) {
       setDeletedRentalHistoryIds([]);
       return;
     }
-    const { data, error } = await supabase
+    const loadRentals = (returnColumns) => supabase
       .from('rentals')
       .select(
         `id, days, status, rented_at, paid_at, return_at, finished_at, rental_amount, security_deposit,
          deposit_status, deposit_held_at, deposit_refunded_at, refundable_amount, hidden_at,
-         products (${PRODUCT_SELECT})`
+         ${returnColumns}products (${PRODUCT_SELECT})`
       )
       .eq('user_id', user.id)
       .order('rented_at', { ascending: false });
+
+    let { data, error } = await loadRentals(RETURN_COLUMNS);
+    if (error?.code === '42703') {
+      // Undefined column: gearrent_returns_update.sql hasn't been run yet.
+      // Still show the rentals instead of an empty page.
+      console.warn('Return columns missing on rentals — run gearrent_returns_update.sql.', error);
+      ({ data, error } = await loadRentals(''));
+    }
     if (error) {
       console.error('Failed to load rentals', error);
       return;
@@ -193,48 +209,30 @@ export function CartProvider({ children }) {
     return { ok: true, receipt, error: null };
   }, [user, refreshCart, refreshRentals]);
 
-  // Returns { ok, rental, error }. The refund (unused days + deposit) is
-  // calculated and credited by the `return_rental` database function.
-  const returnRental = useCallback(async (rentalIndex) => {
+  // The renter hands the gear back. The rental stays active until the owner
+  // (or an admin) checks the gear and confirms, which is when refunds and
+  // any late fee / damage charge are settled by `confirm_rental_return`.
+  // Returns { ok, rental, error, lateDays, lateFee }.
+  const requestReturn = useCallback(async (rentalIndex) => {
     const rental = rentedItems[rentalIndex] || null;
     if (!rental) return { ok: false, rental: null, error: 'Rental not found.' };
 
-    const { data, error } = await supabase.rpc('return_rental', { p_rental_id: String(rental.id) });
+    const { data, error } = await supabase.rpc('request_rental_return', { p_rental_id: String(rental.id) });
     if (error) {
-      console.error('returnRental failed', error);
+      console.error('requestReturn failed', error);
       await refreshRentals();
-      return { ok: false, rental, error: describeMoneyError(error, 'The return could not be processed. Please try again.') };
+      return { ok: false, rental, error: describeMoneyError(error, 'The return could not be requested. Please try again.') };
     }
 
-    await Promise.all([refreshRentals(), refreshProfile()]);
+    await refreshRentals();
     return {
       ok: true,
       error: null,
-      rental: {
-        ...rental,
-        refundableAmount: Number(data.refund) || 0,
-        refundedSecurityDeposit: Number(data.deposit_refund) || 0,
-        depositStatus: 'refunded',
-        unusedDays: Number(data.unused_days) || 0,
-      },
+      rental,
+      lateDays: Number(data?.late_days) || 0,
+      lateFee: Number(data?.late_fee) || 0,
     };
-  }, [rentedItems, refreshRentals, refreshProfile]);
-
-  // Returns { ok, rental, error }. Refunds the security deposit server-side.
-  const finishRental = useCallback(async (rentalIndex) => {
-    const rental = rentedItems[rentalIndex] || null;
-    if (!rental) return { ok: false, rental: null, error: 'Rental not found.' };
-
-    const { data, error } = await supabase.rpc('finish_rental', { p_rental_id: String(rental.id) });
-    if (error) {
-      console.error('finishRental failed', error);
-      await refreshRentals();
-      return { ok: false, rental, error: describeMoneyError(error, 'The rental could not be closed. Please try again.') };
-    }
-
-    await Promise.all([refreshRentals(), refreshProfile()]);
-    return { ok: true, error: null, rental: { ...rental, refundedSecurityDeposit: Number(data.deposit_refund) || 0 } };
-  }, [rentedItems, refreshRentals, refreshProfile]);
+  }, [rentedItems, refreshRentals]);
 
   // Soft-delete only — keeps the underlying financial record intact and
   // just hides it from the user's history view, same as the old
@@ -260,10 +258,10 @@ export function CartProvider({ children }) {
       rentalHistory,
       deletedRentalHistoryIds,
       checkout,
-      returnRental,
-      finishRental,
+      requestReturn,
       removeRentalHistory,
       refreshCart,
+      refreshRentals,
       count: items.length,
       subtotal,
       securityDeposit,
@@ -280,10 +278,10 @@ export function CartProvider({ children }) {
     rentalHistory,
     deletedRentalHistoryIds,
     checkout,
-    returnRental,
-    finishRental,
+    requestReturn,
     removeRentalHistory,
     refreshCart,
+    refreshRentals,
   ]);
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

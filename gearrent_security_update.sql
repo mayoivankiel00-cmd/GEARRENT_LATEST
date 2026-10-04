@@ -185,7 +185,8 @@ begin
     end if;
   end if;
 
-  update public.profiles p set role = p_role where p.id = target.id;
+  -- profiles.role is the user_role enum; p_role arrives as text.
+  update public.profiles p set role = p_role::public.user_role where p.id = target.id;
 
   begin
     insert into public.notifications (message, type, is_admin_channel)

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../CartContext';
+import { formatPeso } from '../pricing';
 import { formatRentalTimeRemaining, getRentalHistoryId } from '../rentalUtils';
 import AccountSidebar from '../components/AccountSidebar';
 import './Account.css';
@@ -19,7 +20,7 @@ export default function History() {
     id: `active-${rental.product.id}-${index}`,
     product: rental.product,
     status: 'current',
-    statusLabel: 'Current possession',
+    statusLabel: rental.returnRequestedAt ? 'Return being checked' : 'Current possession',
     finishedAt: rental.returnAt,
     rentalDetails: `${Number(rental.days) > 0 ? Number(rental.days) : 3} day rental`,
   }));
@@ -65,6 +66,13 @@ export default function History() {
       <div className="rental-history-details">
         <h2>{rental.product.name}</h2>
         <span className="mono">{rental.rentalDetails || rental.dates}</span>
+        {variant === 'past' && (rental.lateFee > 0 || rental.damageCharge > 0) && (
+          <span className="mono">
+            Kept from deposit: {formatPeso(rental.lateFee + rental.damageCharge)}
+            {rental.lateFee > 0 && ` · ${rental.lateDays} day${rental.lateDays === 1 ? '' : 's'} late`}
+            {rental.damageCharge > 0 && ` · damage: ${rental.returnNote || 'no note'}`}
+          </span>
+        )}
         <div className="rental-history-footer">
           <span className={`rental-history-status rental-history-status-${rental.status}`}>
             {rental.statusLabel}

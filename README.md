@@ -17,16 +17,42 @@ This project now talks to a real Postgres database via [Supabase](https://supaba
 7. **Run `gearrent_notifications_update.sql`** (after step 6) — due-rental alerts, links on notifications, and upload rules for photos.
    *Optional:* enable the `pg_cron` extension and run the `cron.schedule(...)` line at the bottom of section 3 of that file, so due/overdue alerts are created even when nobody has the app open.
 8. **Run `gearrent_integrity_update.sql`** (after step 7) — Gear Provider membership can only be bought (not self-assigned), only providers can list gear, a product can't be rented twice at once, and the admin dashboard data.
-9. `npm install && npm run dev`.
+9. **Run `gearrent_returns_update.sql`** (after step 8) — renters request a return, the gear owner (or an admin) inspects it and confirms; late fees and damage come out of the deposit. See *Returns and deposits*.
+10. **Run `gearrent_default_admin.sql`** (after step 5; re-run it if you ever re-run step 5) — makes the default admin account permanent.
+11. **Run `gearrent_categories_update.sql`** (after step 5) — categories (name, tagline, cover image, order) are read from `public.categories` and managed on **Admin → Categories**; a category with products can't be deleted.
+12. `npm install && npm run dev`.
+
+## Returns and deposits
+
+| Step | Who | What happens |
+|---|---|---|
+| Return gear | Renter (My Gears) | `request_rental_return()` tells the owner the renter says the gear is back. It doesn't affect the price. The rental stays active and the product stays booked; due/overdue alerts stop. |
+| Inspect & confirm | Provider (Provider Gear → *Returned gear to check*) for their gear; admins (Admin → Returns) for Gear Rent's gear or any rental | `confirm_rental_return()` records when the gear actually came back (default now, can't be in the future or before the rental started), closes the rental and settles the money. Overdue rentals also show up here, so a provider can close one even if the renter never pressed *Return gear*. |
+
+- **Late fee:** daily rate × days late, counted up to the time the owner enters when confirming. After the 1-hour grace period, any part of a day counts as a full day.
+- **Damage:** amount entered by the inspector, with a required reason that the renter sees.
+- Both come out of the security deposit only (late fee first) and are capped at it; the rest of the deposit is refunded. What is kept goes to the provider, or stays with Gear Rent for its own gear.
+- `deposit_status` ends as `refunded` (all back), `partially_kept` or `kept` (nothing back).
+- Early returns still refund the unused days (paid by Gear Rent — see *Known limitations*).
+- `return_rental()` / `finish_rental()` can no longer be called from the app.
 
 ## Recovering the base schema
 
 The two base files from step 1 were never saved into this project, so the database can't be rebuilt from the repo alone. Your live Supabase project still has everything, so export it once and commit the result:
 
-```sh
-# Database password: Project Settings → Database. Connection string: Connect → "Session pooler".
-npx supabase db dump --db-url "postgresql://postgres.<project-ref>:<password>@<host>:5432/postgres" -f supabase_schema_dump.sql
-```
+1. Install the **PostgreSQL 17+ command-line tools** (EnterpriseDB Windows installer → tick only *Command Line Tools*).
+2. In the Supabase dashboard: **Connect → Session pooler** for the connection string; the database password is under **Project Settings → Database** (reset it if unknown — the app uses the anon key, so this doesn't affect it).
+3. Dump the schema:
+   ```powershell
+   & "C:\Program Files\PostgreSQL\17\bin\pg_dump.exe" "<session-pooler-connection-string>" --schema-only --schema=public --no-owner -f supabase_schema_dump.sql
+   ```
+4. The sign-up trigger lives on `auth.users`, so it isn't in that dump. Get it from the SQL Editor and append it to the file:
+   ```sql
+   select pg_get_triggerdef(oid) || ';' from pg_trigger where tgrelid = 'auth.users'::regclass and not tgisinternal;
+   ```
+5. Optional — seed data: same command with `--data-only --table=public.categories --table=public.products -f supabase_seed_dump.sql`.
+
+(`npx supabase db dump` also works, but needs Docker Desktop.)
 
 Or copy the original two files from the chat where they were generated.
 
@@ -103,7 +129,7 @@ All money now moves inside Postgres functions; the browser only asks for an acti
 ### What changed
 - `AuthContext`, `CartContext`, `ProviderContext`, `NotificationContext` now read/write Supabase instead of `localStorage`/`sessionStorage`. Their exposed function names are unchanged, but mutating calls (`authenticate`, `createAccount`, `addItem`, `returnRental`, etc.) are now `async` — callers that branch on the return value use `await`; the rest fire-and-forget, same as before.
 - Passwords are handled entirely by Supabase Auth now — nothing is stored or compared in plaintext.
-- `src/mockData.js` is still imported for `categories`, `membershipTiers`, and `calculateSecurityDeposit` (pure helper) — the actual product and category *rows* now come from the database, seeded from this same file.
+- `src/pricing.js` (formerly `src/mockData.js`) holds `membershipTiers`, the `formatPeso` / `calculateSecurityDeposit` helpers, and display copies of the service and provider fees. Products and categories come from the database (the original sample products were seeded from an earlier version of this file).
 
 ### Known limitations (carried over from the migration report)
 - ~~Checkout pricing is computed client-side~~ — fixed, see *Server-side payments*.

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { formatPeso } from '../mockData';
+import { formatPeso } from '../pricing';
 import { useCart } from '../CartContext';
 import AccountSidebar from '../components/AccountSidebar';
 import './Cart.css';
@@ -172,7 +172,7 @@ export default function Cart() {
                     <button
                       type="button"
                       className={index === selectedImage ? 'selected' : ''}
-                      key={image}
+                      key={`${index}-${image}`}
                       onClick={() => setSelectedImage(index)}
                       aria-label={`View photo ${index + 1}`}
                     >

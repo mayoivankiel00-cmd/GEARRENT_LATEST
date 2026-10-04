@@ -3,6 +3,14 @@ import { supabase, supabaseAnonKey, supabaseUrl } from '../supabaseClient';
 
 export const MIN_ADMIN_PASSWORD_LENGTH = 12;
 
+// Permanent admin; the database refuses to revoke it. Keep in sync with
+// gearrent_default_admin_email() in gearrent_default_admin.sql.
+export const DEFAULT_ADMIN_EMAIL = 'gearrent0@gmail.com';
+
+export function isDefaultAdmin(email) {
+  return typeof email === 'string' && email.trim().toLowerCase() === DEFAULT_ADMIN_EMAIL;
+}
+
 function friendlyError(error, fallback) {
   if (!error) return fallback;
   const text = `${error.message || ''} ${error.hint || ''}`;
