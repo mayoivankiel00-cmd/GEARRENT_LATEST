@@ -1,8 +1,11 @@
+import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import AdminLayout from './AdminLayout';
 import BarChart from './BarChart';
 import { useAdminData } from './adminData';
-import { formatPeso } from '../lib/pricing';
+import { formatPeso, membershipTiers } from '../lib/pricing';
+import { getTierLevel } from '../lib/providerAccess';
+import { setUserTier } from './adminAccounts';
 import './AdminRenterDetails.css';
 
 const statusLabels = {
@@ -11,10 +14,53 @@ const statusLabels = {
   completed: 'Completed',
 };
 
+// Lets an admin set the member's tier directly (no payment is recorded).
+function MembershipControl({ account, onChanged }) {
+  const currentId = membershipTiers[getTierLevel(account.tier)].id;
+  const [selected, setSelected] = useState(currentId);
+  const [busy, setBusy] = useState(false);
+  const [status, setStatus] = useState({ type: '', text: '' });
+
+  const save = async () => {
+    if (selected === currentId || busy) return;
+    const tier = membershipTiers.find((item) => item.id === selected);
+    if (!window.confirm(`Change ${account.name}'s membership to ${tier.name}? No payment is recorded for this change.`)) return;
+    setBusy(true);
+    setStatus({ type: '', text: '' });
+    const result = await setUserTier(account.id, selected);
+    setBusy(false);
+    if (!result.ok) {
+      setStatus({ type: 'error', text: result.error });
+      return;
+    }
+    setStatus({ type: 'success', text: `Membership changed to ${result.tier || tier.name}. The member has been notified.` });
+    onChanged();
+  };
+
+  return (
+    <section className="card admin-detail-membership">
+      <div>
+        <span className="mono">Membership</span>
+        <h2>Change tier</h2>
+        <p>Upgrade, downgrade or correct this member's plan. Members cannot change their tier themselves except by buying a membership.</p>
+      </div>
+      <div className="admin-detail-membership-controls">
+        <select className="admin-select" value={selected} onChange={(event) => setSelected(event.target.value)} disabled={busy} aria-label="Membership tier">
+          {membershipTiers.map((tier) => <option key={tier.id} value={tier.id}>{tier.name}</option>)}
+        </select>
+        <button type="button" className="btn btn-primary" onClick={save} disabled={busy || selected === currentId}>
+          {busy ? 'Saving…' : 'Save'}
+        </button>
+      </div>
+      {status.text && <p className={`admin-detail-membership-status ${status.type}`} role="status">{status.text}</p>}
+    </section>
+  );
+}
+
 export default function AdminRenterDetails() {
   const { email } = useParams();
   const navigate = useNavigate();
-  const { accountDetails, loading } = useAdminData();
+  const { accountDetails, loading, refresh } = useAdminData();
   const account = accountDetails[decodeURIComponent(email || '')?.trim().toLowerCase()];
 
   if (!account && loading) {
@@ -28,10 +74,10 @@ export default function AdminRenterDetails() {
   if (!account) {
     return (
       <AdminLayout>
-        <Link className="mono admin-detail-back" to="/admin/renters">← Back to Gear Renters</Link>
+        <Link className="mono admin-detail-back" to="/admin/renters">← Back to Members</Link>
         <div className="card admin-detail-not-found">
           <h1>Account not found</h1>
-          <p>This renter account may have been removed.</p>
+          <p>This member account may have been removed.</p>
         </div>
       </AdminLayout>
     );
@@ -40,7 +86,7 @@ export default function AdminRenterDetails() {
   return (
     <AdminLayout>
       <button type="button" className="mono admin-detail-back admin-detail-back-button" onClick={() => navigate('/admin/renters')}>
-        ← Back to Gear Renters
+        ← Back to Members
       </button>
       <div className="admin-detail-heading">
         <div>
@@ -49,6 +95,8 @@ export default function AdminRenterDetails() {
         </div>
         <span className="admin-renter-badge">{account.tier}</span>
       </div>
+
+      <MembershipControl key={account.email} account={account} onChanged={refresh} />
 
       <div className="admin-detail-stats">
         <div className="card admin-detail-stat"><span className="mono">Account balance</span><strong>{formatPeso(account.balance)}</strong></div>

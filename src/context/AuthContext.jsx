@@ -9,7 +9,6 @@ import {
   supabase,
 } from '../lib/supabaseClient';
 import { isRateLimitError } from '../lib/rateLimit';
-import { getTierLevel } from '../lib/providerAccess';
 import { TIER_GUEST } from '../lib/pricing';
 
 const AuthContext = createContext(null);
@@ -493,14 +492,14 @@ export function AuthProvider({ children }) {
 
   // Merges and persists partial updates to the signed-in user's own profile.
   // Applies the change to local state immediately (optimistic update) and
-  // writes it to Supabase in the background. `balance`, `role` and the paid
-  // tiers are not writable from here — the database rejects them (use
-  // purchaseMembership). Moving down to Gear Rent Guest is allowed.
+  // writes it to Supabase in the background. `balance`, `role` and `tier`
+  // are not writable from here and the database rejects them: tiers change
+  // only through purchaseMembership or an administrator.
   const updateUser = useCallback(async (rawUpdates) => {
     const updates = { ...(rawUpdates || {}) };
     delete updates.balance;
     delete updates.role;
-    if ('tier' in updates && getTierLevel(updates.tier) > 0) delete updates.tier;
+    delete updates.tier;
     setUser((prev) => (prev ? { ...prev, ...updates } : prev));
 
     const { data: { session } } = await supabase.auth.getSession();
@@ -508,7 +507,6 @@ export function AuthProvider({ children }) {
 
     const patch = {};
     if ('name' in updates) patch.name = updates.name;
-    if ('tier' in updates) patch.tier = updates.tier;
     if ('phone' in updates) patch.phone = updates.phone;
     if ('address' in updates) patch.address = updates.address;
     if ('city' in updates) patch.city = updates.city;

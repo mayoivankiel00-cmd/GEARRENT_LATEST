@@ -2,38 +2,52 @@ import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AdminLayout from './AdminLayout';
 import { useAdminData } from './adminData';
+import { membershipTiers } from '../lib/pricing';
+import { getTierLevel } from '../lib/providerAccess';
 import './AdminRenters.css';
 
+// Every member account (Guest, Renter and Provider). Opening one shows its
+// details, where an admin can also change the membership.
 export default function AdminRenters() {
   const navigate = useNavigate();
   const { renters } = useAdminData();
   const [searchTerm, setSearchTerm] = useState('');
+  const [tierFilter, setTierFilter] = useState('all');
 
   const filteredRenters = useMemo(() => {
     const query = searchTerm.trim().toLowerCase();
-    if (!query) return renters;
-    return renters.filter((renter) => `${renter.name} ${renter.email}`.toLowerCase().includes(query));
-  }, [renters, searchTerm]);
+    return renters.filter((renter) => {
+      if (tierFilter !== 'all' && membershipTiers[getTierLevel(renter.tier)].id !== tierFilter) return false;
+      return !query || `${renter.name} ${renter.email}`.toLowerCase().includes(query);
+    });
+  }, [renters, searchTerm, tierFilter]);
 
   return (
     <AdminLayout>
       <div className="admin-renters-heading">
         <div>
-          <h1 className="admin-title">Gear <span className="accent">Renters</span></h1>
-          <p className="admin-renters-subtitle">Manage Gear Rent Guest and Gear Rent Renter accounts.</p>
+          <h1 className="admin-title">Gear Rent <span className="accent">Members</span></h1>
+          <p className="admin-renters-subtitle">Guest, Renter and Provider accounts. Open a member to view their activity or change their membership.</p>
         </div>
-        <div className="admin-renters-count mono">{renters.length} renter{renters.length === 1 ? '' : 's'}</div>
+        <div className="admin-renters-count mono">{renters.length} member{renters.length === 1 ? '' : 's'}</div>
       </div>
 
       <div className="card admin-renters-toolbar">
         <label className="admin-renters-search">
-          <span className="mono">Search renters</span>
+          <span className="mono">Search members</span>
           <input
             type="search"
             placeholder="Name or email"
             value={searchTerm}
             onChange={(event) => setSearchTerm(event.target.value)}
           />
+        </label>
+        <label className="admin-renters-filter">
+          <span className="mono">Membership</span>
+          <select className="admin-select" value={tierFilter} onChange={(event) => setTierFilter(event.target.value)}>
+            <option value="all">All tiers</option>
+            {membershipTiers.map((tier) => <option key={tier.id} value={tier.id}>{tier.name}</option>)}
+          </select>
         </label>
       </div>
 
@@ -42,7 +56,7 @@ export default function AdminRenters() {
           <table className="admin-renters-table">
             <thead>
               <tr>
-                <th className="mono">Renter</th>
+                <th className="mono">Member</th>
                 <th className="mono">Membership</th>
                 <th className="mono">Joined</th>
                 <th className="mono">Rentals</th>
@@ -77,12 +91,12 @@ export default function AdminRenters() {
                 </tr>
               ))}
               {filteredRenters.length === 0 && (
-                <tr><td colSpan={6} className="admin-renters-empty">No renter accounts match your search.</td></tr>
+                <tr><td colSpan={6} className="admin-renters-empty">No member accounts match your search.</td></tr>
               )}
             </tbody>
           </table>
         </div>
-        <div className="admin-renters-footer mono">Showing {filteredRenters.length} of {renters.length} renter accounts</div>
+        <div className="admin-renters-footer mono">Showing {filteredRenters.length} of {renters.length} member accounts</div>
       </div>
     </AdminLayout>
   );

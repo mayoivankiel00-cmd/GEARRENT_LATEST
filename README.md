@@ -78,7 +78,8 @@ Or copy the original two files from the chat where they were generated.
 | Rule | How it works |
 |---|---|
 | Three tiers | `profiles.tier` is one of `Gear Rent Guest` (level 0, the default), `Gear Rent Renter` (1) or `Gear Rent Provider` (2). Each tier includes the ones below it (`gearrent_tier_level()` / `getTierLevel()`). |
-| Paid tiers must be paid for | The browser can only move an account down (trigger). The Memberships page shows a card form and calls `purchase_membership('renter' \| 'provider')`. It charges ₱499 for Renter and ₱699 for Provider, or ₱199 when a Renter upgrades. The payment goes into `membership_payments` (1-month period) and the account is upgraded. Switching back to Guest is allowed. |
+| Paid tiers must be paid for | Members can't change their own tier from the browser in either direction (trigger). The Memberships page shows a card form and calls `purchase_membership('renter' \| 'provider')`. It charges ₱499 for Renter and ₱699 for Provider, or ₱199 when a Renter upgrades. The payment goes into `membership_payments` (1-month period) and the account is upgraded. |
+| Admins can set any tier | **Admin → Members →** (a member) **→ Membership** calls `admin_set_user_tier()`, which only admins can run. No payment is recorded, and the member gets a notification. |
 | Only Renters and Providers rent | Adding to `cart_items` and creating `rentals` require level 1+ (admins exempt). Guests see a "View Memberships" button on product pages instead of "Rent Now". |
 | Only providers list gear | Inserting into `products` requires a provider tier (admins exempt). |
 | No double-booking | A rental can't be created for a product that already has an active rental (trigger + partial unique index). `products.status` switches to `booked` on checkout and back to `available` on return/finish, so the catalog shows "Booked". |

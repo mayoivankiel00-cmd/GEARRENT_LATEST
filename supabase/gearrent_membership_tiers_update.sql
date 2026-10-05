@@ -12,8 +12,9 @@
 --   Gear Rent Provider     2    ₱699            rent gear + list gear
 --                               (₱199 when upgrading from Renter)
 --
--- Each tier includes everything below it. Paid tiers are only granted by
--- purchase_membership(); the browser can only move an account DOWN.
+-- Each tier includes everything below it. Members can't change their own
+-- tier: paid tiers are granted by purchase_membership(), and admins can set
+-- any account's tier with admin_set_user_tier() (section 7).
 --
 -- Existing accounts: 'Gear Provider' -> 'Gear Rent Provider'; everything
 -- else (including the old free 'Gear Renter') -> 'Gear Rent Guest'.
@@ -162,11 +163,12 @@ begin
   end if;
 
   if new.tier is distinct from old.tier then
-    -- Accept old names from out-of-date pages ('Gear Renter' -> Guest).
     new.tier := public.gearrent_tier_name(public.gearrent_tier_level(new.tier));
-    if public.gearrent_tier_level(new.tier) > public.gearrent_tier_level(old.tier)
-       and not public.gearrent_is_admin() then
-      raise exception 'Paid memberships have to be purchased on the Memberships page.'
+    -- Members can't change their own tier in either direction: moving up
+    -- needs a payment (purchase_membership) and moving down is not offered.
+    -- Admins change tiers with admin_set_user_tier().
+    if new.tier is distinct from old.tier and not public.gearrent_is_admin() then
+      raise exception 'Memberships can only be changed by purchasing one on the Memberships page, or by an administrator.'
         using errcode = '42501', hint = 'membership_required';
     end if;
   end if;
@@ -334,3 +336,58 @@ begin
   return new;
 end;
 $$;
+
+
+-- ---------------------------------------------------------------------
+-- 7. Admins can change any member's tier
+-- ---------------------------------------------------------------------
+-- Used by Admin → Members → (account) → Membership. No payment is recorded:
+-- this is a manual change (a complimentary upgrade, a correction, or
+-- removing a membership). The member gets a notification.
+create or replace function public.admin_set_user_tier(p_user_id uuid, p_tier text)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_target text := lower(trim(coalesce(p_tier, '')));
+  v_new_tier text;
+  v_old_tier text;
+  v_name text;
+begin
+  if not public.gearrent_is_admin() then
+    raise exception 'Administrators only.' using errcode = '42501';
+  end if;
+
+  -- Accept the short ids the app uses or the full tier names.
+  v_new_tier := case
+    when v_target in ('guest', 'gear rent guest') then 'Gear Rent Guest'
+    when v_target in ('renter', 'gear rent renter') then 'Gear Rent Renter'
+    when v_target in ('provider', 'gear rent provider') then 'Gear Rent Provider'
+  end;
+  if v_new_tier is null then
+    raise exception 'Choose Guest, Renter or Provider.' using errcode = '22023';
+  end if;
+
+  perform public.gearrent_check_rate_limit('admin-tier:' || auth.uid()::text, 30, interval '1 hour');
+
+  select tier, coalesce(nullif(name, ''), email, 'This member') into v_old_tier, v_name
+    from public.profiles where id = p_user_id for update;
+  if not found then
+    raise exception 'Account not found.' using errcode = 'P0002';
+  end if;
+
+  if v_old_tier is distinct from v_new_tier then
+    update public.profiles set tier = v_new_tier where id = p_user_id;
+    perform public.gearrent_notify_link(p_user_id,
+      'An administrator changed your membership to ' || v_new_tier || '.',
+      'info', false, '/memberships');
+  end if;
+
+  return jsonb_build_object('user_id', p_user_id, 'tier', v_new_tier, 'previous_tier', v_old_tier);
+end;
+$$;
+
+revoke all on function public.admin_set_user_tier(uuid, text) from public, anon;
+grant execute on function public.admin_set_user_tier(uuid, text) to authenticated;

@@ -26,6 +26,22 @@ export async function listAdmins() {
   return { admins: data || [], error: null };
 }
 
+// Sets a member's tier ('guest' | 'renter' | 'provider') without a payment.
+// admin_set_user_tier re-checks that the caller is an admin.
+export async function setUserTier(userId, tierId) {
+  const { data, error } = await supabase.rpc('admin_set_user_tier', { p_user_id: userId, p_tier: tierId });
+  if (error) {
+    const missing = /admin_set_user_tier|function .* does not exist|PGRST202/i.test(`${error.message || ''} ${error.code || ''}`);
+    return {
+      ok: false,
+      error: missing
+        ? 'The database is missing admin_set_user_tier. Run supabase/gearrent_membership_tiers_update.sql in Supabase.'
+        : friendlyError(error, 'Could not change the membership.'),
+    };
+  }
+  return { ok: true, error: null, tier: data?.tier || null };
+}
+
 // Grants or revokes admin on an existing account. The database function
 // re-checks that the caller is an admin, so this cannot be abused from a
 // non-admin session.

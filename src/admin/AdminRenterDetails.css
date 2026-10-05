@@ -50,12 +50,31 @@
 .admin-detail-not-found { padding: 2rem; }
 .admin-detail-not-found p { color: var(--text-muted); }
 
+.admin-detail-membership {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.8rem 2rem;
+  margin-bottom: 1rem;
+  padding: 1.2rem 1.4rem;
+  border-left: 3px solid var(--accent);
+}
+.admin-detail-membership span.mono { color: var(--text-dim); font-size: 0.68rem; text-transform: uppercase; }
+.admin-detail-membership h2 { margin: 0.25rem 0 0.35rem; font-size: 1.1rem; }
+.admin-detail-membership p { margin: 0; color: var(--text-muted); font-size: 0.86rem; line-height: 1.5; }
+.admin-detail-membership-controls { display: flex; gap: 0.6rem; align-items: center; }
+.admin-detail-membership-controls .btn { padding: 0.65rem 1.2rem; }
+.admin-detail-membership-status { grid-column: 1 / -1; font-family: var(--font-mono); font-size: 0.8rem; }
+.admin-detail-membership-status.success { color: var(--success); }
+.admin-detail-membership-status.error { color: var(--accent); }
+
 @media (max-width: 850px) {
   .admin-detail-stats { grid-template-columns: repeat(2, 1fr); }
   .admin-detail-grid { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 560px) {
+  .admin-detail-membership { grid-template-columns: 1fr; }
   .admin-detail-heading { flex-direction: column; }
   .admin-detail-stats { grid-template-columns: 1fr; }
   .admin-detail-rental-row { grid-template-columns: 1fr auto; }

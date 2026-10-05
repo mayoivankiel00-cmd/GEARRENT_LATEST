@@ -11,7 +11,7 @@ const links = [
   { to: '/admin/analytics', label: 'Analytics', icon: 'chart' },
   { to: '/admin/history', label: 'Rental History', icon: 'history' },
   { to: '/admin/returns', label: 'Returns', icon: 'swap' },
-  { to: '/admin/renters', label: 'Gear Renters', icon: 'users' },
+  { to: '/admin/renters', label: 'Members', icon: 'users' },
   { to: '/admin/gear', label: 'Gear Inventory', icon: 'box' },
   { to: '/admin/categories', label: 'Categories', icon: 'layers' },
   { to: '/admin/revenue', label: 'Revenue', icon: 'trendingUp' },

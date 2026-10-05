@@ -15,7 +15,7 @@ const CURRENT_PLAN_MESSAGES = [
 export default function Memberships() {
   const navigate = useNavigate();
   const {
-    isAuthenticated, user, pendingSignup, createAccount, updateUser, clearPendingSignup, purchaseMembership,
+    isAuthenticated, user, pendingSignup, createAccount, clearPendingSignup, purchaseMembership,
   } = useAuth();
   const [checkoutTier, setCheckoutTier] = useState(null);
   const [paying, setPaying] = useState(false);
@@ -30,19 +30,11 @@ export default function Memberships() {
 
   const chooseMembership = async (tier) => {
     if (currentUser) {
-      if (tier.level === currentLevel) return;
-      if (tier.level > currentLevel) {
-        // Paid tiers: the database only grants them after payment.
-        setPaymentError('');
-        setCheckoutTier(tier);
-        return;
-      }
-      // Moving down is only offered to the free Guest tier. Paid time is not refunded.
-      if (tier.level !== 0) return;
-      if (!window.confirm(`Switch to ${TIER_GUEST}? You will no longer be able to rent gear, and the rest of your paid month is not refunded.`)) return;
-      setCheckoutTier(null);
-      await updateUser({ tier: TIER_GUEST });
-      navigate('/catalog');
+      // Members can only move up (by paying). Lower tiers are already part of
+      // their plan, and only an administrator can change a tier otherwise.
+      if (tier.level <= currentLevel) return;
+      setPaymentError('');
+      setCheckoutTier(tier);
       return;
     }
 
@@ -97,11 +89,7 @@ export default function Memberships() {
       return { label: pendingSignup ? 'Create Guest Account' : tier.cta, disabled: false };
     }
     if (tier.level === currentLevel) return { label: 'Current Plan', disabled: true };
-    if (tier.level < currentLevel) {
-      return tier.level === 0
-        ? { label: 'Switch to Guest', disabled: false }
-        : { label: 'Included in your plan', disabled: true };
-    }
+    if (tier.level < currentLevel) return { label: 'Included in your plan', disabled: true };
     return { label: `${tier.cta} · ${formatPeso(getMembershipPrice(tier, currentLevel))}`, disabled: false };
   };
 

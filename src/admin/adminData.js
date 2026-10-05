@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import { getTierLevel, isGearProvider } from '../lib/providerAccess';
+import { getTierLevel } from '../lib/providerAccess';
 import { formatPeso, membershipTiers, TIER_GUEST } from '../lib/pricing';
 import { useCategories } from '../context/CategoryContext';
 
@@ -215,6 +215,8 @@ export function buildAdminData(snapshot, categories = []) {
       }, 0),
     }));
     details[email] = {
+      id: account.id,
+      role: account.role,
       name: account.name || 'Unnamed renter',
       email: account.email || 'No email provided',
       tier: account.tier,
@@ -240,8 +242,10 @@ export function buildAdminData(snapshot, categories = []) {
     };
     return details;
   }, {});
+  // Every member account (Guest, Renter and Provider); admins are listed on
+  // Admin Accounts instead.
   const renters = accounts
-    .filter((account) => !isGearProvider(account) && account.role !== 'admin')
+    .filter((account) => account.role !== 'admin')
     .map((account) => {
       const accountRentals = rentals.filter((rental) => rental.accountEmail === account.email);
       return {

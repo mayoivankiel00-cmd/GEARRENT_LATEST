@@ -17,25 +17,33 @@
 }
 
 .admin-renters-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem 2rem;
   margin-bottom: 1rem;
   padding: 1rem 1.2rem;
   background: linear-gradient(145deg, color-mix(in srgb, var(--bg-card) 92%, var(--card-tint)), var(--bg-card));
 }
 
-.admin-renters-search {
+.admin-renters-search,
+.admin-renters-filter {
   display: flex;
   align-items: center;
   gap: 1rem;
   max-width: 460px;
 }
 
-.admin-renters-search span {
+.admin-renters-search span,
+.admin-renters-filter span {
   flex-shrink: 0;
   color: var(--text-muted);
   font-size: 0.72rem;
   text-transform: uppercase;
 }
 
+.admin-renters-search { flex: 1; }
 .admin-renters-search input { flex: 1; }
 
 .admin-renters-table-card { overflow: hidden; box-shadow: 0 14px 30px rgb(0 0 0 / 10%); }
@@ -105,4 +113,8 @@
 @media (max-width: 600px) {
   .admin-renters-heading { align-items: start; flex-direction: column; }
   .admin-renters-search { align-items: stretch; flex-direction: column; gap: 0.45rem; }
+}
+.admin-renters-filter {
+  flex: none;
+  max-width: none;
 }

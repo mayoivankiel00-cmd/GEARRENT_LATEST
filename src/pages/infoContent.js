@@ -154,7 +154,7 @@ export const legalPages = {
               `Gear Rent Provider: ${providerFee} per month, or ${upgradeFee} when upgrading from an active Renter membership. Includes everything in Renter, plus listing your own equipment.`,
             ],
           },
-          'You can switch back to Gear Rent Guest at any time. Membership fees already paid are not refunded for the unused part of the month.',
+          'Once you buy Gear Rent Renter or Gear Rent Provider, your account cannot be switched back to Gear Rent Guest from the Memberships page. If your membership needs to be changed, contact the crew and an administrator will help. Membership fees already paid are not refunded.',
         ],
       },
       {
@@ -404,7 +404,7 @@ export const faqs = [
     a: 'Open My Profile and choose "Transfer to bank". You can transfer up to your available balance.',
   },
   {
-    q: 'Can I cancel my membership?',
-    a: 'Yes. Switch to Gear Rent Guest on the Memberships page at any time. Fees already paid for the current month are not refunded.',
+    q: 'Can I switch back to Guest or cancel my membership?',
+    a: `Not from your account. Paid memberships stay on your plan, and lower tiers are already included. If you need your membership changed, email ${SUPPORT_EMAIL} and an administrator will update it. Fees already paid are not refunded.`,
   },
 ];
