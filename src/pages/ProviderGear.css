@@ -488,3 +488,35 @@
 }
 
 .provider-form-actions .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* Weight field: number input with a fixed "kg" unit inside it. */
+.provider-unit-input {
+  position: relative;
+  display: block;
+}
+
+.provider-form-grid .provider-unit-input input {
+  padding-right: 2.8rem;
+}
+
+.provider-unit-input > span {
+  position: absolute;
+  top: 50%;
+  right: 0.85rem;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  pointer-events: none;
+}
+
+/* Hide the browser's up/down spinners on number fields; typing is clearer. */
+.provider-form-grid input[type='number']::-webkit-outer-spin-button,
+.provider-form-grid input[type='number']::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.provider-form-grid input[type='number'] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}

@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from './AuthContext';
 import { removeStoredImages } from '../lib/imageStorage';
+import { formatQuantity, formatWeight, validateGearSpecs } from '../lib/gearSpecs';
 
 const ProviderContext = createContext(null);
 
@@ -18,7 +19,26 @@ export function describeProductError(error) {
   // Validation messages raised by the database (e.g. photo rules) are
   // written for people, so show them as-is.
   if (error.code === '22023') return error.message;
-  return 'Something went wrong. Please try again.';
+  // Anything else: include the database's own reason so the cause (a
+  // missing column, a constraint, a setup step) is visible instead of hidden.
+  if (error.code === '23503') return `That category no longer exists. Refresh the page and pick another one. (${error.message})`;
+  if (error.code === '23502') return `A required value is missing: ${error.message}`;
+  return error.message
+    ? `Something went wrong: ${error.message}${error.code ? ` (code ${error.code})` : ''}`
+    : 'Something went wrong. Please try again.';
+}
+
+// products.id has no database default, so new listings get a readable id
+// in the same style as the original catalog ("sony-fx3"), plus a short
+// random suffix so two listings with the same name never collide.
+function makeProductId(name) {
+  const slug = String(name || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 48) || 'gear';
+  const suffix = (window.crypto?.randomUUID?.() || Math.random().toString(16).slice(2)).replace(/-/g, '').slice(0, 6);
+  return `${slug}-${suffix}`;
 }
 
 function mapProductRow(row) {
@@ -123,7 +143,11 @@ export function ProviderProvider({ children }) {
   // listings created by an admin are approved immediately.
   const addProviderProduct = useCallback(async (productDetails) => {
     if (!user) return { product: null, error: 'You need to be signed in.' };
+    const specError = validateGearSpecs(productDetails);
+    if (specError) return { product: null, error: specError };
+    const sensor = String(productDetails.sensor || '').trim();
     const row = {
+      id: makeProductId(productDetails.name),
       provider_id: user.id,
       category_id: productDetails.category,
       name: productDetails.name,
@@ -134,9 +158,10 @@ export function ProviderProvider({ children }) {
       description: productDetails.description || 'Provider listed gear available for your next project.',
       images: productDetails.images?.length ? productDetails.images : [productDetails.image].filter(Boolean),
       specs: {
-        Capacity: productDetails.capacity || 'Not specified',
-        Weight: productDetails.weight || 'Not specified',
-        Sensor: productDetails.sensor || 'Not specified',
+        Quantity: formatQuantity(productDetails.quantity) || '1 unit',
+        Weight: formatWeight(productDetails.weight) || 'Not specified',
+        // Only Admin → Add Equipment still has a sensor / output field.
+        ...(sensor ? { Sensor: sensor } : {}),
         Condition: productDetails.condition || 'Good',
       },
       features: ['Provider listed', 'Available for rental'],

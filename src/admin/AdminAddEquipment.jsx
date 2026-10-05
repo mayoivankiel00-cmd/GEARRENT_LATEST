@@ -6,12 +6,15 @@ import { useProviderCatalog } from '../context/ProviderContext';
 import { useNotifications } from '../context/NotificationContext';
 import { useAuth } from '../context/AuthContext';
 import ImageDropzone from '../components/ImageDropzone';
+import {
+  blockInvalidNumberKeys, formatQuantity, formatWeight, MAX_QUANTITY, MAX_WEIGHT_KG, validateGearSpecs,
+} from '../lib/gearSpecs';
 import AdminLayout from './AdminLayout';
 import './AdminAddEquipment.css';
 
 const initialForm = {
   name: '', category: '', price: '', condition: 'Good', // empty category = first in the list
-  capacity: '', weight: '', sensor: '', images: [], description: '',
+  quantity: '', weight: '', sensor: '', images: [], description: '',
 };
 
 export default function AdminAddEquipment() {
@@ -35,6 +38,11 @@ export default function AdminAddEquipment() {
       return;
     }
     if (submitting) return;
+    const specError = validateGearSpecs(form);
+    if (specError) {
+      setMessage(specError);
+      return;
+    }
     setSubmitting(true);
     const { product, error } = await addProviderProduct({
       ...form,
@@ -63,10 +71,10 @@ export default function AdminAddEquipment() {
       <form className="card admin-equipment-form" onSubmit={handleSubmit}>
         <div className="admin-equipment-workspace">
           <div className="admin-equipment-fields">
-            <div className="admin-equipment-form-section"><span className="mono">01 / Identity</span><div className="admin-equipment-grid"><label>Product name<input name="name" value={form.name} onChange={updateField} placeholder="Sony FX3 Cinema Camera" required /></label><label>Category<select name="category" value={selectedCategory} onChange={updateField} required>{categories.map((category) => <option value={category.id} key={category.id}>{category.name}</option>)}</select></label></div></div>
-            <div className="admin-equipment-form-section"><span className="mono">02 / Rental terms</span><div className="admin-equipment-grid"><label>Daily rate<input name="price" type="number" min="1" step="1" value={form.price} onChange={updateField} placeholder="2500" required /></label><label>Condition<select name="condition" value={form.condition} onChange={updateField}><option>Excellent</option><option>Good</option><option>Fair</option></select></label></div></div>
-            <div className="admin-equipment-form-section"><span className="mono">03 / Equipment details</span><div className="admin-equipment-grid"><label>Capacity<input name="capacity" value={form.capacity} onChange={updateField} placeholder="1 operator" /></label><label>Weight<input name="weight" value={form.weight} onChange={updateField} placeholder="2.1 lbs" /></label><label>Sensor / output<input name="sensor" value={form.sensor} onChange={updateField} placeholder="Full-frame CMOS" /></label></div></div>
-            <div className="admin-equipment-form-section"><span className="mono">04 / Presentation</span><div className="admin-equipment-grid"><div className="admin-equipment-wide"><span className="admin-equipment-image-label">Product photos</span><ImageDropzone value={form.images} onChange={updateImages} folder={`products/${user?.id || 'admin'}`} maxFiles={8} label="Drag photos here to upload" /></div><label className="admin-equipment-wide">Description<textarea name="description" rows="5" value={form.description} onChange={updateField} placeholder="Describe the equipment, ideal use, and included accessories." required /></label></div></div>
+            <div className="admin-equipment-form-section"><span className="mono">01 / Identity</span><div className="admin-equipment-grid"><label>Product name<input name="name" value={form.name} onChange={updateField} required /></label><label>Category<select name="category" value={selectedCategory} onChange={updateField} required>{categories.map((category) => <option value={category.id} key={category.id}>{category.name}</option>)}</select></label></div></div>
+            <div className="admin-equipment-form-section"><span className="mono">02 / Rental terms</span><div className="admin-equipment-grid"><label>Daily rate<input name="price" type="number" min="1" step="1" value={form.price} onChange={updateField} required /></label><label>Condition<select name="condition" value={form.condition} onChange={updateField}><option>Excellent</option><option>Good</option><option>Fair</option></select></label></div></div>
+            <div className="admin-equipment-form-section"><span className="mono">03 / Equipment details</span><div className="admin-equipment-grid"><label>Quantity (units)<input name="quantity" type="number" inputMode="numeric" min="1" max={MAX_QUANTITY} step="1" value={form.quantity} onChange={updateField} onKeyDown={(event) => blockInvalidNumberKeys(event, { allowDecimal: false })} /></label><label>Weight (kg)<input name="weight" type="number" inputMode="decimal" min="0.01" max={MAX_WEIGHT_KG} step="0.01" value={form.weight} onChange={updateField} onKeyDown={blockInvalidNumberKeys} /></label><label>Sensor / output<input name="sensor" value={form.sensor} onChange={updateField} /></label></div></div>
+            <div className="admin-equipment-form-section"><span className="mono">04 / Presentation</span><div className="admin-equipment-grid"><div className="admin-equipment-wide"><span className="admin-equipment-image-label">Product photos</span><ImageDropzone value={form.images} onChange={updateImages} folder={`products/${user?.id || 'admin'}`} maxFiles={8} label="Drag photos here to upload" /></div><label className="admin-equipment-wide">Description<textarea name="description" rows="5" value={form.description} onChange={updateField} required /></label></div></div>
           </div>
           <aside className="admin-add-equipment-preview" aria-label="Live equipment preview">
             <div className="admin-preview-heading"><span className="eyebrow">Live preview</span><span className="admin-preview-status">Available</span></div>
@@ -75,7 +83,7 @@ export default function AdminAddEquipment() {
             <strong>{form.name || 'Equipment name'}</strong>
             <span className="mono admin-preview-price">{form.price ? `${formatPeso(Number(form.price))} / day` : 'Set daily rate'}</span>
             <p>{form.description || 'Your equipment description will appear here.'}</p>
-            <div className="admin-preview-specs"><span><b>Capacity</b>{form.capacity || '—'}</span><span><b>Weight</b>{form.weight || '—'}</span><span><b>Condition</b>{form.condition || '—'}</span></div>
+            <div className="admin-preview-specs"><span><b>Quantity</b>{formatQuantity(form.quantity) || '—'}</span><span><b>Weight</b>{formatWeight(form.weight) || '—'}</span><span><b>Condition</b>{form.condition || '—'}</span></div>
           </aside>
         </div>
         <div className="admin-equipment-actions"><button type="submit" className="btn btn-primary" disabled={submitting}>{submitting ? 'Publishing…' : 'Publish Equipment'}</button><button type="button" className="btn btn-outline" onClick={() => navigate('/admin/gear')}>Cancel</button>{message && <span className="admin-equipment-message" role="status">{message}</span>}</div>

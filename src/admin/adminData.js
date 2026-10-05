@@ -50,6 +50,7 @@ function normalizeRental(row) {
     amount: Number(row.rental_amount) || 0,
     securityDeposit: Number(row.security_deposit) || 0,
     depositStatus: row.deposit_status,
+    serviceFee: Number(row.service_fee) || 0,
   };
 }
 
@@ -299,6 +300,24 @@ export function buildAdminData(snapshot, categories = []) {
       period: formatPeriod(rental),
       status: rental.status,
       revenue: formatPeso(getRentalAmount(rental)),
+      // Shown in the View Details panel on Rental History.
+      details: {
+        accountEmail: rental.accountEmail,
+        productId: rental.product?.id,
+        owner: (() => {
+          const providerEmail = allProducts.find((product) => product.id === rental.product?.id)?.providerEmail;
+          return providerEmail ? getAccountName(providerEmail, accounts) : 'Gear Rent';
+        })(),
+        days: rental.days,
+        paidAt: rental.paidAt,
+        rentedAt: rental.rentedAt,
+        returnAt: rental.returnAt,
+        finishedAt: rental.finishedAt,
+        amount: rental.amount,
+        securityDeposit: rental.securityDeposit,
+        depositStatus: rental.depositStatus,
+        serviceFee: rental.serviceFee,
+      },
     })),
   };
 }

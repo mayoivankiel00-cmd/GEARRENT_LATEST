@@ -248,6 +248,7 @@ export const legalPages = {
               `Service fee: ${serviceFee} per checkout.`,
               'Security deposit: 2% of the item\'s daily rate, rounded up to the nearest ₱100, with a minimum of ₱100 per item.',
               'Everything is paid upfront at checkout. Once paid, the item is reserved for you and cannot be booked by anyone else until it is returned.',
+              'Your rental period starts when the owner hands you the equipment, not when you pay. A 3-day rental gives you 3 full days with the gear.',
             ],
           },
         ],
@@ -256,7 +257,7 @@ export const legalPages = {
         id: 'pickup',
         heading: 'Pickup',
         body: [
-          'Bring a valid government-issued ID. Check the equipment and its accessories with our team before leaving, and report any existing damage or missing parts at pickup so it is not attributed to you.',
+          'Bring a valid government-issued ID. Check the equipment and its accessories with our team before leaving, and report any existing damage or missing parts at pickup so it is not attributed to you. When the gear is handed to you, the owner starts your rental in Gear Rent and your due date is set from that moment.',
         ],
       },
       {
@@ -354,6 +355,7 @@ export const pickupSteps = [
   ['Contact the crew', 'Let us know when you plan to come so your equipment is prepared and tested.'],
   ['Bring a valid ID', 'A government-issued ID is required to release equipment.'],
   ['Check the gear together', 'Inspect every item and accessory with our team before you leave.'],
+  ['Your rental starts', 'Your rental time starts when the gear is handed to you, and your due date appears in My Gears.'],
 ];
 
 export const returnSteps = [
@@ -378,6 +380,10 @@ export const faqs = [
   {
     q: 'What do I pay at checkout?',
     a: `The daily rate times the number of days for each item, a ${serviceFee} service fee per checkout, and a refundable security deposit for each item (2% of its daily rate, rounded up to the nearest ₱100, minimum ₱100).`,
+  },
+  {
+    q: 'When does my rental time start?',
+    a: 'When the owner hands you the gear, not when you pay. Until then My Gears shows "Waiting for handover", and your due date is set from the moment the rental starts.',
   },
   {
     q: 'How do I return gear?',

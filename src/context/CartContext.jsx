@@ -121,7 +121,7 @@ export function CartProvider({ children }) {
          ${returnColumns}products (${PRODUCT_SELECT})`
       )
       .eq('user_id', user.id)
-      .order('rented_at', { ascending: false });
+      .order('paid_at', { ascending: false, nullsFirst: false });
 
     let { data, error } = await loadRentals(RETURN_COLUMNS);
     if (error?.code === '42703') {

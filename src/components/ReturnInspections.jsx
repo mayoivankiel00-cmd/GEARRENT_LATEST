@@ -20,7 +20,8 @@ function toLocalInput(value) {
 function describeError(error, fallback) {
   if (!error) return fallback;
   if (['P0001', 'P0002', '22023', '42501'].includes(error.code)) return error.message;
-  return fallback;
+  // Anything else: show the database's own reason instead of hiding it.
+  return error.message ? `${fallback} (${error.message}${error.code ? `, code ${error.code}` : ''})` : fallback;
 }
 
 // Returns waiting for inspection: rentals whose renter pressed "Return gear",

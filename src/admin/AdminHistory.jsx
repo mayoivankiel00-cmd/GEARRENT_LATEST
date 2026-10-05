@@ -1,5 +1,8 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import AdminLayout from './AdminLayout';
+import Icon from '../components/Icon';
+import { formatPeso } from '../lib/pricing';
 import { useAdminData } from './adminData';
 import './AdminHistory.css';
 
@@ -9,11 +12,86 @@ const statusMeta = {
   completed: { text: 'Completed', cls: 'completed' },
 };
 
+const depositLabels = {
+  held: 'Held by Gear Rent',
+  refunded: 'Refunded in full',
+  partially_kept: 'Partly kept',
+  kept: 'Kept',
+};
+
+function formatDateTime(value) {
+  return value ? new Date(value).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }) : null;
+}
+
+// Everything the dashboard snapshot knows about one rental.
+function RentalDetails({ rental, onClose }) {
+  const d = rental.details;
+
+  useEffect(() => {
+    const onKey = (event) => { if (event.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose]);
+
+  const rows = [
+    ['Renter', <>{rental.account}<span className="history-detail-sub">{d.accountEmail} · {rental.accountType}</span></>],
+    ['Gear', rental.items.join(', ')],
+    ['Owner', d.owner],
+    ['Rental length', `${d.days} day${d.days === 1 ? '' : 's'}`],
+    ['Paid', formatDateTime(d.paidAt) || 'Not recorded'],
+    ['Handed over (clock started)', formatDateTime(d.rentedAt) || 'Waiting for handover'],
+    ['Due back', formatDateTime(d.returnAt) || 'Set when the rental starts'],
+    ['Returned', formatDateTime(d.finishedAt) || (rental.status === 'completed' ? 'Not recorded' : 'Not yet')],
+    ['Rental fee', formatPeso(d.amount)],
+    ['Service fee', d.serviceFee ? formatPeso(d.serviceFee) : 'Charged on another item in this checkout'],
+    ['Security deposit', `${formatPeso(d.securityDeposit)} · ${depositLabels[d.depositStatus] || d.depositStatus || 'Unknown'}`],
+  ];
+
+  return (
+    <div className="history-detail-backdrop" role="presentation" onMouseDown={onClose}>
+      <div
+        className="card history-detail-panel"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="history-detail-title"
+        onMouseDown={(event) => event.stopPropagation()}
+      >
+        <div className="history-detail-head">
+          <div>
+            <span className="mono history-detail-id">#{rental.id}</span>
+            <h2 id="history-detail-title">{rental.items.join(', ')}</h2>
+          </div>
+          <span className={`status-pill ${statusMeta[rental.status].cls}`}>{statusMeta[rental.status].text}</span>
+          <button type="button" className="history-detail-close" onClick={onClose} aria-label="Close details">
+            <Icon name="close" />
+          </button>
+        </div>
+        <dl className="history-detail-list">
+          {rows.map(([label, value]) => (
+            <div key={label}>
+              <dt className="mono">{label}</dt>
+              <dd>{value}</dd>
+            </div>
+          ))}
+        </dl>
+        <div className="history-detail-actions">
+          {d.accountEmail && (
+            <Link className="btn btn-outline" to={`/admin/renters/${encodeURIComponent(d.accountEmail)}`}>View member</Link>
+          )}
+          {d.productId && <Link className="btn btn-outline" to={`/product/${d.productId}`}>View gear</Link>}
+          <button type="button" className="btn btn-primary" onClick={onClose}>Close</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function AdminHistory() {
   const { rentalLog } = useAdminData();
   const [accountFilter, setAccountFilter] = useState('');
   const [orderFilter, setOrderFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [selectedRental, setSelectedRental] = useState(null);
 
   const filtered = useMemo(() => {
     return rentalLog.filter((r) => {
@@ -61,7 +139,6 @@ export default function AdminHistory() {
             <option value="completed">Completed</option>
           </select>
         </div>
-        <button className="btn btn-outline apply-btn">Apply Filters</button>
       </div>
 
       <div className="card history-table-card">
@@ -98,7 +175,7 @@ export default function AdminHistory() {
                 </td>
                 <td className="revenue-cell">{r.revenue}</td>
                 <td>
-                  <button className="btn btn-outline view-details-btn">View Details</button>
+                  <button type="button" className="btn btn-outline view-details-btn" onClick={() => setSelectedRental(r)}>View Details</button>
                 </td>
               </tr>
             ))}
@@ -116,6 +193,7 @@ export default function AdminHistory() {
           <span className="mono">Showing 1-{filtered.length} of {rentalLog.length} records</span>
         </div>
       </div>
+      {selectedRental && <RentalDetails rental={selectedRental} onClose={() => setSelectedRental(null)} />}
     </AdminLayout>
   );
 }

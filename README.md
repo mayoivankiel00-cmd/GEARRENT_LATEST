@@ -37,12 +37,14 @@ All SQL files mentioned below are in the `supabase/` folder.
 10. **Run `gearrent_default_admin.sql`** (after step 5; re-run it if you ever re-run step 5) — makes the default admin account permanent.
 11. **Run `gearrent_categories_update.sql`** (after step 5) — categories (name, tagline, cover image, order) are read from `public.categories` and managed on **Admin → Categories**; a category with products can't be deleted.
 12. **Run `gearrent_membership_tiers_update.sql`** (after step 8) — three tiers: Gear Rent Guest (free, browse only), Gear Rent Renter (₱499) and Gear Rent Provider (₱699, or ₱199 for Renters). Existing providers become Gear Rent Provider; everyone else becomes Gear Rent Guest. See *Memberships and bookings*.
-13. `npm install && npm run dev`.
+13. **Run `gearrent_handover_update.sql`** (after step 9) — the renter's time starts when the owner hands the gear over (**Start rental** in Provider Gear, or Admin → Handovers & Returns for Gear Rent's gear), not at payment.
+14. `npm install && npm run dev`.
 
 ## Returns and deposits
 
 | Step | Who | What happens |
 |---|---|---|
+| Start rental | Provider (Provider Gear → *Gear to hand over*) for their gear; admins (Admin → Handovers & Returns) for Gear Rent's gear or any rental | `start_rental()` sets the start time to now and the due date to now + rental days. Until then the rental is paid and the gear is reserved, but no time is counted, no due alerts are sent and it can't be returned. |
 | Return gear | Renter (My Gears) | `request_rental_return()` tells the owner the renter says the gear is back. It doesn't affect the price. The rental stays active and the product stays booked; due/overdue alerts stop. |
 | Inspect & confirm | Provider (Provider Gear → *Returned gear to check*) for their gear; admins (Admin → Returns) for Gear Rent's gear or any rental | `confirm_rental_return()` records when the gear actually came back (default now, can't be in the future or before the rental started), closes the rental and settles the money. Overdue rentals also show up here, so a provider can close one even if the renter never pressed *Return gear*. |
 

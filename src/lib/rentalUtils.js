@@ -10,6 +10,12 @@ function parseTimestamp(value) {
   return null;
 }
 
+// The clock starts when the owner hands the gear over (start_rental), not
+// at payment. Until then rentedAt / returnAt are empty.
+export function isRentalStarted(rental) {
+  return Boolean(parseTimestamp(rental?.rentedAt) && parseTimestamp(rental?.returnAt));
+}
+
 export function getRentalEndTime(rental, now) {
   const rentalDays = Number(rental?.days);
   const durationDays = Number.isFinite(rentalDays) && rentalDays > 0 ? rentalDays : 3;
@@ -21,6 +27,7 @@ export function getRentalTimeRemaining(rental, now) {
 }
 
 export function formatRentalTimeRemaining(rental, now) {
+  if (!isRentalStarted(rental)) return 'Waiting for handover';
   const totalSeconds = Math.floor(getRentalTimeRemaining(rental, now) / 1000);
   if (totalSeconds <= 0) return 'Rental ended';
 

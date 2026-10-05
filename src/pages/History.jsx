@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { formatPeso } from '../lib/pricing';
-import { formatRentalTimeRemaining, getRentalHistoryId } from '../lib/rentalUtils';
+import { formatRentalTimeRemaining, getRentalHistoryId, isRentalStarted } from '../lib/rentalUtils';
 import AccountSidebar from '../components/AccountSidebar';
 import Icon from '../components/Icon';
 import './Account.css';
@@ -21,7 +21,7 @@ export default function History() {
     id: `active-${rental.product.id}-${index}`,
     product: rental.product,
     status: 'current',
-    statusLabel: rental.returnRequestedAt ? 'Return being checked' : 'Current possession',
+    statusLabel: !isRentalStarted(rental) ? 'Awaiting handover' : rental.returnRequestedAt ? 'Return being checked' : 'Current possession',
     finishedAt: rental.returnAt,
     rentalDetails: `${Number(rental.days) > 0 ? Number(rental.days) : 3} day rental`,
   }));
@@ -80,7 +80,9 @@ export default function History() {
           </span>
           <span className="mono">
             {variant === 'active'
-              ? `Time remaining: ${formatRentalTimeRemaining(rental, now)}`
+              ? (isRentalStarted(rental)
+                ? `Time remaining: ${formatRentalTimeRemaining(rental, now)}`
+                : 'Rental time starts when the owner hands over the gear')
               : `Finished renting: ${formatFinishedDate(rental.finishedAt)}`}
           </span>
           {variant === 'past' && (

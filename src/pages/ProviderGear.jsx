@@ -9,6 +9,10 @@ import AccountSidebar from '../components/AccountSidebar';
 import Icon from '../components/Icon';
 import ImageDropzone from '../components/ImageDropzone';
 import ReturnInspections from '../components/ReturnInspections';
+import RentalHandovers from '../components/RentalHandovers';
+import {
+  blockInvalidNumberKeys, formatQuantity, formatWeight, MAX_QUANTITY, MAX_WEIGHT_KG, validateGearSpecs,
+} from '../lib/gearSpecs';
 import './ProviderGear.css';
 
 const approvalLabels = {
@@ -22,9 +26,8 @@ const initialForm = {
   category: '', // empty = first category in the list
   price: '',
   condition: 'Good',
-  capacity: '',
+  quantity: '',
   weight: '',
-  sensor: '',
   images: [],
   description: '',
 };
@@ -56,6 +59,11 @@ export default function ProviderGear() {
     if (submitting) return;
     if (!form.images.length) {
       setMessage('Drag in a photo from your device before publishing.');
+      return;
+    }
+    const specError = validateGearSpecs(form);
+    if (specError) {
+      setMessage(specError);
       return;
     }
     setSubmitting(true);
@@ -99,6 +107,9 @@ export default function ProviderGear() {
           <div><span className="mono">Not approved</span><strong>{String(rejectedCount).padStart(2, '0')}</strong></div>
         </div>
 
+        {/* Only shows up when a renter has paid and is waiting to receive the gear. */}
+        <RentalHandovers hideWhenEmpty title="Gear to hand over" />
+
         {/* Only shows up when a renter has handed back this provider's gear. */}
         <ReturnInspections hideWhenEmpty title="Returned gear to check" />
 
@@ -111,23 +122,51 @@ export default function ProviderGear() {
             <div className="provider-form-fields">
               <div className="provider-form-grid">
                 <div className="provider-form-section-label">Identity</div>
-                <label className="field">Product name<input name="name" value={form.name} onChange={handleChange} placeholder="Sony FX3 Cinema Camera" required /></label>
+                <label className="field">Product name<input name="name" value={form.name} onChange={handleChange} required /></label>
                 <label className="field">Category
                   <select name="category" value={selectedCategory} onChange={handleChange} required>
                     {categories.map((category) => <option value={category.id} key={category.id}>{category.name}</option>)}
                   </select>
                 </label>
                 <div className="provider-form-section-label">Rental terms</div>
-                <label className="field">Daily rate<input name="price" value={form.price} onChange={handleChange} type="number" min="1" step="1" placeholder="2500" required /></label>
+                <label className="field">Daily rate<input name="price" value={form.price} onChange={handleChange} type="number" min="1" step="1" required /></label>
                 <label className="field">Condition
                   <select name="condition" value={form.condition} onChange={handleChange}>
                     <option>Excellent</option><option>Good</option><option>Fair</option>
                   </select>
                 </label>
                 <div className="provider-form-section-label">Technical profile</div>
-                <label className="field">Capacity<input name="capacity" value={form.capacity} onChange={handleChange} placeholder="1 operator" /></label>
-                <label className="field">Weight<input name="weight" value={form.weight} onChange={handleChange} placeholder="2.1 lbs" /></label>
-                <label className="field provider-form-wide">Sensor<input name="sensor" value={form.sensor} onChange={handleChange} placeholder="Full-frame CMOS" /></label>
+                <label className="field">Quantity (units)
+                  <input
+                    name="quantity"
+                    type="number"
+                    inputMode="numeric"
+                    min="1"
+                    max={MAX_QUANTITY}
+                    step="1"
+                    value={form.quantity}
+                    onChange={handleChange}
+                    onKeyDown={(event) => blockInvalidNumberKeys(event, { allowDecimal: false })}
+                   
+                  />
+                </label>
+                <label className="field">Weight (kg)
+                  <span className="provider-unit-input">
+                    <input
+                      name="weight"
+                      type="number"
+                      inputMode="decimal"
+                      min="0.01"
+                      max={MAX_WEIGHT_KG}
+                      step="0.01"
+                      value={form.weight}
+                      onChange={handleChange}
+                      onKeyDown={blockInvalidNumberKeys}
+                     
+                    />
+                    <span className="mono" aria-hidden="true">kg</span>
+                  </span>
+                </label>
                 <div className="provider-form-section-label">Presentation</div>
                 <div className="provider-image-source provider-form-wide">
                   <div className="field provider-photo-copy">
@@ -142,7 +181,7 @@ export default function ProviderGear() {
                     label="Drag photos here to upload"
                   />
                 </div>
-                <label className="field provider-form-wide">Description<textarea name="description" value={form.description} onChange={handleChange} rows="3" placeholder="Tell renters what makes this gear useful." /></label>
+                <label className="field provider-form-wide">Description<textarea name="description" value={form.description} onChange={handleChange} rows="3" /></label>
               </div>
             </div>
             <aside className="provider-preview" aria-label="Listing preview">
@@ -155,9 +194,9 @@ export default function ProviderGear() {
               <span className="mono">{form.price ? `${formatPeso(Number(form.price))} / day` : 'Set a daily rate'}</span>
               <p className="provider-preview-description">{form.description || 'Your gear description will appear here.'}</p>
               <div className="provider-preview-specs">
-                <span><b>Capacity</b>{form.capacity || '—'}</span>
-                <span><b>Weight</b>{form.weight || '—'}</span>
-                <span><b>Sensor</b>{form.sensor || '—'}</span>
+                <span><b>Quantity</b>{formatQuantity(form.quantity) || '—'}</span>
+                <span><b>Weight</b>{formatWeight(form.weight) || '—'}</span>
+                <span><b>Condition</b>{form.condition || '—'}</span>
               </div>
             </aside>
           </div>
@@ -192,8 +231,8 @@ export default function ProviderGear() {
                     <div className="provider-listing-head"><h3>{product.name}</h3><span className="provider-listing-category">{getCategoryName(product.category)}</span></div>
                     <strong className="provider-listing-price">{formatPeso(product.price)} <span>/ day</span></strong>
                     <div className="provider-listing-specs">
-                      {['capacity', 'weight', 'sensor'].map((spec) => product.specs?.[spec[0].toUpperCase() + spec.slice(1)] && (
-                        <span key={spec}>{product.specs[spec[0].toUpperCase() + spec.slice(1)]}</span>
+                      {['Quantity', 'Weight'].map((spec) => product.specs?.[spec] && product.specs[spec] !== 'Not specified' && (
+                        <span key={spec}>{product.specs[spec]}</span>
                       ))}
                     </div>
                     <p>{product.description || 'No description added.'}</p>

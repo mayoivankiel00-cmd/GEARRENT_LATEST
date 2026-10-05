@@ -10,7 +10,7 @@ const links = [
   { to: '/admin', label: 'Dashboard', icon: 'dashboard', end: true },
   { to: '/admin/analytics', label: 'Analytics', icon: 'chart' },
   { to: '/admin/history', label: 'Rental History', icon: 'history' },
-  { to: '/admin/returns', label: 'Returns', icon: 'swap' },
+  { to: '/admin/returns', label: 'Handovers & Returns', icon: 'swap' },
   { to: '/admin/renters', label: 'Members', icon: 'users' },
   { to: '/admin/gear', label: 'Gear Inventory', icon: 'box' },
   { to: '/admin/categories', label: 'Categories', icon: 'layers' },
@@ -153,9 +153,6 @@ export default function AdminLayout({ children }) {
 
           <div className="admin-sidebar-divider" />
           <nav className="admin-nav">
-            <a href="mailto:support@gearrent.ph">
-              <span className="admin-nav-icon"><Icon name="mail" /></span> Support
-            </a>
             {/* Revokes every session of this account and returns to sign-in. */}
             <button type="button" className="admin-nav-link" onClick={() => signOut()}>
               <span className="admin-nav-icon"><Icon name="logout" /></span> Logout

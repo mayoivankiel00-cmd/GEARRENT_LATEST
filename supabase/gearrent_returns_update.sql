@@ -387,9 +387,10 @@
     v_deposit_refund := v_deposit - v_late_kept - v_damage_kept;
     v_status := case when q.unused_days > 0 then 'returned' else 'finished' end;
 
+    -- status is set with literal values (below), not v_status, so this works
+    -- whether rentals.status is text or the rental_status enum.
     update public.rentals
-      set status = v_status,
-          finished_at = v_handed,
+      set finished_at = v_handed,
           -- Keep the renter's own click time; finished_at records the handover.
           return_requested_at = coalesce(return_requested_at, v_handed),
           return_confirmed_at = v_now,
@@ -402,6 +403,12 @@
           deposit_refunded_at = v_now,
           refundable_amount = q.unused_refund + v_deposit_refund
     where id = r.id;
+
+    if v_status = 'returned' then
+      update public.rentals set status = 'returned' where id = r.id;
+    else
+      update public.rentals set status = 'finished' where id = r.id;
+    end if;
 
     -- Record how much of the deposit was kept. Separate literal updates (not a
     -- CASE) so this works whether deposit_status is text or an enum.

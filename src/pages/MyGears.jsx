@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useNotifications } from '../context/NotificationContext';
 import { formatPeso } from '../lib/pricing';
-import { formatRentalTimeRemaining, getRentalEndTime, getRentalTimeRemaining } from '../lib/rentalUtils';
+import { formatRentalTimeRemaining, getRentalEndTime, getRentalTimeRemaining, isRentalStarted } from '../lib/rentalUtils';
 import AccountSidebar from '../components/AccountSidebar';
 import './Account.css';
 
@@ -21,14 +21,14 @@ export default function MyGears() {
     return () => window.clearInterval(timer);
   }, []);
 
-  // While a return is waiting for the owner's inspection, keep checking so
-  // the rental moves to history once it is confirmed.
-  const awaitingInspection = rentedItems.some((rental) => rental.returnRequestedAt);
+  // While the owner still has to hand the gear over (the clock then starts)
+  // or check a return, keep checking so the page follows along.
+  const awaitingOwner = rentedItems.some((rental) => rental.returnRequestedAt || !isRentalStarted(rental));
   useEffect(() => {
-    if (!awaitingInspection) return undefined;
+    if (!awaitingOwner) return undefined;
     const timer = window.setInterval(refreshRentals, 30000);
     return () => window.clearInterval(timer);
-  }, [awaitingInspection, refreshRentals]);
+  }, [awaitingOwner, refreshRentals]);
 
   const formatPaidDate = (timestamp) => timestamp
     ? new Date(timestamp).toLocaleString('en-US', {
@@ -46,7 +46,7 @@ export default function MyGears() {
   // database once the owner (or an admin) has checked the gear.
   const handleReturnRental = async (rentalIndex) => {
     const rental = rentedItems[rentalIndex];
-    if (!rental || busyRentalId || rental.returnRequestedAt) return;
+    if (!rental || busyRentalId || rental.returnRequestedAt || !isRentalStarted(rental)) return;
     setBusyRentalId(rental.id);
     const result = await requestReturn(rentalIndex);
     setBusyRentalId(null);
@@ -86,8 +86,10 @@ export default function MyGears() {
               const endTime = getRentalEndTime(rental, now);
               const startTime = rentedAt || now;
               const remaining = getRentalTimeRemaining(rental, now);
-              const progress = Math.min(100, Math.max(0, (remaining / (endTime - startTime)) * 100));
-              const urgency = remaining === 0 ? 'ended' : progress <= 10 ? 'critical' : progress <= 25 ? 'warning' : 'normal';
+              const started = isRentalStarted(rental);
+              // Before the handover the full rental time is still ahead.
+              const progress = started ? Math.min(100, Math.max(0, (remaining / (endTime - startTime)) * 100)) : 100;
+              const urgency = !started ? 'normal' : remaining === 0 ? 'ended' : progress <= 10 ? 'critical' : progress <= 25 ? 'warning' : 'normal';
 
               return (
               <article
@@ -112,7 +114,7 @@ export default function MyGears() {
                   <span className="mono">{days} day rental</span>
                   <span className="mono rented-gear-paid-date">Paid {formatPaidDate(rental.paidAt || rental.rentedAt)}</span>
                 </div>
-                <strong className="rented-gear-status">{rental.returnRequestedAt ? 'Returning' : 'Paid'}</strong>
+                <strong className="rented-gear-status">{!started ? 'Awaiting handover' : rental.returnRequestedAt ? 'Returning' : 'Paid'}</strong>
                 <div className="rented-gear-progress">
                   <div className="rented-gear-progress-label">
                     <span>Rental time remaining</span>
@@ -122,7 +124,11 @@ export default function MyGears() {
                     <div className={`rented-gear-progress-fill rented-gear-progress-${urgency}`} style={{ width: `${progress}%` }} />
                   </div>
                   <div className="rented-gear-actions">
-                    {rental.returnRequestedAt ? (
+                    {!started ? (
+                      <span className="mono rented-gear-paid-date">
+                        Your {days}-day rental time starts when the owner hands you the gear.
+                      </span>
+                    ) : rental.returnRequestedAt ? (
                       <span className="mono rented-gear-paid-date">
                         Returned {formatPaidDate(rental.returnRequestedAt)} · waiting for the owner to check the gear
                       </span>
@@ -175,8 +181,9 @@ export default function MyGears() {
                   const endTime = getRentalEndTime(selectedRental, now);
                   const startTime = selectedRental.rentedAt || now;
                   const remaining = getRentalTimeRemaining(selectedRental, now);
-                  const progress = Math.min(100, Math.max(0, (remaining / (endTime - startTime)) * 100));
-                  const urgency = remaining === 0 ? 'ended' : progress <= 10 ? 'critical' : progress <= 25 ? 'warning' : 'normal';
+                  const started = isRentalStarted(selectedRental);
+                  const progress = started ? Math.min(100, Math.max(0, (remaining / (endTime - startTime)) * 100)) : 100;
+                  const urgency = !started ? 'normal' : remaining === 0 ? 'ended' : progress <= 10 ? 'critical' : progress <= 25 ? 'warning' : 'normal';
                   return (
                     <>
                       <strong className={`rented-gear-modal-countdown rented-gear-time-${urgency}`}>{formatRentalTimeRemaining(selectedRental, now)}</strong>
@@ -185,10 +192,11 @@ export default function MyGears() {
                   );
                 })()}
               </div>
-              <button type="button" className="btn btn-outline btn-block rented-gear-modal-return" disabled={Boolean(busyRentalId) || Boolean(selectedRental.returnRequestedAt)} onClick={() => handleReturnRental(selectedRental.rentalIndex)}>
+              <button type="button" className="btn btn-outline btn-block rented-gear-modal-return" disabled={Boolean(busyRentalId) || Boolean(selectedRental.returnRequestedAt) || !isRentalStarted(selectedRental)} onClick={() => handleReturnRental(selectedRental.rentalIndex)}>
                 {busyRentalId === selectedRental.id
                   ? 'Processing…'
-                  : selectedRental.returnRequestedAt ? 'Waiting for inspection' : 'Return gear'}
+                  : !isRentalStarted(selectedRental) ? 'Starts at handover'
+                    : selectedRental.returnRequestedAt ? 'Waiting for inspection' : 'Return gear'}
               </button>
             </div>
             <div className="rented-gear-modal-copy">
