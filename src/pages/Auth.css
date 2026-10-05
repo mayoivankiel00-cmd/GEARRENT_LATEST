@@ -47,6 +47,7 @@
 }
 
 .auth-visual-copy h1 {
+  color: var(--on-ink); /* sits on a dark photo overlay in both themes */
   max-width: 390px;
   margin: 0.6rem 0 0;
   font-size: clamp(2rem, 4vw, 3.2rem);

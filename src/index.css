@@ -19,36 +19,79 @@
   --on-ink-muted: #9a9a97;
   --on-accent: #fff;
 
+  /* Surfaces that differ per theme (the light theme redefines them). */
+  --navbar-bg: rgba(10, 10, 10, 0.92);
+  --media-bg: linear-gradient(150deg, #1c1c1c, #0a0a0a);   /* behind product photos */
+  --media-solid: #0a0a0a;
+  --badge-muted: #2a2a2a;
+  --card-tint: #1c2925;                                    /* admin card gradient tint */
+  --hover-tint: rgb(255 255 255 / 3%);
+
   --font-display: 'Archivo', system-ui, sans-serif;
   --font-mono: 'IBM Plex Mono', 'SFMono-Regular', Menlo, monospace;
 
   color-scheme: dark;
 }
 
+/* Light theme: warm "paper" page with white cards lifted by soft shadows,
+   rather than plain white everywhere. */
 :root[data-theme='light'] {
-  --bg: #FFFFFF;
+  --bg: #FAF8F5;
   --surface: #FFFFFF;
-  --surface-alt: #F8F6F2;
-  --border: #DDD6CC;
-  --text: #16130F;
+  --surface-alt: #F2EEE8;
+  --border: #E8E2D9;
+  --text: #1B1815;
   --text-secondary: #4A443D;
-  --text-muted: #7A7267;
-  --accent: #D92D20;
+  --text-muted: #6B6359;
+  --accent: #D42C21;
   --accent-hover: #B42318;
-  --accent-soft: #FDECEA;
-  --ink: #14110F;
+  --accent-soft: #F7C9C3;
+  --ink: #17140F;
   --on-ink: #F5F1EA;
   --on-ink-muted: #A8A095;
   --on-accent: #FFFFFF;
-  --shadow: 0 1px 2px rgba(22,19,15,0.06), 0 6px 16px rgba(22,19,15,0.06);
+  --shadow: 0 1px 2px rgba(48, 36, 24, 0.05), 0 8px 24px rgba(48, 36, 24, 0.07);
 
   --bg-raised: var(--surface-alt);
   --bg-card: var(--surface);
-  --border-hover: #B8AEA2;
-  --text-dim: var(--text-muted);
-  --success: #167A45;
-  --warn: #8A4B00;
+  --border-hover: #D2C8BB;
+  --text-dim: #938A7E;
+  --success: #157347;
+  --warn: #9A5B00;
+
+  --navbar-bg: rgba(255, 255, 255, 0.86);
+  --media-bg: linear-gradient(150deg, #F5F1EB, #EAE4DA);
+  --media-solid: #F2EEE8;
+  --badge-muted: #ECE7DF;
+  --card-tint: #F3ECE1;
+  --hover-tint: rgb(27 24 21 / 4%);
   color-scheme: light;
+}
+
+/* A faint warm glow at the top keeps large light pages from feeling flat. */
+:root[data-theme='light'] body {
+  background:
+    radial-gradient(1200px 520px at 50% -180px, rgba(212, 44, 33, 0.04), transparent 70%),
+    var(--bg);
+  background-attachment: fixed;
+}
+
+:root[data-theme='light'] .card:hover {
+  box-shadow: 0 2px 4px rgba(48, 36, 24, 0.06), 0 14px 32px rgba(48, 36, 24, 0.1);
+}
+
+:root[data-theme='light'] .btn-primary {
+  box-shadow: 0 1px 2px rgba(180, 35, 24, 0.25), 0 4px 12px rgba(212, 44, 33, 0.18);
+}
+
+:root[data-theme='light'] .btn-primary:disabled {
+  background: #E8D6D2;
+  color: #A08C88;
+  box-shadow: none;
+}
+
+:root[data-theme='light'] .btn-outline {
+  background: var(--surface);
 }
 
 * {
@@ -62,9 +105,6 @@ html, body {
   color: var(--text);
 }
 
-:root[data-theme='light'] body {
-  background: var(--bg);
-}
 
 body {
   font-family: var(--font-display);

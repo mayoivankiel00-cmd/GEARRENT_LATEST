@@ -24,7 +24,7 @@
   aspect-ratio: 16 / 10;
   border-radius: 4px;
   overflow: hidden;
-  background: linear-gradient(150deg, #1c1c1c, #0a0a0a);
+  background: var(--media-bg);
   border: 1px solid var(--border);
 }
 
@@ -61,7 +61,7 @@
   aspect-ratio: 1;
   border-radius: 3px;
   border: 1px solid var(--border);
-  background: linear-gradient(150deg, #171717, #0b0b0b);
+  background: var(--media-bg);
 }
 
 .product-thumb img {

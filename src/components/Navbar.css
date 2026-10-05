@@ -2,14 +2,9 @@
   border-bottom: 1px solid var(--border);
   position: sticky;
   top: 0;
-  background: rgba(10, 10, 10, 0.92);
+  background: var(--navbar-bg);
   backdrop-filter: blur(8px);
   z-index: 50;
-}
-
-:root[data-theme='light'] .navbar {
-  background: var(--ink);
-  border-bottom-color: var(--ink);
 }
 
 .navbar-inner {
@@ -26,10 +21,6 @@
   letter-spacing: -0.01em;
   color: var(--accent);
   white-space: nowrap;
-}
-
-:root[data-theme='light'] .navbar-logo {
-  color: var(--accent);
 }
 
 .navbar-links {
@@ -55,27 +46,6 @@
   border-bottom-color: var(--accent);
 }
 
-:root[data-theme='light'] .navbar-links a,
-:root[data-theme='light'] .navbar-cart,
-:root[data-theme='light'] .navbar-login,
-:root[data-theme='light'] .navbar-signout,
-:root[data-theme='light'] .navbar-user-name {
-  color: var(--on-ink-muted);
-}
-
-:root[data-theme='light'] .navbar-links a:hover,
-:root[data-theme='light'] .navbar-links a.active,
-:root[data-theme='light'] .navbar-cart:hover,
-:root[data-theme='light'] .navbar-login:hover,
-:root[data-theme='light'] .navbar-signout:hover,
-:root[data-theme='light'] .navbar-user:hover .navbar-user-name {
-  color: var(--on-ink);
-}
-
-:root[data-theme='light'] .navbar-links a.active {
-  border-bottom-color: var(--accent);
-}
-
 .navbar-actions {
   display: flex;
   align-items: center;
@@ -98,8 +68,7 @@
 }
 
 /* Membership badge beside Cart: Guest = outline, Renter = red outline,
-   Provider = solid red. The navbar stays dark in the light theme too,
-   hence the on-ink colors there. */
+   Provider = solid red. */
 .navbar-tier {
   display: inline-flex;
   align-items: center;
@@ -131,15 +100,6 @@
   color: var(--on-accent);
 }
 
-:root[data-theme='light'] .navbar-tier-guest {
-  border-color: #3a3a3a;
-  color: var(--on-ink-muted);
-}
-
-:root[data-theme='light'] .navbar-tier-guest:hover {
-  color: var(--on-ink);
-}
-
 .navbar-cart-badge {
   min-width: 1.25rem;
   height: 1.25rem;
@@ -163,7 +123,7 @@
   padding: 0.35rem 0.65rem 0.35rem 0.4rem;
   border: 1px solid var(--border);
   border-radius: 3px;
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--hover-tint);
   color: var(--text);
   white-space: nowrap;
   transition: border-color 0.15s ease, background 0.15s ease;

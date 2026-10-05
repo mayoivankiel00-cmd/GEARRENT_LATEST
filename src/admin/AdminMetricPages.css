@@ -19,7 +19,7 @@
 .metric-user-date { color: var(--text-muted); font-size: 0.68rem; }
 .metric-page-empty { color: var(--text-muted); font-size: 0.85rem; }
 .utilization-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1rem; }
-.metric-summary-card { padding: 1.1rem; background: linear-gradient(145deg, color-mix(in srgb, var(--bg-card) 92%, #1c2925), var(--bg-card)); }
+.metric-summary-card { padding: 1.1rem; background: linear-gradient(145deg, color-mix(in srgb, var(--bg-card) 92%, var(--card-tint)), var(--bg-card)); }
 .metric-summary-card span, .metric-summary-card small { display: block; color: var(--text-dim); font-size: 0.68rem; text-transform: uppercase; }
 .metric-summary-card strong { display: block; margin: 0.55rem 0 0.3rem; color: var(--accent); font-family: var(--font-mono); font-size: 1.65rem; }
 .metric-summary-card small { color: var(--text-muted); font-size: 0.7rem; text-transform: none; }

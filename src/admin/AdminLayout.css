@@ -297,7 +297,7 @@
 
 .admin-nav a:hover {
   color: var(--text);
-  background: rgb(255 255 255 / 3%);
+  background: var(--hover-tint);
 }
 
 .admin-nav a.active {
@@ -324,7 +324,7 @@
 
 .admin-nav-link:hover {
   color: var(--text);
-  background: rgb(255 255 255 / 3%);
+  background: var(--hover-tint);
 }
 
 .admin-nav-icon {

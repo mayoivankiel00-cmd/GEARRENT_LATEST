@@ -22,7 +22,7 @@
 .admin-detail-email { margin: 0; color: var(--text-muted); font-family: var(--font-mono); font-size: 0.78rem; }
 
 .admin-detail-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
-.admin-detail-stat { padding: 1.1rem; background: linear-gradient(145deg, color-mix(in srgb, var(--bg-card) 92%, #1c2925), var(--bg-card)); }
+.admin-detail-stat { padding: 1.1rem; background: linear-gradient(145deg, color-mix(in srgb, var(--bg-card) 92%, var(--card-tint)), var(--bg-card)); }
 .admin-detail-stat span { display: block; margin-bottom: 0.65rem; color: var(--text-dim); font-size: 0.68rem; text-transform: uppercase; }
 .admin-detail-stat strong { color: var(--accent); font-family: var(--font-mono); font-size: 1.35rem; }
 

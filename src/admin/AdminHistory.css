@@ -11,7 +11,7 @@
   padding: 1.3rem;
   margin-bottom: 1.3rem;
   flex-wrap: wrap;
-  background: linear-gradient(145deg, color-mix(in srgb, var(--bg-card) 92%, #1c2925), var(--bg-card));
+  background: linear-gradient(145deg, color-mix(in srgb, var(--bg-card) 92%, var(--card-tint)), var(--bg-card));
 }
 
 .filter-field {
@@ -62,7 +62,7 @@
   letter-spacing: 0.04em;
   padding: 0.9rem 1rem;
   border-bottom: 1px solid var(--border);
-  background: color-mix(in srgb, var(--bg-card) 86%, #1c2925);
+  background: color-mix(in srgb, var(--bg-card) 86%, var(--card-tint));
 }
 
 .history-table td {

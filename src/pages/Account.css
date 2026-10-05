@@ -364,7 +364,7 @@
   overflow: hidden;
   border: 1px solid var(--border);
   border-radius: 3px;
-  background: #0a0a0a;
+  background: var(--media-solid);
 }
 
 .rented-gear-modal-hero img,
@@ -387,7 +387,7 @@
   overflow: hidden;
   border: 1px solid var(--border);
   border-radius: 3px;
-  background: #0a0a0a;
+  background: var(--media-solid);
   cursor: pointer;
 }
 
@@ -649,7 +649,7 @@
   margin-bottom: 0.7rem;
   padding: 0.9rem 1rem;
   border: 1px solid var(--border);
-  background: #0a0a0a;
+  background: var(--media-solid);
 }
 
 .profile-transfer-display .mono {
@@ -930,7 +930,7 @@
   height: 64px;
   flex-shrink: 0;
   border-radius: 3px;
-  background: linear-gradient(150deg, #1c1c1c, #0a0a0a);
+  background: var(--media-bg);
 }
 
 .rental-info {

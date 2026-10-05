@@ -20,7 +20,7 @@
   position: relative;
   overflow: hidden;
   padding: 1.25rem;
-  background: linear-gradient(145deg, color-mix(in srgb, var(--bg-card) 92%, #1c2925), var(--bg-card));
+  background: linear-gradient(145deg, color-mix(in srgb, var(--bg-card) 92%, var(--card-tint)), var(--bg-card));
   transition: border-color 0.15s ease, transform 0.15s ease;
 }
 
@@ -249,7 +249,7 @@
   max-height: min(720px, calc(100vh - 2rem));
   overflow: auto;
   padding: 1.35rem;
-  background: linear-gradient(145deg, color-mix(in srgb, var(--bg-card) 92%, #1c2925), var(--bg-card));
+  background: linear-gradient(145deg, color-mix(in srgb, var(--bg-card) 92%, var(--card-tint)), var(--bg-card));
   box-shadow: 0 24px 70px rgb(0 0 0 / 38%);
 }
 

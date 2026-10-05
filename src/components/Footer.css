@@ -45,3 +45,7 @@
 .footer-links a:hover {
   color: var(--on-ink);
 }
+
+:root[data-theme='light'] .site-footer {
+  border-top-color: var(--ink);
+}
