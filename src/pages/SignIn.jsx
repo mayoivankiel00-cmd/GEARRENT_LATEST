@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { SIGN_OUT_REASONS, useAuth } from '../AuthContext';
+import { SIGN_OUT_REASONS, useAuth } from '../context/AuthContext';
 import GoogleLoginButton from '../components/GoogleLoginButton';
-import { createAttemptLimiter, formatWait } from '../rateLimit';
+import { createAttemptLimiter, formatWait } from '../lib/rateLimit';
 import './Auth.css';
 
 // 5 failed attempts → 30s lock, doubling on each further lock (max 15 min).

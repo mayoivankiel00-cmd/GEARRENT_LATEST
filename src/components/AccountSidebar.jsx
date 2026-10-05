@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom';
-import { useAuth } from '../AuthContext';
-import { useCart } from '../CartContext';
-import { isGearProvider } from '../providerAccess';
+import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
+import { isGearProvider } from '../lib/providerAccess';
 import './AccountSidebar.css';
 
 const links = [

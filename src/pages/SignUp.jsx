@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../AuthContext';
+import { useAuth } from '../context/AuthContext';
 import GoogleLoginButton from '../components/GoogleLoginButton';
-import { createAttemptLimiter, formatWait } from '../rateLimit';
+import { createAttemptLimiter, formatWait } from '../lib/rateLimit';
 import './Auth.css';
 
 const MIN_PASSWORD_LENGTH = 8;

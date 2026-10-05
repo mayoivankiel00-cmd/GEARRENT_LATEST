@@ -1,12 +1,12 @@
 // Copy for the footer pages (Privacy, Terms, Rental Agreement, Contact,
-// Locations) and the Support page. The amounts mirror src/pricing.js and the
+// Locations) and the Support page. The amounts mirror src/lib/pricing.js and the
 // SQL functions named there. Update both if a rule changes.
 //
 // Section body items: a string is a paragraph, { list: [...] } is a bullet list.
 
 import {
   formatPeso, PROVIDER_MEMBERSHIP_FEE, PROVIDER_UPGRADE_FEE, RENTER_MEMBERSHIP_FEE, SERVICE_FEE,
-} from '../pricing';
+} from '../lib/pricing';
 
 export const SUPPORT_EMAIL = 'support@gearrent.ph';
 export const LAST_UPDATED = 'October 5, 2026';

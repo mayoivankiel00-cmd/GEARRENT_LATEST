@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useCart } from '../CartContext';
-import { useNotifications } from '../NotificationContext';
-import { formatPeso } from '../pricing';
-import { formatRentalTimeRemaining, getRentalEndTime, getRentalTimeRemaining } from '../rentalUtils';
+import { useCart } from '../context/CartContext';
+import { useNotifications } from '../context/NotificationContext';
+import { formatPeso } from '../lib/pricing';
+import { formatRentalTimeRemaining, getRentalEndTime, getRentalTimeRemaining } from '../lib/rentalUtils';
 import AccountSidebar from '../components/AccountSidebar';
 import './Account.css';
 

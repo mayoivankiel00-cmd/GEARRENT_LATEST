@@ -1,4 +1,4 @@
-import { setRememberSession, supabase } from '../supabaseClient';
+import { setRememberSession, supabase } from '../lib/supabaseClient';
 
 export default function GoogleLoginButton({ text = 'signin_with' }) {
   return (

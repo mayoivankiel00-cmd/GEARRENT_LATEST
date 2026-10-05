@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useCart } from '../CartContext';
-import { formatPeso } from '../pricing';
-import { formatRentalTimeRemaining, getRentalHistoryId } from '../rentalUtils';
+import { useCart } from '../context/CartContext';
+import { formatPeso } from '../lib/pricing';
+import { formatRentalTimeRemaining, getRentalHistoryId } from '../lib/rentalUtils';
 import AccountSidebar from '../components/AccountSidebar';
 import './Account.css';
 

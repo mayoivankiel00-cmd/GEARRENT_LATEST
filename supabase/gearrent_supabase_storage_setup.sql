@@ -6,7 +6,7 @@
 -- Idempotent: safe to run more than once.
 
 -- 1. Create the public bucket (id must be exactly 'gear-images' to match
---    src/imageStorage.js). Limits match MAX_IMAGE_BYTES and
+--    src/lib/imageStorage.js). Limits match MAX_IMAGE_BYTES and
 --    ALLOWED_IMAGE_TYPES there (SVG is excluded: it can carry scripts).
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 values (

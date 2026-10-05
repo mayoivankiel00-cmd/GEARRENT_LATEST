@@ -7,10 +7,10 @@ import {
   isSessionRemembered,
   setRememberSession,
   supabase,
-} from './supabaseClient';
-import { isRateLimitError } from './rateLimit';
-import { getTierLevel } from './providerAccess';
-import { TIER_GUEST } from './pricing';
+} from '../lib/supabaseClient';
+import { isRateLimitError } from '../lib/rateLimit';
+import { getTierLevel } from '../lib/providerAccess';
+import { TIER_GUEST } from '../lib/pricing';
 
 const AuthContext = createContext(null);
 const PENDING_SIGNUP_KEY = 'gearRentPendingSignup';

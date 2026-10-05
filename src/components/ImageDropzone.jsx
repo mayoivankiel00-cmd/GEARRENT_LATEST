@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { supabase } from '../supabaseClient';
-import { ALLOWED_IMAGE_TYPES, IMAGE_BUCKET, MAX_IMAGE_BYTES, removeStoredImages } from '../imageStorage';
+import { supabase } from '../lib/supabaseClient';
+import { ALLOWED_IMAGE_TYPES, IMAGE_BUCKET, MAX_IMAGE_BYTES, removeStoredImages } from '../lib/imageStorage';
 import './ImageDropzone.css';
 
 const BUCKET = IMAGE_BUCKET;

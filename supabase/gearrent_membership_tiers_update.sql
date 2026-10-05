@@ -25,7 +25,7 @@
 -- ---------------------------------------------------------------------
 
 -- 0 = Guest, 1 = Renter, 2 = Provider. Matches getTierLevel() in
--- src/providerAccess.js. Unknown / legacy values count as Guest, except
+-- src/lib/providerAccess.js. Unknown / legacy values count as Guest, except
 -- anything containing "provider".
 create or replace function public.gearrent_tier_level(p_tier text)
 returns integer
@@ -59,7 +59,7 @@ immutable
 as $$ select public.gearrent_tier_level(p_tier) >= 2; $$;
 
 -- What an account on p_current_tier pays to move up to p_target
--- ('renter' / 'provider'). Keep in sync with src/pricing.js.
+-- ('renter' / 'provider'). Keep in sync with src/lib/pricing.js.
 create or replace function public.gearrent_membership_fee(p_target text, p_current_tier text default null)
 returns numeric
 language sql
@@ -110,7 +110,7 @@ update public.profiles
  where tier is distinct from public.gearrent_tier_name(public.gearrent_tier_level(tier));
 
 -- Display-only copy of the tiers seeded by the original setup (the app
--- reads src/pricing.js, not this table). Skipped if the table isn't there;
+-- reads src/lib/pricing.js, not this table). Skipped if the table isn't there;
 -- if its columns differ, a notice is shown and the rest of the file still runs.
 do $$
 begin

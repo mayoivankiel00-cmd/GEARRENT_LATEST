@@ -1,6 +1,22 @@
 # GearRent — connected to Supabase
 
-This project now talks to a real Postgres database via [Supabase](https://supabase.com) instead of `localStorage`. Setup:
+This project now talks to a real Postgres database via [Supabase](https://supabase.com) instead of `localStorage`.
+
+## Project layout
+
+| Folder | What's in it |
+|---|---|
+| `src/pages/` | One file per page (Catalog, Cart, Memberships, Support, ...) with its CSS |
+| `src/admin/` | The admin dashboard pages |
+| `src/components/` | Shared pieces: Navbar, Footer, ProductCard, ImageDropzone, ... |
+| `src/context/` | Shared app state: signed-in user, cart, categories, gear catalog, notifications |
+| `src/lib/` | Helpers: Supabase client, prices and tiers (`pricing.js`), tier checks, image storage, rate limits |
+| `public/` | Files served as-is, such as the tab icon (`favicon.png`) |
+| `supabase/` | Every SQL file to run in the Supabase SQL Editor (order below) |
+
+## Setup
+
+All SQL files mentioned below are in the `supabase/` folder.
 
 1. **Create the schema.** In your Supabase project's SQL Editor, run these two files in order (from the chat where this project was generated — ⚠️ **they are not in this repository yet**; see *Recovering the base schema* below):
    - `gearrent_supabase_schema.sql` — tables, RLS policies, auth trigger
@@ -132,7 +148,7 @@ All money now moves inside Postgres functions; the browser only asks for an acti
 ### What changed
 - `AuthContext`, `CartContext`, `ProviderContext`, `NotificationContext` now read/write Supabase instead of `localStorage`/`sessionStorage`. Their exposed function names are unchanged, but mutating calls (`authenticate`, `createAccount`, `addItem`, `returnRental`, etc.) are now `async` — callers that branch on the return value use `await`; the rest fire-and-forget, same as before.
 - Passwords are handled entirely by Supabase Auth now — nothing is stored or compared in plaintext.
-- `src/pricing.js` (formerly `src/mockData.js`) holds `membershipTiers`, the `formatPeso` / `calculateSecurityDeposit` helpers, and display copies of the service and provider fees. Products and categories come from the database (the original sample products were seeded from an earlier version of this file).
+- `src/lib/pricing.js` (formerly `src/mockData.js`) holds `membershipTiers`, the `formatPeso` / `calculateSecurityDeposit` helpers, and display copies of the service and provider fees. Products and categories come from the database (the original sample products were seeded from an earlier version of this file).
 
 ### Known limitations (carried over from the migration report)
 - ~~Checkout pricing is computed client-side~~ — fixed, see *Server-side payments*.

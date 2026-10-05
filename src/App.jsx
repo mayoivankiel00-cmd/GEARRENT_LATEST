@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { Link, Navigate, Route, Routes, useLocation } from 'react-router-dom';
-import { useAuth } from './AuthContext';
-import { useNotifications } from './NotificationContext';
+import { useAuth } from './context/AuthContext';
+import { useNotifications } from './context/NotificationContext';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Landing from './pages/Landing';
@@ -33,7 +33,7 @@ import AdminApprovals from './admin/AdminApprovals';
 import AdminReturns from './admin/AdminReturns';
 import AdminCategories from './admin/AdminCategories';
 import AdminAdmins from './admin/AdminAdmins';
-import { isGearProvider } from './providerAccess';
+import { isGearProvider } from './lib/providerAccess';
 import ToastStack from './components/ToastStack';
 import ErrorBoundary from './components/ErrorBoundary';
 

@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useSearchParams } from 'react-router-dom';
-import { useCategories } from '../CategoryContext';
-import { useProviderCatalog } from '../ProviderContext';
+import { useCategories } from '../context/CategoryContext';
+import { useProviderCatalog } from '../context/ProviderContext';
 import ProductCard from '../components/ProductCard';
 import AccountSidebar from '../components/AccountSidebar';
 import './Catalog.css';

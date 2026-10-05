@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
-import { supabase } from '../supabaseClient';
-import { formatPeso } from '../pricing';
+import { supabase } from '../lib/supabaseClient';
+import { formatPeso } from '../lib/pricing';
 import '../admin/AdminModeration.css';
 
 const REFRESH_INTERVAL_MS = 30 * 1000;

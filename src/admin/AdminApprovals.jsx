@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { formatPeso } from '../pricing';
-import { useCategories } from '../CategoryContext';
-import { useProviderCatalog } from '../ProviderContext';
+import { formatPeso } from '../lib/pricing';
+import { useCategories } from '../context/CategoryContext';
+import { useProviderCatalog } from '../context/ProviderContext';
 import AdminLayout from './AdminLayout';
 import './AdminMetricPages.css';
 import './AdminModeration.css';

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
-import { supabase } from '../supabaseClient';
-import { useAuth } from '../AuthContext';
-import { useCategories } from '../CategoryContext';
+import { supabase } from '../lib/supabaseClient';
+import { useAuth } from '../context/AuthContext';
+import { useCategories } from '../context/CategoryContext';
 import ImageDropzone from '../components/ImageDropzone';
 import AdminLayout from './AdminLayout';
 import './AdminMetricPages.css';

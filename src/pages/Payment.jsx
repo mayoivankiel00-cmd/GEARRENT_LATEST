@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useCart } from '../CartContext';
-import { useNotifications } from '../NotificationContext';
-import { formatPeso } from '../pricing';
+import { useCart } from '../context/CartContext';
+import { useNotifications } from '../context/NotificationContext';
+import { formatPeso } from '../lib/pricing';
 import './Payment.css';
 
 export default function Payment() {

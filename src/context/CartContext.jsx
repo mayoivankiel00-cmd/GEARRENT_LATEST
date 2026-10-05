@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { supabase } from './supabaseClient';
-import { SERVICE_FEE, calculateSecurityDeposit } from './pricing';
-import { getRentalHistoryId } from './rentalUtils';
+import { supabase } from '../lib/supabaseClient';
+import { SERVICE_FEE, calculateSecurityDeposit } from '../lib/pricing';
+import { getRentalHistoryId } from '../lib/rentalUtils';
 import { useAuth } from './AuthContext';
 
 const CartContext = createContext(null);

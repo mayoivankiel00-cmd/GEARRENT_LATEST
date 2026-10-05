@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { useAuth } from '../AuthContext';
-import { useCart } from '../CartContext';
-import { useNotifications } from '../NotificationContext';
-import { membershipTiers } from '../pricing';
-import { getTierLevel } from '../providerAccess';
+import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
+import { useNotifications } from '../context/NotificationContext';
+import { membershipTiers } from '../lib/pricing';
+import { getTierLevel } from '../lib/providerAccess';
 import './Navbar.css';
 
 export default function Navbar() {

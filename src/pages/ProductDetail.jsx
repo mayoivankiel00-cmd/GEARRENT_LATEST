@@ -1,11 +1,11 @@
 import { useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { formatPeso, calculateSecurityDeposit } from '../pricing';
-import { useCart } from '../CartContext';
-import { useAuth } from '../AuthContext';
-import { canRentGear } from '../providerAccess';
-import { useCategories } from '../CategoryContext';
-import { useProviderCatalog } from '../ProviderContext';
+import { formatPeso, calculateSecurityDeposit } from '../lib/pricing';
+import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
+import { canRentGear } from '../lib/providerAccess';
+import { useCategories } from '../context/CategoryContext';
+import { useProviderCatalog } from '../context/ProviderContext';
 import ProductCard from '../components/ProductCard';
 import './ProductDetail.css';
 

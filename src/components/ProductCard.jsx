@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { formatPeso } from '../pricing';
+import { formatPeso } from '../lib/pricing';
 import './ProductCard.css';
 
 export default function ProductCard({ product, featured = false, showActions = true, showStatus = true }) {

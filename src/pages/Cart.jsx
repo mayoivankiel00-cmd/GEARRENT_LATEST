@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { formatPeso } from '../pricing';
-import { useCart } from '../CartContext';
+import { formatPeso } from '../lib/pricing';
+import { useCart } from '../context/CartContext';
 import AccountSidebar from '../components/AccountSidebar';
 import './Cart.css';
 

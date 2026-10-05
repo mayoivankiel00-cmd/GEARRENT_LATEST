@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../AuthContext';
-import { useCategories } from '../CategoryContext';
-import { useProviderCatalog } from '../ProviderContext';
+import { useAuth } from '../context/AuthContext';
+import { useCategories } from '../context/CategoryContext';
+import { useProviderCatalog } from '../context/ProviderContext';
 import ProductCard from '../components/ProductCard';
 import './Landing.css';
 

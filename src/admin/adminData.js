@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { supabase } from '../supabaseClient';
-import { getTierLevel, isGearProvider } from '../providerAccess';
-import { formatPeso, membershipTiers, TIER_GUEST } from '../pricing';
-import { useCategories } from '../CategoryContext';
+import { supabase } from '../lib/supabaseClient';
+import { getTierLevel, isGearProvider } from '../lib/providerAccess';
+import { formatPeso, membershipTiers, TIER_GUEST } from '../lib/pricing';
+import { useCategories } from '../context/CategoryContext';
 
 // All admin pages read one snapshot from admin_dashboard_snapshot() (see
 // gearrent_integrity_update.sql). The function refuses non-admins, so this

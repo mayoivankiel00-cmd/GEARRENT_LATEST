@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useAuth } from '../AuthContext';
+import { useAuth } from '../context/AuthContext';
 import AdminLayout from './AdminLayout';
 import { MIN_ADMIN_PASSWORD_LENGTH, createAdminAccount, isDefaultAdmin, listAdmins, setUserRole } from './adminAccounts';
 import './AdminMetricPages.css';

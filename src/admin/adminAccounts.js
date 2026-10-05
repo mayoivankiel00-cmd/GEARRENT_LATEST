@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { supabase, supabaseAnonKey, supabaseUrl } from '../supabaseClient';
+import { supabase, supabaseAnonKey, supabaseUrl } from '../lib/supabaseClient';
 
 export const MIN_ADMIN_PASSWORD_LENGTH = 12;
 

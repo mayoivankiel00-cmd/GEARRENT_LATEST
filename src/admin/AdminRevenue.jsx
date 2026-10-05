@@ -1,6 +1,6 @@
 import AdminLayout from './AdminLayout';
 import BarChart from './BarChart';
-import { formatPeso } from '../pricing';
+import { formatPeso } from '../lib/pricing';
 import { useAdminData } from './adminData';
 import './AdminMetricPages.css';
 

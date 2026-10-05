@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../AuthContext';
-import { formatPeso, getMembershipPrice, membershipTiers, TIER_GUEST } from '../pricing';
-import { getTierLevel } from '../providerAccess';
+import { useAuth } from '../context/AuthContext';
+import { formatPeso, getMembershipPrice, membershipTiers, TIER_GUEST } from '../lib/pricing';
+import { getTierLevel } from '../lib/providerAccess';
 import './Memberships.css';
 import './Payment.css';
 

@@ -3,11 +3,11 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import './index.css';
 import App from './App.jsx';
-import { AuthProvider } from './AuthContext.jsx';
-import { CategoryProvider } from './CategoryContext.jsx';
-import { CartProvider } from './CartContext.jsx';
-import { ProviderProvider } from './ProviderContext.jsx';
-import { NotificationProvider } from './NotificationContext.jsx';
+import { AuthProvider } from './context/AuthContext.jsx';
+import { CategoryProvider } from './context/CategoryContext.jsx';
+import { CartProvider } from './context/CartContext.jsx';
+import { ProviderProvider } from './context/ProviderContext.jsx';
+import { NotificationProvider } from './context/NotificationContext.jsx';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

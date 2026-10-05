@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { formatPeso } from '../pricing';
-import { useCategories } from '../CategoryContext';
-import { useProviderCatalog } from '../ProviderContext';
+import { formatPeso } from '../lib/pricing';
+import { useCategories } from '../context/CategoryContext';
+import { useProviderCatalog } from '../context/ProviderContext';
 import AdminLayout from './AdminLayout';
 import './AdminGear.css';
 

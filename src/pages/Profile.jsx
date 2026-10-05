@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../AuthContext';
-import { useCart } from '../CartContext';
-import { useNotifications } from '../NotificationContext';
-import { formatPeso, TIER_GUEST } from '../pricing';
+import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
+import { useNotifications } from '../context/NotificationContext';
+import { formatPeso, TIER_GUEST } from '../lib/pricing';
 import AccountSidebar from '../components/AccountSidebar';
 import './Account.css';
 

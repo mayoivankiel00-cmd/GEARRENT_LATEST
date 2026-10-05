@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { supabase } from './supabaseClient';
+import { supabase } from '../lib/supabaseClient';
 import { useAuth } from './AuthContext';
-import { removeStoredImages } from './imageStorage';
+import { removeStoredImages } from '../lib/imageStorage';
 
 const ProviderContext = createContext(null);
 

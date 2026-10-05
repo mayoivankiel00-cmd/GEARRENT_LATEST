@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { formatPeso } from '../pricing';
-import { useCategories } from '../CategoryContext';
-import { useProviderCatalog } from '../ProviderContext';
-import { useNotifications } from '../NotificationContext';
-import { useAuth } from '../AuthContext';
+import { formatPeso } from '../lib/pricing';
+import { useCategories } from '../context/CategoryContext';
+import { useProviderCatalog } from '../context/ProviderContext';
+import { useNotifications } from '../context/NotificationContext';
+import { useAuth } from '../context/AuthContext';
 import AccountSidebar from '../components/AccountSidebar';
 import ImageDropzone from '../components/ImageDropzone';
 import ReturnInspections from '../components/ReturnInspections';
