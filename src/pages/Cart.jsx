@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { formatPeso } from '../lib/pricing';
 import { useCart } from '../context/CartContext';
 import AccountSidebar from '../components/AccountSidebar';
+import Icon from '../components/Icon';
 import './Cart.css';
 
 const DAYS_IN_WEEK = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
@@ -111,7 +112,7 @@ export default function Cart() {
                   aria-label={`Remove ${product.name}`}
                   onClick={() => removeItem(product.id)}
                 >
-                  🗑
+                  <Icon name="trash" />
                 </button>
               </div>
             ))}

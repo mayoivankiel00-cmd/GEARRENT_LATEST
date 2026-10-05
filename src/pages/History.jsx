@@ -4,6 +4,7 @@ import { useCart } from '../context/CartContext';
 import { formatPeso } from '../lib/pricing';
 import { formatRentalTimeRemaining, getRentalHistoryId } from '../lib/rentalUtils';
 import AccountSidebar from '../components/AccountSidebar';
+import Icon from '../components/Icon';
 import './Account.css';
 
 export default function History() {
@@ -90,7 +91,7 @@ export default function History() {
               title="Delete from rental history"
               onClick={() => removeRentalHistory(rental.id)}
             >
-              <span aria-hidden="true">🗑</span>
+              <Icon name="trash" />
             </button>
           )}
         </div>

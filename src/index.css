@@ -198,3 +198,10 @@ input::placeholder { color: var(--text-dim); }
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
+
+/* Line icons from components/Icon.jsx */
+.icon {
+  display: inline-block;
+  flex-shrink: 0;
+  vertical-align: -0.125em;
+}

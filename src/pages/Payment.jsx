@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useNotifications } from '../context/NotificationContext';
 import { formatPeso } from '../lib/pricing';
+import Icon from '../components/Icon';
 import './Payment.css';
 
 export default function Payment() {
@@ -35,7 +36,7 @@ export default function Payment() {
   if (paid) {
     return (
       <div className="container payment-page payment-confirmed">
-        <div className="payment-icon">✓</div>
+        <div className="payment-icon"><Icon name="check" strokeWidth={2.4} /></div>
         <div className="eyebrow">Payment complete</div>
         <h1>Rental Confirmed</h1>
         <p>Your payment of <strong>{formatPeso(receipt.total)}</strong> was processed successfully. The following gear is now rented to you:</p>

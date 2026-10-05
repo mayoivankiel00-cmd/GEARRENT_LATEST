@@ -1,15 +1,16 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useNotifications } from '../context/NotificationContext';
+import Icon from './Icon';
 import './ToastStack.css';
 
 const TOAST_META = {
-  review: { icon: '⚑', title: 'Listing awaiting review', action: 'Review now', duration: 12000 },
-  due: { icon: '⏰', title: 'Rental due soon', action: 'View rental', duration: 12000 },
-  overdue: { icon: '!', title: 'Rental overdue', action: 'View rental', duration: 15000 },
-  warning: { icon: '!', title: 'Needs attention', action: 'View', duration: 10000 },
-  success: { icon: '✓', title: 'Done', action: 'View', duration: 7000 },
-  info: { icon: 'i', title: 'Update', action: 'View', duration: 7000 },
+  review: { icon: 'flag', title: 'Listing awaiting review', action: 'Review now', duration: 12000 },
+  due: { icon: 'clock', title: 'Rental due soon', action: 'View rental', duration: 12000 },
+  overdue: { icon: 'alert', title: 'Rental overdue', action: 'View rental', duration: 15000 },
+  warning: { icon: 'alert', title: 'Needs attention', action: 'View', duration: 10000 },
+  success: { icon: 'check', title: 'Done', action: 'View', duration: 7000 },
+  info: { icon: 'info', title: 'Update', action: 'View', duration: 7000 },
 };
 
 function Toast({ toast, onDismiss }) {
@@ -44,7 +45,7 @@ function Toast({ toast, onDismiss }) {
       onFocus={() => setPaused(true)}
       onBlur={() => setPaused(false)}
     >
-      <span className="toast-icon" aria-hidden="true">{meta.icon}</span>
+      <span className="toast-icon" aria-hidden="true"><Icon name={meta.icon} strokeWidth={2.2} /></span>
       <div className="toast-body">
         <strong>{toast.audience === 'admin' ? `Admin · ${meta.title}` : meta.title}</strong>
         <p>{toast.message}</p>

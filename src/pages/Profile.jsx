@@ -5,6 +5,7 @@ import { useCart } from '../context/CartContext';
 import { useNotifications } from '../context/NotificationContext';
 import { formatPeso, TIER_GUEST } from '../lib/pricing';
 import AccountSidebar from '../components/AccountSidebar';
+import Icon from '../components/Icon';
 import './Account.css';
 
 export default function Profile() {
@@ -133,7 +134,7 @@ export default function Profile() {
               onClick={() => setIsTransferOpen(true)}
               disabled={accountBalance <= 0}
             >
-              <span aria-hidden="true">↗</span> Transfer to bank
+              <Icon name="arrowUpRight" /> Transfer to bank
             </button>
           </div>
         </section>
@@ -216,7 +217,7 @@ export default function Profile() {
                   <div className="profile-transfer-keypad" aria-label="Transfer amount calculator">
                     {['7', '8', '9', '4', '5', '6', '1', '2', '3', '.', '0', 'backspace'].map((key) => (
                       <button type="button" key={key} onClick={() => handleCalculatorInput(key)} aria-label={key === 'backspace' ? 'Backspace' : key}>
-                        {key === 'backspace' ? '⌫' : key}
+                        {key === 'backspace' ? <Icon name="backspace" /> : key}
                       </button>
                     ))}
                     <button type="button" className="profile-transfer-clear" onClick={() => handleCalculatorInput('clear')}>Clear</button>

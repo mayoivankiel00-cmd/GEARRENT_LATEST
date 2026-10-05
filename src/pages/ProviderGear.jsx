@@ -6,6 +6,7 @@ import { useProviderCatalog } from '../context/ProviderContext';
 import { useNotifications } from '../context/NotificationContext';
 import { useAuth } from '../context/AuthContext';
 import AccountSidebar from '../components/AccountSidebar';
+import Icon from '../components/Icon';
 import ImageDropzone from '../components/ImageDropzone';
 import ReturnInspections from '../components/ReturnInspections';
 import './ProviderGear.css';
@@ -199,7 +200,7 @@ export default function ProviderGear() {
                     {product.approvalStatus === 'pending' && <p className="provider-review-note mono">Waiting for administrator approval. Not visible to renters yet.</p>}
                     {product.approvalStatus === 'rejected' && <p className="provider-review-note rejected"><b>Reviewer note:</b> {product.reviewNote || 'No reason given.'} Remove this listing and submit a corrected one.</p>}
                   </div>
-                  <button type="button" className="provider-delete" onClick={(event) => { event.stopPropagation(); removeProviderProduct(product.id); }} aria-label={`Remove ${product.name}`} title="Remove listing">🗑</button>
+                  <button type="button" className="provider-delete" onClick={(event) => { event.stopPropagation(); removeProviderProduct(product.id); }} aria-label={`Remove ${product.name}`} title="Remove listing"><Icon name="trash" /></button>
                 </article>
                 );
               })}

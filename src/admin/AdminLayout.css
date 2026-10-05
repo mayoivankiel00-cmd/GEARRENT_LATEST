@@ -79,8 +79,10 @@
 .admin-search-icon {
   position: absolute;
   left: 0.8rem;
-  font-size: 0.8rem;
-  opacity: 0.6;
+  display: flex;
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  pointer-events: none;
 }
 
 .admin-search input {
@@ -327,8 +329,10 @@
 
 .admin-nav-icon {
   width: 1.2em;
-  display: inline-block;
-  text-align: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.05rem;
   opacity: 0.9;
 }
 
@@ -400,3 +404,9 @@
 .admin-notification-dot.due { background: var(--warn); }
 .admin-notification-item.is-link { cursor: pointer; }
 .admin-notification-item.is-link:hover p { text-decoration: underline; }
+
+.admin-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}

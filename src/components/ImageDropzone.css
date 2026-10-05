@@ -36,7 +36,8 @@
 }
 
 .image-dropzone-icon {
-  font-size: 1.4rem;
+  display: inline-flex;
+  font-size: 1.6rem;
   color: var(--accent);
 }
 

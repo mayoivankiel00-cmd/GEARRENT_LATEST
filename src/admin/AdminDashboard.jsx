@@ -3,13 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import AdminLayout from './AdminLayout';
 import BarChart from './BarChart';
 import { useAdminData } from './adminData';
+import Icon from '../components/Icon';
 import './AdminDashboard.css';
 
 const statMeta = [
-  { key: 'totalRevenue', label: 'Total Revenue', icon: '↗' },
-  { key: 'activeRentals', label: 'Available Gear', icon: '🗂' },
-  { key: 'newUsers', label: 'New Users', icon: '👤' },
-  { key: 'gearUtilization', label: 'Gear Util. %', icon: '◔' },
+  { key: 'totalRevenue', label: 'Total Revenue', icon: 'trendingUp' },
+  { key: 'activeRentals', label: 'Available Gear', icon: 'box' },
+  { key: 'newUsers', label: 'New Users', icon: 'user' },
+  { key: 'gearUtilization', label: 'Gear Util. %', icon: 'pie' },
 ];
 
 const statusLabels = {
@@ -89,12 +90,12 @@ export default function AdminDashboard() {
             >
               <div className="stat-card-top">
                 <span className="mono stat-label">{s.label}</span>
-                <span className="stat-icon">{s.icon}</span>
+                <span className="stat-icon"><Icon name={s.icon} /></span>
               </div>
               <div className="stat-value">{stat.value}</div>
               <div className={`stat-change ${stat.trend}`}>
-                {stat.trend === 'up' && '↑ '}
-                {stat.trend === 'warn' && '⚠ '}
+                {stat.trend === 'up' && <><Icon name="arrowUp" />{' '}</>}
+                {stat.trend === 'warn' && <><Icon name="alert" />{' '}</>}
                 {stat.change}
               </div>
               {s.key === 'gearUtilization' && (

@@ -5,6 +5,7 @@ import { useCart } from '../context/CartContext';
 import { useNotifications } from '../context/NotificationContext';
 import { membershipTiers } from '../lib/pricing';
 import { getTierLevel } from '../lib/providerAccess';
+import Icon from './Icon';
 import './Navbar.css';
 
 export default function Navbar() {
@@ -112,7 +113,7 @@ export default function Navbar() {
             title={isLightTheme ? 'Switch to dark theme' : 'Switch to light theme'}
             onClick={() => setIsLightTheme((lightTheme) => !lightTheme)}
           >
-            <span aria-hidden="true">{isLightTheme ? '☾' : '☀'}</span>
+            <Icon name={isLightTheme ? 'moon' : 'sun'} />
           </button>
           {isAuthenticated && (
             <Link to="/profile" className="navbar-user" aria-label={`View ${userName}'s profile`}>

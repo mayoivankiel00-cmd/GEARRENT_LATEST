@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { ALLOWED_IMAGE_TYPES, IMAGE_BUCKET, MAX_IMAGE_BYTES, removeStoredImages } from '../lib/imageStorage';
+import Icon from './Icon';
 import './ImageDropzone.css';
 
 const BUCKET = IMAGE_BUCKET;
@@ -202,7 +203,7 @@ export default function ImageDropzone({ value = [], onChange, folder, maxFiles =
           className="image-dropzone-input"
           onChange={handleBrowse}
         />
-        <span className="image-dropzone-icon" aria-hidden="true">{isUploading ? '⟳' : '⇪'}</span>
+        <span className="image-dropzone-icon" aria-hidden="true"><Icon name={isUploading ? 'loader' : 'upload'} /></span>
         <span className="image-dropzone-label">{isUploading ? 'Uploading…' : label}</span>
         <span className="image-dropzone-hint">or click to browse · JPG, PNG, WebP up to 8MB</span>
       </div>
@@ -221,7 +222,7 @@ export default function ImageDropzone({ value = [], onChange, folder, maxFiles =
                 onClick={(event) => { event.stopPropagation(); removeImage(url); }}
                 aria-label={`Remove photo ${index + 1}`}
               >
-                ✕
+                <Icon name="close" />
               </button>
             </div>
           ))}

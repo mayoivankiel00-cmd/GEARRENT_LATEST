@@ -3,21 +3,22 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useNotifications } from '../context/NotificationContext';
 import { useProviderCatalog } from '../context/ProviderContext';
+import Icon from '../components/Icon';
 import './AdminLayout.css';
 
 const links = [
-  { to: '/admin', label: 'Dashboard', icon: '▦', end: true },
-  { to: '/admin/analytics', label: 'Analytics', icon: '📈' },
-  { to: '/admin/history', label: 'Rental History', icon: '↺' },
-  { to: '/admin/returns', label: 'Returns', icon: '⇄' },
-  { to: '/admin/renters', label: 'Gear Renters', icon: '♙' },
-  { to: '/admin/gear', label: 'Gear Inventory', icon: '▣' },
-  { to: '/admin/categories', label: 'Categories', icon: '▤' },
-  { to: '/admin/revenue', label: 'Revenue', icon: '↗' },
-  { to: '/admin/users', label: 'New Users', icon: '♙' },
-  { to: '/admin/utilization', label: 'Gear Utilization', icon: '◔' },
-  { to: '/admin/approvals', label: 'Approvals', icon: '✓', badge: 'pending' },
-  { to: '/admin/admins', label: 'Admin Accounts', icon: '⚿' },
+  { to: '/admin', label: 'Dashboard', icon: 'dashboard', end: true },
+  { to: '/admin/analytics', label: 'Analytics', icon: 'chart' },
+  { to: '/admin/history', label: 'Rental History', icon: 'history' },
+  { to: '/admin/returns', label: 'Returns', icon: 'swap' },
+  { to: '/admin/renters', label: 'Gear Renters', icon: 'users' },
+  { to: '/admin/gear', label: 'Gear Inventory', icon: 'box' },
+  { to: '/admin/categories', label: 'Categories', icon: 'layers' },
+  { to: '/admin/revenue', label: 'Revenue', icon: 'trendingUp' },
+  { to: '/admin/users', label: 'New Users', icon: 'userPlus' },
+  { to: '/admin/utilization', label: 'Gear Utilization', icon: 'pie' },
+  { to: '/admin/approvals', label: 'Approvals', icon: 'checkCircle', badge: 'pending' },
+  { to: '/admin/admins', label: 'Admin Accounts', icon: 'shield' },
 ];
 
 export default function AdminLayout({ children }) {
@@ -50,7 +51,7 @@ export default function AdminLayout({ children }) {
           <strong>Rental network</strong>
         </div>
         <div className="admin-search">
-          <span className="admin-search-icon">🔍</span>
+          <span className="admin-search-icon"><Icon name="search" /></span>
           <input type="text" placeholder="Search equipment, orders, or users..." />
         </div>
         <div className="admin-topbar-actions">
@@ -121,7 +122,7 @@ export default function AdminLayout({ children }) {
             title={isLightTheme ? 'Switch to dark theme' : 'Switch to light theme'}
             onClick={() => setIsLightTheme((lightTheme) => !lightTheme)}
           >
-            <span aria-hidden="true">{isLightTheme ? '☾' : '☀'}</span>
+            <Icon name={isLightTheme ? 'moon' : 'sun'} />
           </button>
         </div>
       </header>
@@ -140,7 +141,7 @@ export default function AdminLayout({ children }) {
                 end={l.end}
                 className={({ isActive }) => (isActive ? 'active' : '')}
               >
-                <span className="admin-nav-icon">{l.icon}</span> {l.label}
+                <span className="admin-nav-icon"><Icon name={l.icon} /></span> {l.label}
                 {l.badge === 'pending' && pendingProducts.length > 0 && (
                   <span className="admin-nav-badge" aria-label={`${pendingProducts.length} awaiting review`}>{pendingProducts.length}</span>
                 )}
@@ -153,11 +154,11 @@ export default function AdminLayout({ children }) {
           <div className="admin-sidebar-divider" />
           <nav className="admin-nav">
             <a href="mailto:support@gearrent.ph">
-              <span className="admin-nav-icon">📩</span> Support
+              <span className="admin-nav-icon"><Icon name="mail" /></span> Support
             </a>
             {/* Revokes every session of this account and returns to sign-in. */}
             <button type="button" className="admin-nav-link" onClick={() => signOut()}>
-              <span className="admin-nav-icon">⎋</span> Logout
+              <span className="admin-nav-icon"><Icon name="logout" /></span> Logout
             </button>
           </nav>
         </aside>
