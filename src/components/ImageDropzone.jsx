@@ -19,6 +19,28 @@ function imageTypeOf(file) {
   return EXTENSION_TYPES[extension] || null;
 }
 
+// Turns a Storage error into something the user (or whoever set up the
+// Supabase project) can act on, instead of a generic "upload failed".
+function describeUploadError(error) {
+  const text = `${error?.message || ''} ${error?.error || ''} ${error?.statusCode || ''}`;
+  if (/bucket not found/i.test(text)) {
+    return 'The "gear-images" storage bucket does not exist yet. Run gearrent_supabase_storage_setup.sql in Supabase.';
+  }
+  if (/row-level security|row level security|unauthorized|403/i.test(text)) {
+    return 'Storage refused the upload (permissions). Sign out and back in; if it keeps happening, check the gear-images storage policies.';
+  }
+  if (/mime|content type|not supported/i.test(text)) {
+    return 'Storage does not accept this file type. Use JPG, PNG, WebP, GIF or AVIF.';
+  }
+  if (/maximum allowed size|too large|payload/i.test(text)) {
+    return 'The photo is larger than storage allows (8MB).';
+  }
+  if (/failed to fetch|network/i.test(text)) {
+    return 'Upload failed. Please check your connection and try again.';
+  }
+  return error?.message ? `Upload failed: ${error.message}` : 'Upload failed. Please try again.';
+}
+
 function randomId() {
   return (window.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(16).slice(2)}`);
 }
@@ -100,9 +122,10 @@ export default function ImageDropzone({ value = [], onChange, folder, maxFiles =
     if (uploadedUrls.length) onChange([...value, ...uploadedUrls]);
     if (failures.length) {
       failures.forEach((failure) => console.error('Image upload failed', failure.reason));
+      const reason = describeUploadError(failures[0].reason);
       setError(failures.length === results.length
-        ? 'Upload failed. Please check your connection and try again.'
-        : `${failures.length} of ${results.length} photos failed to upload. Try those again.`);
+        ? reason
+        : `${failures.length} of ${results.length} photos failed to upload. ${reason}`);
     }
   }, [value, onChange, folder, maxFiles]);
 

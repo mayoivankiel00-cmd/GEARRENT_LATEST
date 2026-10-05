@@ -1,0 +1,456 @@
+/* Support, Privacy, Terms, Rental Agreement, Contact and Locations. */
+
+.info-page {
+  flex: 1;
+  padding-top: 4.5rem;
+  padding-bottom: 5rem;
+  max-width: 1120px;
+}
+
+/* ---- Header ---------------------------------------------------------- */
+
+.info-hero {
+  border-top: 3px solid var(--accent);
+  padding-top: 2rem;
+  margin-bottom: 3.5rem;
+}
+
+.info-hero h1 {
+  font-size: clamp(2.4rem, 5vw, 4.2rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  margin: 0.7rem 0 1.25rem;
+}
+
+.info-intro {
+  max-width: 62ch;
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 1.1rem;
+  line-height: 1.65;
+}
+
+.info-meta {
+  margin: 1.25rem 0 0;
+  color: var(--text-dim);
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.info-link {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ---- Legal pages: contents + numbered sections ----------------------- */
+
+.info-layout {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 4rem;
+  align-items: start;
+}
+
+.info-toc {
+  position: sticky;
+  top: calc(68px + 2rem);
+  border-left: 1px solid var(--border);
+  padding-left: 1.1rem;
+}
+
+.info-toc-title {
+  display: block;
+  margin-bottom: 0.9rem;
+  color: var(--text-dim);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.info-toc ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.info-toc a {
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  line-height: 1.35;
+}
+
+.info-toc a:hover {
+  color: var(--accent);
+}
+
+.info-sections {
+  max-width: 72ch;
+}
+
+.info-section {
+  scroll-margin-top: calc(68px + 1.5rem);
+  padding: 2rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.info-section:first-child {
+  padding-top: 0;
+}
+
+.info-section:last-child {
+  border-bottom: none;
+}
+
+.info-section h2 {
+  display: flex;
+  align-items: baseline;
+  gap: 0.85rem;
+  margin: 0 0 1rem;
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.info-section-number {
+  color: var(--accent);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.info-section p,
+.info-section li {
+  color: var(--text-muted);
+  font-size: 0.98rem;
+  line-height: 1.7;
+}
+
+.info-section p {
+  margin: 0 0 0.9rem;
+}
+
+.info-section ul {
+  margin: 0 0 0.9rem;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.info-section li {
+  position: relative;
+  padding-left: 1.3rem;
+}
+
+.info-section li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.72em;
+  width: 0.45rem;
+  height: 2px;
+  background: var(--accent);
+}
+
+/* ---- Cards ------------------------------------------------------------ */
+
+.info-card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 3rem;
+}
+
+.info-card-grid-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.info-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 1.6rem;
+}
+
+.info-card p {
+  flex: 1;
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+.info-card-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.info-card-link {
+  margin-top: 0.4rem;
+  color: var(--accent);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.info-card-clickable:hover {
+  border-color: var(--accent);
+}
+
+/* ---- Two-column panels (Contact, Locations) --------------------------- */
+
+.info-split {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 3rem;
+  margin-bottom: 1rem;
+}
+
+.info-panel h2 {
+  margin: 0 0 1.4rem;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid var(--border);
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+.info-panel-note {
+  margin: 1.4rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.info-topic-list {
+  margin: 0;
+  display: grid;
+  gap: 1.2rem;
+}
+
+.info-topic-list dt {
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+
+.info-topic-list dd {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+.info-checklist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.9rem;
+}
+
+.info-checklist li {
+  position: relative;
+  padding-left: 1.8rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.info-checklist li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.info-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 1.3rem;
+}
+
+.info-steps li {
+  display: flex;
+  gap: 1rem;
+}
+
+.info-step-number {
+  flex: none;
+  width: 2rem;
+  height: 2rem;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--accent);
+  border-radius: 50%;
+  color: var(--accent);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.info-steps strong {
+  display: block;
+  margin-bottom: 0.2rem;
+}
+
+.info-steps p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+/* ---- Locations hub card ----------------------------------------------- */
+
+.info-location {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+  padding: 2rem;
+  margin-bottom: 3.5rem;
+  border-left: 3px solid var(--accent);
+}
+
+.info-location .info-card-title {
+  display: block;
+  margin: 0.4rem 0 0.2rem;
+  font-size: 1.6rem;
+}
+
+.info-location p {
+  margin: 0.2rem 0 0;
+  color: var(--text-muted);
+}
+
+.info-location-details {
+  display: flex;
+  align-items: center;
+  gap: 2.5rem;
+}
+
+/* ---- Support FAQ ------------------------------------------------------ */
+
+.info-faq-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  gap: 4rem;
+  margin: 4.5rem 0 1rem;
+}
+
+.info-faq-heading {
+  margin: 0.6rem 0 1rem;
+  font-size: 1.9rem;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+}
+
+.info-faq-sub {
+  margin: 0;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.info-faq {
+  border-top: 1px solid var(--border);
+}
+
+.info-faq details {
+  border-bottom: 1px solid var(--border);
+}
+
+.info-faq summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.15rem 0;
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+}
+
+.info-faq summary::-webkit-details-marker {
+  display: none;
+}
+
+.info-faq summary::after {
+  content: '+';
+  flex: none;
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 1.2rem;
+  transition: transform 0.15s ease;
+}
+
+.info-faq details[open] summary::after {
+  transform: rotate(45deg);
+}
+
+.info-faq summary:hover {
+  color: var(--accent);
+}
+
+.info-faq details p {
+  margin: 0 0 1.25rem;
+  max-width: 65ch;
+  color: var(--text-muted);
+  line-height: 1.7;
+}
+
+/* ---- Bottom call-out -------------------------------------------------- */
+
+.info-callout {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.5rem;
+  margin-top: 4.5rem;
+  padding: 1.75rem 2rem;
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+
+.info-callout strong {
+  font-size: 1.15rem;
+}
+
+.info-callout p {
+  margin: 0.3rem 0 0;
+  color: var(--text-muted);
+}
+
+.info-callout-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+/* ---- Responsive ------------------------------------------------------- */
+
+@media (max-width: 960px) {
+  .info-layout { grid-template-columns: 1fr; gap: 0; }
+  .info-toc { display: none; }
+  .info-card-grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .info-faq-layout { grid-template-columns: 1fr; gap: 1.5rem; }
+  .info-location,
+  .info-location-details { flex-direction: column; align-items: flex-start; }
+  .info-location-details { gap: 1.2rem; }
+}
+
+@media (max-width: 720px) {
+  .info-page { padding-top: 3rem; padding-bottom: 3.5rem; }
+  .info-hero { margin-bottom: 2.5rem; }
+  .info-card-grid,
+  .info-card-grid-4,
+  .info-split { grid-template-columns: 1fr; }
+  .info-split { gap: 2.5rem; }
+  .info-callout { flex-direction: column; align-items: flex-start; padding: 1.5rem; }
+}

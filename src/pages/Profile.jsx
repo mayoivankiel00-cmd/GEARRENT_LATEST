@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { useCart } from '../CartContext';
 import { useNotifications } from '../NotificationContext';
-import { formatPeso } from '../pricing';
+import { formatPeso, TIER_GUEST } from '../pricing';
 import AccountSidebar from '../components/AccountSidebar';
 import './Account.css';
 
@@ -13,8 +13,8 @@ export default function Profile() {
   const { refreshNotifications } = useNotifications();
   const [transferring, setTransferring] = useState(false);
   const profileUser = user && typeof user === 'object'
-    ? { tier: 'Gear Renter', ...user }
-    : { name: '', email: '', tier: 'Gear Renter' };
+    ? { tier: TIER_GUEST, ...user }
+    : { name: '', email: '', tier: TIER_GUEST };
   const [isEditing, setIsEditing] = useState(false);
   const [isTransferOpen, setIsTransferOpen] = useState(false);
   const [transferAmount, setTransferAmount] = useState('');

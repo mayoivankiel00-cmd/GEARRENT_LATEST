@@ -9,7 +9,8 @@ import {
   supabase,
 } from './supabaseClient';
 import { isRateLimitError } from './rateLimit';
-import { isGearProvider } from './providerAccess';
+import { getTierLevel } from './providerAccess';
+import { TIER_GUEST } from './pricing';
 
 const AuthContext = createContext(null);
 const PENDING_SIGNUP_KEY = 'gearRentPendingSignup';
@@ -53,7 +54,7 @@ function mapProfileToUser(authUser, profile) {
     email: authUser.email,
     name: profile?.name || authUser.user_metadata?.name || '',
     picture: authUser.user_metadata?.avatar_url || '',
-    tier: profile?.tier || 'Gear Renter',
+    tier: profile?.tier || TIER_GUEST,
     role: profile?.role || 'customer',
     balance: Number(profile?.balance) || 0,
     phone: profile?.phone || '',
@@ -390,12 +391,9 @@ export function AuthProvider({ children }) {
       return { success: false, error: error.message, rateLimited: isRateLimitError(error) };
     }
 
-    // The `on_auth_user_created` trigger creates the profile row; once it
-    // exists we can also save the chosen membership tier.
-    // The provider tier is bought after sign-up, never set here.
-    if (userData.tier && !isGearProvider({ tier: userData.tier }) && data.user && data.session) {
-      await supabase.from('profiles').update({ tier: userData.tier }).eq('id', data.user.id);
-    }
+    // The `on_auth_user_created` trigger creates the profile row, and the
+    // database always starts it on Gear Rent Guest. Paid tiers are bought
+    // afterwards with purchaseMembership.
 
     if (data.session) {
       setRememberSession(true);
@@ -461,10 +459,13 @@ export function AuthProvider({ children }) {
     return { ok: true, error: null, balance, amount: Number(data?.amount) || Number(amount) };
   }, []);
 
-  // The Gear Provider tier can only be granted by the database after the
-  // (still simulated) card payment. Returns { ok, error, periodEnd }.
-  const purchaseProviderMembership = useCallback(async (cardLast4) => {
-    const { data, error } = await supabase.rpc('purchase_provider_membership', {
+  // Paid tiers ('renter' / 'provider') can only be granted by the database
+  // after the (still simulated) card payment. The database also decides the
+  // price (₱199 instead of ₱699 when a Renter upgrades to Provider).
+  // Returns { ok, error, tier, amount, periodEnd }.
+  const purchaseMembership = useCallback(async (tierId, cardLast4) => {
+    const { data, error } = await supabase.rpc('purchase_membership', {
+      p_tier: tierId,
       p_card_last4: /^\d{4}$/.test(cardLast4 || '') ? cardLast4 : null,
     });
     if (error) {
@@ -475,8 +476,14 @@ export function AuthProvider({ children }) {
           : error.message || 'The payment could not be completed.',
       };
     }
-    setUser((prev) => (prev ? { ...prev, tier: data?.tier || 'Gear Provider' } : prev));
-    return { ok: true, error: null, periodEnd: data?.period_end || null };
+    if (data?.tier) setUser((prev) => (prev ? { ...prev, tier: data.tier } : prev));
+    return {
+      ok: true,
+      error: null,
+      tier: data?.tier || null,
+      amount: Number(data?.amount) || 0,
+      periodEnd: data?.period_end || null,
+    };
   }, []);
 
   // Signs out everywhere (all tabs, browsers and devices), invalidates the
@@ -486,14 +493,14 @@ export function AuthProvider({ children }) {
 
   // Merges and persists partial updates to the signed-in user's own profile.
   // Applies the change to local state immediately (optimistic update) and
-  // writes it to Supabase in the background. `balance`, `role` and the
-  // provider tier are not writable from here — the database rejects them
-  // (use purchaseProviderMembership for the tier).
+  // writes it to Supabase in the background. `balance`, `role` and the paid
+  // tiers are not writable from here — the database rejects them (use
+  // purchaseMembership). Moving down to Gear Rent Guest is allowed.
   const updateUser = useCallback(async (rawUpdates) => {
     const updates = { ...(rawUpdates || {}) };
     delete updates.balance;
     delete updates.role;
-    if (isGearProvider({ tier: updates.tier })) delete updates.tier;
+    if ('tier' in updates && getTierLevel(updates.tier) > 0) delete updates.tier;
     setUser((prev) => (prev ? { ...prev, ...updates } : prev));
 
     const { data: { session } } = await supabase.auth.getSession();
@@ -538,7 +545,7 @@ export function AuthProvider({ children }) {
     logout,
     refreshProfile,
     requestWithdrawal,
-    purchaseProviderMembership,
+    purchaseMembership,
     signOut,
     updateUser,
     setPendingSignup,

@@ -58,7 +58,7 @@ export default function SignIn() {
       return;
     }
     if (result.unconfirmed) {
-      setErrorMessage('Please confirm your email address first — check your inbox for the confirmation link.');
+      setErrorMessage('Please confirm your email address first. Check your inbox for the confirmation link.');
       return;
     }
 

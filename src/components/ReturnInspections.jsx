@@ -178,7 +178,7 @@ function ReturnCard({ item, onConfirmed }) {
 
         <div className="moderation-actions">
           <button type="button" className="btn btn-primary" disabled={busy} onClick={confirm}>
-            {busy ? 'Saving…' : damaging ? 'Confirm return with damage' : 'Gear is fine — confirm return'}
+            {busy ? 'Saving…' : damaging ? 'Confirm return with damage' : 'Gear is fine, confirm return'}
           </button>
           <button type="button" className="btn btn-outline" disabled={busy} onClick={() => { setDamaging((value) => !value); setError(''); }}>
             {damaging ? 'No damage' : 'Report damage…'}

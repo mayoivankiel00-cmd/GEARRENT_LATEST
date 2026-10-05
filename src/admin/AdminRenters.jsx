@@ -20,7 +20,7 @@ export default function AdminRenters() {
       <div className="admin-renters-heading">
         <div>
           <h1 className="admin-title">Gear <span className="accent">Renters</span></h1>
-          <p className="admin-renters-subtitle">Manage accounts using the Gear Renter membership.</p>
+          <p className="admin-renters-subtitle">Manage Gear Rent Guest and Gear Rent Renter accounts.</p>
         </div>
         <div className="admin-renters-count mono">{renters.length} renter{renters.length === 1 ? '' : 's'}</div>
       </div>

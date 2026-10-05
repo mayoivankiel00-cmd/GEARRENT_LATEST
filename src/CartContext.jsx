@@ -145,8 +145,10 @@ export function CartProvider({ children }) {
     refreshRentals();
   }, [refreshCart, refreshRentals]);
 
+  // Returns { ok, error }. Guests are refused by the database
+  // (gearrent_require_renter_tier), not just by the page.
   const addItem = useCallback(async (product, days = DEFAULT_DAYS) => {
-    if (!user) return;
+    if (!user) return { ok: false, error: 'Please sign in to rent gear.' };
     const existing = items.find((i) => i.product.id === product.id);
     const nextDays = clampDays(existing ? existing.days + days : days);
     const { error } = await supabase
@@ -154,9 +156,15 @@ export function CartProvider({ children }) {
       .upsert({ user_id: user.id, product_id: product.id, days: nextDays }, { onConflict: 'user_id,product_id' });
     if (error) {
       console.error('addItem failed', error);
-      return;
+      return {
+        ok: false,
+        error: error.hint === 'membership_required'
+          ? error.message
+          : describeMoneyError(error, 'This item could not be added to your cart.'),
+      };
     }
     await refreshCart();
+    return { ok: true, error: null };
   }, [items, user, refreshCart]);
 
   const removeItem = useCallback(async (productId) => {

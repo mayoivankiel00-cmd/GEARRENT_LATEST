@@ -2,6 +2,8 @@ import { useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { formatPeso, calculateSecurityDeposit } from '../pricing';
 import { useCart } from '../CartContext';
+import { useAuth } from '../AuthContext';
+import { canRentGear } from '../providerAccess';
 import { useCategories } from '../CategoryContext';
 import { useProviderCatalog } from '../ProviderContext';
 import ProductCard from '../components/ProductCard';
@@ -13,6 +15,8 @@ export default function ProductDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { addItem } = useCart();
+  const { user } = useAuth();
+  const canRent = canRentGear(user);
   const { catalogProducts } = useProviderCatalog();
   const { categories } = useCategories();
   const product = catalogProducts.find((p) => p.id === id);
@@ -20,6 +24,7 @@ export default function ProductDetail() {
   const [pickup, setPickup] = useState(null);
   const [dropoff, setDropoff] = useState(null);
   const [added, setAdded] = useState(false);
+  const [addError, setAddError] = useState('');
   const [selectedImage, setSelectedImage] = useState(0);
   const [calendarMonth, setCalendarMonth] = useState(() => {
     const today = new Date();
@@ -84,9 +89,14 @@ export default function ProductDetail() {
     }
   };
 
-  const handleRentNow = () => {
-    if (!pickup || !dropoff) return;
-    addItem(product, days);
+  const handleRentNow = async () => {
+    if (!pickup || !dropoff || !canRent) return;
+    setAddError('');
+    const result = await addItem(product, days);
+    if (!result.ok) {
+      setAddError(result.error);
+      return;
+    }
     setAdded(true);
   };
 
@@ -225,13 +235,23 @@ export default function ProductDetail() {
             </div>
           </div>
 
-          <button
-            className="btn btn-primary btn-block"
-            disabled={product.status !== 'available' || !pickup || !dropoff}
-            onClick={handleRentNow}
-          >
-            {added ? 'Added to Cart ✓' : pickup && dropoff ? 'Rent Now' : 'Select Rental Dates'}
-          </button>
+          {canRent ? (
+            <button
+              className="btn btn-primary btn-block"
+              disabled={product.status !== 'available' || !pickup || !dropoff}
+              onClick={handleRentNow}
+            >
+              {added ? 'Added to Cart ✓' : pickup && dropoff ? 'Rent Now' : 'Select Rental Dates'}
+            </button>
+          ) : (
+            <>
+              <p className="deposit-note mono">Gear Rent Guests can browse only. Become a Gear Rent Renter to rent this item.</p>
+              <Link to="/memberships" className="btn btn-primary btn-block">
+                View Memberships
+              </Link>
+            </>
+          )}
+          {addError && <p className="booking-error" role="alert">{addError}</p>}
           {added && (
             <button className="btn btn-outline btn-block" onClick={() => navigate('/cart')}>
               Go to Cart

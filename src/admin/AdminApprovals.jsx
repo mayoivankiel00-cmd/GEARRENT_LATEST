@@ -102,7 +102,7 @@ export default function AdminApprovals() {
     const result = await reviewProduct(productId, decision, note);
     if (result.ok) {
       setFlash(decision === 'approved'
-        ? `${product?.name || 'Listing'} approved — it is now live in the catalog.`
+        ? `${product?.name || 'Listing'} approved. It is now live in the catalog.`
         : `${product?.name || 'Listing'} rejected. The provider has been notified.`);
     }
     return result;

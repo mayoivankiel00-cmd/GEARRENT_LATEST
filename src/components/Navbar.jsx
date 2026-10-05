@@ -3,6 +3,8 @@ import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { useCart } from '../CartContext';
 import { useNotifications } from '../NotificationContext';
+import { membershipTiers } from '../pricing';
+import { getTierLevel } from '../providerAccess';
 import './Navbar.css';
 
 export default function Navbar() {
@@ -25,6 +27,7 @@ export default function Navbar() {
     .join('')
     .slice(0, 2)
     .toUpperCase();
+  const membership = membershipTiers[getTierLevel(user)];
 
   // signOut() revokes every session of this account and redirects to the
   // sign-in screen itself.
@@ -115,6 +118,16 @@ export default function Navbar() {
             <Link to="/profile" className="navbar-user" aria-label={`View ${userName}'s profile`}>
               {user?.picture ? <img className="navbar-user-avatar" src={user.picture} alt="" /> : <span className="navbar-user-avatar" aria-hidden="true">{userInitials}</span>}
               <span className="navbar-user-name">{userName}</span>
+            </Link>
+          )}
+          {isAuthenticated && (
+            <Link
+              to="/memberships"
+              className={`navbar-tier navbar-tier-${membership.id}`}
+              title={`${membership.name}: view memberships`}
+              aria-label={`Membership: ${membership.name}`}
+            >
+              {membership.name.replace('Gear Rent ', '')}
             </Link>
           )}
           <Link to="/cart" className="navbar-cart" aria-label={count > 0 ? `Cart with ${count} item${count === 1 ? '' : 's'}` : 'Cart'}>

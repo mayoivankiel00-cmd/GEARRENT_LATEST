@@ -97,6 +97,49 @@
   gap: 0.45rem;
 }
 
+/* Membership badge beside Cart: Guest = outline, Renter = red outline,
+   Provider = solid red. The navbar stays dark in the light theme too,
+   hence the on-ink colors there. */
+.navbar-tier {
+  display: inline-flex;
+  align-items: center;
+  height: 1.5rem;
+  padding: 0 0.6rem;
+  border: 1px solid var(--border-hover);
+  border-radius: 999px;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.navbar-tier:hover {
+  color: var(--text);
+}
+
+.navbar-tier-renter {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.navbar-tier-provider,
+.navbar-tier-provider:hover {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+:root[data-theme='light'] .navbar-tier-guest {
+  border-color: #3a3a3a;
+  color: var(--on-ink-muted);
+}
+
+:root[data-theme='light'] .navbar-tier-guest:hover {
+  color: var(--on-ink);
+}
+
 .navbar-cart-badge {
   min-width: 1.25rem;
   height: 1.25rem;

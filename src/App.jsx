@@ -136,7 +136,14 @@ function GuestRoute({ children }) {
 }
 
 export default function App() {
-  const { pathname } = useLocation();
+  const { pathname, hash } = useLocation();
+
+  // A new page starts at the top (e.g. footer links), unless the link points
+  // at a section (#hash) — InfoPage scrolls to that itself.
+  useEffect(() => {
+    if (!hash) window.scrollTo(0, 0);
+  }, [pathname]); // eslint-disable-line react-hooks/exhaustive-deps
+
   return (
     <>
     <ToastStack />

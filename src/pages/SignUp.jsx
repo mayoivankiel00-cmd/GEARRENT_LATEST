@@ -43,7 +43,6 @@ export default function SignUp() {
       name: formData.get('name').trim(),
       email,
       password,
-      tier: 'Gear Renter',
     });
     setSubmitting(false);
 

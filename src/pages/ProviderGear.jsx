@@ -196,7 +196,7 @@ export default function ProviderGear() {
                       ))}
                     </div>
                     <p>{product.description || 'No description added.'}</p>
-                    {product.approvalStatus === 'pending' && <p className="provider-review-note mono">Waiting for administrator approval — not visible to renters yet.</p>}
+                    {product.approvalStatus === 'pending' && <p className="provider-review-note mono">Waiting for administrator approval. Not visible to renters yet.</p>}
                     {product.approvalStatus === 'rejected' && <p className="provider-review-note rejected"><b>Reviewer note:</b> {product.reviewNote || 'No reason given.'} Remove this listing and submit a corrected one.</p>}
                   </div>
                   <button type="button" className="provider-delete" onClick={(event) => { event.stopPropagation(); removeProviderProduct(product.id); }} aria-label={`Remove ${product.name}`} title="Remove listing">🗑</button>

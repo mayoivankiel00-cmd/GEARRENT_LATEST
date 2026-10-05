@@ -70,7 +70,7 @@
 
 .tiers-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 420px));
+  grid-template-columns: repeat(3, minmax(0, 360px));
   gap: 1.5rem;
   align-items: start;
   justify-content: center;
@@ -169,4 +169,24 @@
 
 .membership-payment-actions .payment-submit {
   margin-top: 0;
+}
+
+.tier-price .was-price {
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--text-dim);
+  text-decoration: line-through;
+  margin-right: 0.4rem;
+}
+
+.tier-price-note {
+  margin: -0.4rem 0 0;
+  font-size: 0.8rem;
+  color: var(--accent);
+}
+
+.membership-payment-note {
+  margin: 0 0 1rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
 }

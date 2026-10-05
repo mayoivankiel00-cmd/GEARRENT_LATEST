@@ -22,6 +22,23 @@ alter table public.categories add column if not exists tagline text;
 alter table public.categories add column if not exists image text;
 alter table public.categories add column if not exists sort_order integer not null default 0;
 
+-- The original schema stored the cover image in image_url. Copy it into
+-- image (which the app reads) so existing covers are kept. image_url is
+-- left in place but no longer used.
+do $$
+begin
+  if exists (
+    select 1 from information_schema.columns
+     where table_schema = 'public' and table_name = 'categories' and column_name = 'image_url'
+  ) then
+    update public.categories
+       set image = image_url
+     where coalesce(image, '') = '' and coalesce(image_url, '') <> '';
+    -- New categories only fill in image, so image_url must not be required.
+    alter table public.categories alter column image_url drop not null;
+  end if;
+end $$;
+
 
 -- The five original categories (same content the app had in mockData.js).
 with seed (id, name, tagline, image, sort_order) as (

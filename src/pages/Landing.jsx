@@ -84,7 +84,7 @@ export default function Landing() {
           </h1>
           <p>
             Cavite's one-stop online catalog for cameras, camping gear, event supplies,
-            lighting, and full production packages — basic to pro, with crew on request.
+            lighting, and full production packages, from basic to pro, with crew on request.
           </p>
           <Link to="/signup" className="btn btn-primary hero-cta">
             Browse Catalog →

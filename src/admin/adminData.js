@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { supabase } from '../supabaseClient';
-import { isGearProvider } from '../providerAccess';
-import { formatPeso } from '../pricing';
+import { getTierLevel, isGearProvider } from '../providerAccess';
+import { formatPeso, membershipTiers, TIER_GUEST } from '../pricing';
 import { useCategories } from '../CategoryContext';
 
 // All admin pages read one snapshot from admin_dashboard_snapshot() (see
@@ -23,7 +23,7 @@ function normalizeAccount(row) {
     id: row.id,
     email: normalizeEmail(row.email),
     name: row.name || '',
-    tier: row.tier || 'Gear Renter',
+    tier: row.tier || TIER_GUEST,
     role: row.role || 'customer',
     balance: Number(row.balance) || 0,
     createdAt: toTime(row.created_at),
@@ -125,14 +125,11 @@ function buildMonthlyVolume(rentals) {
 }
 
 function buildUserDistribution(accounts) {
-  const providerCount = accounts.filter(isGearProvider).length;
-  const renterCount = Math.max(0, accounts.length - providerCount);
-  const total = providerCount + renterCount;
-  if (!total) return [{ label: 'Gear Renters', pct: 0 }, { label: 'Gear Providers', pct: 0 }];
-  return [
-    { label: 'Gear Renters', pct: Math.round((renterCount / total) * 100) },
-    { label: 'Gear Providers', pct: Math.round((providerCount / total) * 100) },
-  ];
+  const total = accounts.length;
+  return membershipTiers.map((tier) => {
+    const count = accounts.filter((account) => getTierLevel(account) === tier.level).length;
+    return { label: `${tier.name}s`, pct: total ? Math.round((count / total) * 100) : 0 };
+  });
 }
 
 export function buildAdminData(snapshot, categories = []) {
@@ -293,7 +290,7 @@ export function buildAdminData(snapshot, categories = []) {
     rentalLog: rentals.map((rental) => ({
       id: rental.id,
       account: getAccountName(rental.accountEmail, accounts),
-      accountType: isGearProvider(accounts.find((account) => account.email === rental.accountEmail)) ? 'Gear Provider' : 'Gear Renter',
+      accountType: membershipTiers[getTierLevel(accounts.find((account) => account.email === rental.accountEmail))].name,
       items: [getProductName(rental)],
       period: formatPeriod(rental),
       status: rental.status,

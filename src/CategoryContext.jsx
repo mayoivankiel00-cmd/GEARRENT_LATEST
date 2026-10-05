@@ -9,7 +9,12 @@ function describeCategoryError(error, fallback) {
   if (!error) return fallback;
   if (error.code === '23505') return 'A category with this id already exists.';
   if (['22023', '23503', '42501'].includes(error.code)) return error.message;
-  return fallback;
+  // Missing tagline / image / sort_order columns: the migration hasn't run.
+  if (error.code === 'PGRST204' || error.code === '42703') {
+    return `${fallback} The categories table is missing columns. Run gearrent_categories_update.sql in Supabase. (${error.message})`;
+  }
+  if (error.code === '23502') return `${fallback} A required column is empty. (${error.message})`;
+  return error.message ? `${fallback} (${error.message})` : fallback;
 }
 
 function mapCategoryRow(row) {

@@ -20,7 +20,8 @@ This project now talks to a real Postgres database via [Supabase](https://supaba
 9. **Run `gearrent_returns_update.sql`** (after step 8) — renters request a return, the gear owner (or an admin) inspects it and confirms; late fees and damage come out of the deposit. See *Returns and deposits*.
 10. **Run `gearrent_default_admin.sql`** (after step 5; re-run it if you ever re-run step 5) — makes the default admin account permanent.
 11. **Run `gearrent_categories_update.sql`** (after step 5) — categories (name, tagline, cover image, order) are read from `public.categories` and managed on **Admin → Categories**; a category with products can't be deleted.
-12. `npm install && npm run dev`.
+12. **Run `gearrent_membership_tiers_update.sql`** (after step 8) — three tiers: Gear Rent Guest (free, browse only), Gear Rent Renter (₱499) and Gear Rent Provider (₱699, or ₱199 for Renters). Existing providers become Gear Rent Provider; everyone else becomes Gear Rent Guest. See *Memberships and bookings*.
+13. `npm install && npm run dev`.
 
 ## Returns and deposits
 
@@ -60,12 +61,14 @@ Or copy the original two files from the chat where they were generated.
 
 | Rule | How it works |
 |---|---|
-| Gear Provider must be paid for | `profiles.tier` can't be set to a provider tier from the browser (trigger). The Memberships page shows a card form and calls `purchase_provider_membership()`, which records the ₱499 in `membership_payments` (1-month period) and upgrades the account. Downgrading to Gear Renter is still allowed. |
+| Three tiers | `profiles.tier` is one of `Gear Rent Guest` (level 0, the default), `Gear Rent Renter` (1) or `Gear Rent Provider` (2). Each tier includes the ones below it (`gearrent_tier_level()` / `getTierLevel()`). |
+| Paid tiers must be paid for | The browser can only move an account down (trigger). The Memberships page shows a card form and calls `purchase_membership('renter' \| 'provider')`. It charges ₱499 for Renter and ₱699 for Provider, or ₱199 when a Renter upgrades. The payment goes into `membership_payments` (1-month period) and the account is upgraded. Switching back to Guest is allowed. |
+| Only Renters and Providers rent | Adding to `cart_items` and creating `rentals` require level 1+ (admins exempt). Guests see a "View Memberships" button on product pages instead of "Rent Now". |
 | Only providers list gear | Inserting into `products` requires a provider tier (admins exempt). |
 | No double-booking | A rental can't be created for a product that already has an active rental (trigger + partial unique index). `products.status` switches to `booked` on checkout and back to `available` on return/finish, so the catalog shows "Booked". |
 | Admin dashboard | All admin analytics pages read `admin_dashboard_snapshot()` (admin-only) and refresh every 30 s. |
 
-The provider card form is still a simulation, and the monthly period isn't enforced yet (nothing downgrades an expired membership).
+The membership card form is still a simulation, and the monthly period isn't enforced yet (nothing downgrades an expired membership).
 
 ## Notification toasts
 

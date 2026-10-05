@@ -346,3 +346,12 @@
   .features-list { grid-template-columns: 1fr; }
   .similar-grid { grid-template-columns: 1fr; }
 }
+
+.booking-error {
+  margin: 0.75rem 0 0;
+  padding: 0.6rem 0.75rem;
+  border-left: 3px solid var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  color: var(--text);
+  font-size: 0.85rem;
+}
