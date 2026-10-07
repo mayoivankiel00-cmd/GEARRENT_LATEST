@@ -361,47 +361,88 @@
   border-top: 1px solid var(--border);
 }
 
-.info-faq details {
+.info-faq-item {
   border-bottom: 1px solid var(--border);
 }
 
-.info-faq summary {
+.info-faq-question {
+  margin: 0;
+  font-size: inherit;
+}
+
+.info-faq-question button {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 1rem;
+  width: 100%;
   padding: 1.15rem 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
   font-weight: 600;
+  text-align: left;
   cursor: pointer;
-  list-style: none;
+  transition: color 0.2s ease;
 }
 
-.info-faq summary::-webkit-details-marker {
-  display: none;
-}
-
-.info-faq summary::after {
+.info-faq-question button::after {
   content: '+';
   flex: none;
   color: var(--accent);
   font-family: var(--font-mono);
   font-size: 1.2rem;
-  transition: transform 0.15s ease;
+  transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
-.info-faq details[open] summary::after {
+.info-faq-item.is-open .info-faq-question button::after {
   transform: rotate(45deg);
 }
 
-.info-faq summary:hover {
+.info-faq-question button:hover,
+.info-faq-item.is-open .info-faq-question button {
   color: var(--accent);
 }
 
-.info-faq details p {
+/* Slide the answer open: the row animates 0fr -> 1fr while the text fades
+   and settles into place. */
+.info-faq-answer {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.4s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.info-faq-item.is-open .info-faq-answer {
+  grid-template-rows: 1fr;
+}
+
+.info-faq-answer > div {
+  overflow: hidden;
+}
+
+.info-faq-answer p {
   margin: 0 0 1.25rem;
   max-width: 65ch;
   color: var(--text-muted);
   line-height: 1.7;
+  opacity: 0;
+  transform: translateY(-6px);
+  transition: opacity 0.25s ease, transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.info-faq-item.is-open .info-faq-answer p {
+  opacity: 1;
+  transform: none;
+  transition-delay: 0.08s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .info-faq-answer,
+  .info-faq-answer p,
+  .info-faq-question button::after {
+    transition: none;
+  }
 }
 
 /* ---- Bottom call-out -------------------------------------------------- */

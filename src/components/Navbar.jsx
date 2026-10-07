@@ -133,7 +133,7 @@ export default function Navbar() {
           )}
           <Link to="/cart" className="navbar-cart" aria-label={count > 0 ? `Cart with ${count} item${count === 1 ? '' : 's'}` : 'Cart'}>
             <span>Cart</span>
-            {count > 0 && <span className="navbar-cart-badge" aria-label={`${count} item${count === 1 ? '' : 's'}`}>{count}</span>}
+            {count > 0 && <span className="navbar-cart-badge" key={count} aria-label={`${count} item${count === 1 ? '' : 's'}`}>{count}</span>}
           </Link>
           {isAuthenticated ? (
             <button type="button" className="navbar-signout" onClick={handleSignOut}>

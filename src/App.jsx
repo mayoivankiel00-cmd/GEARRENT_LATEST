@@ -173,6 +173,8 @@ export default function App() {
           <SiteLayout>
             {/* Inner boundary keeps the navbar/footer usable when a page crashes */}
             <ErrorBoundary resetKey={pathname}>
+            {/* Keyed by path so each new page fades in (see .page-transition). */}
+            <div className="page-transition" key={pathname}>
             <Routes>
               <Route path="/" element={<Landing />} />
               <Route path="/catalog" element={<ProtectedRoute><Catalog /></ProtectedRoute>} />
@@ -195,6 +197,7 @@ export default function App() {
               <Route path="/locations" element={<InfoPage type="locations" />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
+            </div>
             </ErrorBoundary>
           </SiteLayout>
         }

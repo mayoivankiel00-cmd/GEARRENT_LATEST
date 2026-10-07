@@ -245,3 +245,27 @@ input::placeholder { color: var(--text-dim); }
   flex-shrink: 0;
   vertical-align: -0.125em;
 }
+
+/* Each customer page fades up when you switch to it (App.jsx). The fill is
+   backwards only, so no transform is left behind to trap fixed modals. */
+.page-transition {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  animation: page-enter 0.4s cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
+}
+
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-transition { animation: none; }
+}

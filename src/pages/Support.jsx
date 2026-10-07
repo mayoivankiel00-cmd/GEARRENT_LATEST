@@ -1,7 +1,29 @@
+import { useId, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { HelpCallout, InfoHero } from './InfoPage';
 import { faqs, SUPPORT_EMAIL, supportTopics } from './infoContent';
 import './InfoPages.css';
+
+// One question. The answer slides open by animating its grid row from 0fr
+// to 1fr, which works without knowing the answer's height.
+function FaqItem({ question, answer }) {
+  const [open, setOpen] = useState(false);
+  const id = useId();
+  return (
+    <div className={`info-faq-item ${open ? 'is-open' : ''}`}>
+      <h3 className="info-faq-question">
+        <button type="button" aria-expanded={open} aria-controls={id} onClick={() => setOpen((value) => !value)}>
+          {question}
+        </button>
+      </h3>
+      <div className="info-faq-answer" id={id} inert={!open}>
+        <div>
+          <p>{answer}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function Support() {
   return (
@@ -32,10 +54,7 @@ export default function Support() {
         </div>
         <div className="info-faq">
           {faqs.map((faq) => (
-            <details key={faq.q}>
-              <summary>{faq.q}</summary>
-              <p>{faq.a}</p>
-            </details>
+            <FaqItem key={faq.q} question={faq.q} answer={faq.a} />
           ))}
         </div>
       </div>

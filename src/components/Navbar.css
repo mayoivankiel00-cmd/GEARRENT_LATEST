@@ -32,18 +32,39 @@
 }
 
 .navbar-links a {
+  position: relative;
   color: var(--text-muted);
   padding-bottom: 4px;
-  border-bottom: 1px solid transparent;
+  transition: color 0.2s ease;
+}
+
+/* Underline grows out from the center on hover and stays on the active tab. */
+.navbar-links a::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transition: transform 0.3s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
 .navbar-links a:hover {
   color: var(--text);
 }
 
+.navbar-links a:hover::after {
+  transform: scaleX(0.6);
+}
+
 .navbar-links a.active {
   color: var(--text);
-  border-bottom-color: var(--accent);
+}
+
+.navbar-links a.active::after {
+  transform: scaleX(1);
 }
 
 .navbar-actions {
@@ -114,6 +135,12 @@
   font-size: 0.68rem;
   font-weight: 800;
   line-height: 1;
+  animation: navbar-badge-pop 0.4s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+
+@keyframes navbar-badge-pop {
+  from { transform: scale(0.4); }
+  to { transform: scale(1); }
 }
 
 .navbar-user {
@@ -273,6 +300,21 @@
   border: 1px solid var(--border);
   background: var(--bg-card);
   box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.24);
+  transform-origin: top right;
+  animation: navbar-panel-in 0.22s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+@keyframes navbar-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.97);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .navbar-links a::after { transition: none; }
+  .navbar-cart-badge,
+  .navbar-notification-panel { animation: none; }
 }
 
 .navbar-notification-heading {
