@@ -80,7 +80,14 @@
   }
 }
 
+.sidebar-nav a.sidebar-provider-link {
+  display: none;
+}
+
 @media (max-width: 900px) {
+  .sidebar-nav a.sidebar-provider-link {
+    display: flex;
+  }
   .account-sidebar {
     width: 100%;
   }

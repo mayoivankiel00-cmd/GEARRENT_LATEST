@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useNotifications } from '../context/NotificationContext';
 import { useProviderCatalog } from '../context/ProviderContext';
 import Icon from '../components/Icon';
+import useTheme from '../hooks/useTheme';
 import './AdminLayout.css';
 
 const links = [
@@ -31,13 +32,8 @@ export default function AdminLayout({ children }) {
     markAdminNotificationsRead,
     clearAdminNotifications,
   } = useNotifications();
-  const [isLightTheme, setIsLightTheme] = useState(() => window.localStorage.getItem('gearRentTheme') === 'light');
+  const { isLightTheme, toggleTheme } = useTheme();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
-
-  useEffect(() => {
-    document.documentElement.dataset.theme = isLightTheme ? 'light' : 'dark';
-    window.localStorage.setItem('gearRentTheme', isLightTheme ? 'light' : 'dark');
-  }, [isLightTheme]);
 
   return (
     <div className="admin-shell">
@@ -120,7 +116,7 @@ export default function AdminLayout({ children }) {
             className="admin-icon-btn admin-theme-toggle"
             aria-label={isLightTheme ? 'Switch to dark theme' : 'Switch to light theme'}
             title={isLightTheme ? 'Switch to dark theme' : 'Switch to light theme'}
-            onClick={() => setIsLightTheme((lightTheme) => !lightTheme)}
+            onClick={toggleTheme}
           >
             <Icon name={isLightTheme ? 'moon' : 'sun'} />
           </button>

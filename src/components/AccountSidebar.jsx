@@ -28,7 +28,8 @@ export default function AccountSidebar() {
             {l.to === '/my-gears' && rentedItems.length > 0 && <span className="sidebar-cart-badge">{rentedItems.length}</span>}
           </NavLink>
         ))}
-        {isProvider && <NavLink to="/provider-gear" className={({ isActive }) => (isActive ? 'active' : '')}><span>Provider Gear</span></NavLink>}
+        {/* Lives in the top bar on wide screens; kept here for phones, where the top bar links are hidden. */}
+        {isProvider && <NavLink to="/provider-gear" className={({ isActive }) => `sidebar-provider-link ${isActive ? 'active' : ''}`}><span>Provider Gear</span></NavLink>}
       </nav>
     </aside>
   );

@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useNotifications } from '../context/NotificationContext';
 import { membershipTiers } from '../lib/pricing';
-import { getTierLevel } from '../lib/providerAccess';
+import { getTierLevel, isGearProvider } from '../lib/providerAccess';
+import useTheme from '../hooks/useTheme';
 import Icon from './Icon';
 import './Navbar.css';
 
@@ -13,13 +14,8 @@ export default function Navbar() {
   const { notifications, unreadCount, markAllRead, clearAllNotifications } = useNotifications();
   const { isAuthenticated, user, signOut } = useAuth();
   const navigate = useNavigate();
-  const [isLightTheme, setIsLightTheme] = useState(() => window.localStorage.getItem('gearRentTheme') === 'light');
+  const { isLightTheme, toggleTheme } = useTheme();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
-
-  useEffect(() => {
-    document.documentElement.dataset.theme = isLightTheme ? 'light' : 'dark';
-    window.localStorage.setItem('gearRentTheme', isLightTheme ? 'light' : 'dark');
-  }, [isLightTheme]);
 
   const userName = typeof user?.name === 'string' && user.name.trim() ? user.name.trim() : 'Member';
   const userInitials = userName
@@ -48,6 +44,11 @@ export default function Navbar() {
           <NavLink to="/catalog" className={({ isActive }) => (isActive ? 'active' : '')}>
             Catalog
           </NavLink>
+          {isAuthenticated && isGearProvider(user) && (
+            <NavLink to="/provider-gear" className={({ isActive }) => (isActive ? 'active' : '')}>
+              Provider Gear
+            </NavLink>
+          )}
           <NavLink to="/memberships" className={({ isActive }) => (isActive ? 'active' : '')}>
             Memberships
           </NavLink>
@@ -111,7 +112,7 @@ export default function Navbar() {
             className="navbar-theme-toggle"
             aria-label={isLightTheme ? 'Switch to dark theme' : 'Switch to light theme'}
             title={isLightTheme ? 'Switch to dark theme' : 'Switch to light theme'}
-            onClick={() => setIsLightTheme((lightTheme) => !lightTheme)}
+            onClick={toggleTheme}
           >
             <Icon name={isLightTheme ? 'moon' : 'sun'} />
           </button>
