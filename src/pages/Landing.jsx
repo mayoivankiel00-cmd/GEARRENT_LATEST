@@ -1,9 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCategories } from '../context/CategoryContext';
 import { useProviderCatalog } from '../context/ProviderContext';
 import ProductCard from '../components/ProductCard';
+import useLoopingScroll from '../hooks/useLoopingScroll';
+import useReveal from '../hooks/useReveal';
 import './Landing.css';
 
 const heroSlides = [
@@ -34,8 +36,9 @@ export default function Landing() {
   const { categories } = useCategories();
   const { catalogProducts } = useProviderCatalog();
   const [activeSlide, setActiveSlide] = useState(0);
-  const productsTrackRef = useRef(null);
-  const productsPausedRef = useRef(false);
+  const { trackRef: productsTrackRef, loops: productsLoop, loopStyle: productsLoopStyle } =
+    useLoopingScroll(catalogProducts.length);
+  const revealRef = useReveal([categories.length, catalogProducts.length > 0]);
 
   useEffect(() => {
     const slideTimer = window.setInterval(() => {
@@ -45,42 +48,18 @@ export default function Landing() {
     return () => window.clearInterval(slideTimer);
   }, []);
 
-  useEffect(() => {
-    const productsTrack = productsTrackRef.current;
-    if (!productsTrack) return undefined;
-
-    const autoSlideTimer = window.setInterval(() => {
-      if (productsPausedRef.current) return;
-
-      const firstProduct = productsTrack.querySelector('.product-card');
-      if (!firstProduct) return;
-
-      const gap = Number.parseFloat(window.getComputedStyle(productsTrack).gap) || 0;
-      const productStep = firstProduct.getBoundingClientRect().width + gap;
-      const reachedEnd = productsTrack.scrollLeft + productsTrack.clientWidth >= productsTrack.scrollWidth - 2;
-
-      productsTrack.scrollTo({
-        left: reachedEnd ? 0 : productsTrack.scrollLeft + productStep,
-        behavior: reachedEnd ? 'auto' : 'smooth',
-      });
-    }, 3000);
-
-    return () => window.clearInterval(autoSlideTimer);
-  }, []);
-
   const showSlide = (slideIndex) => {
     setActiveSlide((slideIndex + heroSlides.length) % heroSlides.length);
   };
 
   return (
-    <div className="landing">
+    <div className="landing" ref={revealRef}>
       <section className="container hero">
         <div className="hero-copy">
           <span className="hero-tag">Available Now</span>
           <h1>
-            Rent Pro Gear.
-            <br />
-            <span className="accent">Build Anything.</span>
+            <span className="hero-line">Rent Pro Gear.</span>
+            <span className="hero-line accent">Build Anything.</span>
           </h1>
           <p>
             Cavite's one-stop online catalog for cameras, camping gear, event supplies,
@@ -91,12 +70,18 @@ export default function Landing() {
           </Link>
         </div>
         <div className="hero-media" aria-label="Featured equipment photos">
-          <div className="hero-slides" style={{ transform: `translateX(-${activeSlide * 100}%)` }}>
-            {heroSlides.map((slide) => (
-              <img key={slide.image} src={slide.image} alt={slide.alt} />
+          <div className="hero-slides">
+            {heroSlides.map((slide, index) => (
+              <img
+                key={slide.image}
+                src={slide.image}
+                alt={index === activeSlide ? slide.alt : ''}
+                aria-hidden={index === activeSlide ? undefined : 'true'}
+                className={index === activeSlide ? 'active' : ''}
+              />
             ))}
           </div>
-          <div className="hero-slide-caption">{heroSlides[activeSlide].label}</div>
+          <div className="hero-slide-caption" key={activeSlide}>{heroSlides[activeSlide].label}</div>
           <div className="hero-slide-controls">
             <button type="button" onClick={() => showSlide(activeSlide - 1)} aria-label="Previous photo">
               ←
@@ -121,7 +106,7 @@ export default function Landing() {
       </section>
 
       <section className="container categories-section">
-        <div className="categories-header">
+        <div className="categories-header reveal">
           <h2>Equipment Categories</h2>
           <Link to="/signup" className="mono view-all">
             View All Categories
@@ -133,7 +118,8 @@ export default function Landing() {
             <Link
               to={isAuthenticated ? `/catalog?category=${cat.id}` : '/signup'}
               key={cat.id}
-              className={`category-card ${i === 0 ? 'span-2-rows' : ''}`}
+              className={`category-card reveal ${i === 0 ? 'span-2-rows' : ''}`}
+              style={{ '--reveal-delay': `${Math.min(i, 6) * 70}ms` }}
             >
               <div className="category-card-media">
                 <img src={cat.image} alt={`${cat.name} equipment`} loading="lazy" />
@@ -147,7 +133,7 @@ export default function Landing() {
         </div>
       </section>
 
-      <section className="container products-section">
+      <section className="container products-section reveal">
         <div className="categories-header">
           <h2>Product Equipment</h2>
           <Link to="/signup" className="mono view-all">
@@ -156,14 +142,22 @@ export default function Landing() {
         </div>
 
         <div
-          className="home-products-grid"
+          className={`home-products-grid ${productsLoop ? 'is-looping' : ''}`}
           ref={productsTrackRef}
-          onMouseEnter={() => { productsPausedRef.current = true; }}
-          onMouseLeave={() => { productsPausedRef.current = false; }}
         >
-          {catalogProducts.map((product) => (
-            <ProductCard key={product.id} product={product} showActions={false} showStatus={false} />
-          ))}
+          <div className="home-products-rail" style={productsLoopStyle}>
+            {catalogProducts.map((product) => (
+              <ProductCard key={product.id} product={product} showActions={false} showStatus={false} />
+            ))}
+            {/* Copy for the seamless loop, hidden from screen readers and tabbing. */}
+            {productsLoop && (
+              <div className="home-products-copy" aria-hidden="true" inert>
+                {catalogProducts.map((product) => (
+                  <ProductCard key={product.id} product={product} showActions={false} showStatus={false} />
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </section>
     </div>

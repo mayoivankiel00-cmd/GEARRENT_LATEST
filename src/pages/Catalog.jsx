@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useSearchParams } from 'react-router-dom';
 import { useCategories } from '../context/CategoryContext';
 import { useProviderCatalog } from '../context/ProviderContext';
 import ProductCard from '../components/ProductCard';
 import AccountSidebar from '../components/AccountSidebar';
+import useLoopingScroll from '../hooks/useLoopingScroll';
 import './Catalog.css';
 
 export default function Catalog() {
@@ -12,8 +13,12 @@ export default function Catalog() {
   const { catalogProducts } = useProviderCatalog();
   const { categories } = useCategories();
   const advertisingProducts = catalogProducts.slice(0, 8);
-  const featuredTrackRef = useRef(null);
-  const featuredPausedRef = useRef(false);
+  const featuredProducts = advertisingProducts;
+  const {
+    trackRef: featuredTrackRef,
+    loops: featuredLoops,
+    loopStyle: featuredLoopStyle,
+  } = useLoopingScroll(featuredProducts.length);
   const [advertisingSlide, setAdvertisingSlide] = useState(0);
   // The catalog can be empty (still loading, failed, or nothing approved) or
   // shrink below the current slide, so never index past the end.
@@ -74,27 +79,6 @@ export default function Catalog() {
   const lastVisibleProduct = Math.min(currentPage * productsPerPage, filtered.length);
 
   useEffect(() => {
-    const featuredTrack = featuredTrackRef.current;
-    if (!featuredTrack) return undefined;
-
-    const autoSlideTimer = window.setInterval(() => {
-      if (featuredPausedRef.current) return;
-      const firstProduct = featuredTrack.querySelector('.product-card');
-      if (!firstProduct) return;
-      const gap = Number.parseFloat(window.getComputedStyle(featuredTrack).gap) || 0;
-      const productStep = firstProduct.getBoundingClientRect().width + gap;
-      const reachedEnd = featuredTrack.scrollLeft + featuredTrack.clientWidth >= featuredTrack.scrollWidth - 2;
-
-      featuredTrack.scrollTo({
-        left: reachedEnd ? 0 : featuredTrack.scrollLeft + productStep,
-        behavior: reachedEnd ? 'auto' : 'smooth',
-      });
-    }, 3500);
-
-    return () => window.clearInterval(autoSlideTimer);
-  }, []);
-
-  useEffect(() => {
     if (advertisingProducts.length === 0) return undefined;
     const advertisingTimer = window.setInterval(() => {
       setAdvertisingSlide((slide) => (slide + 1) % advertisingProducts.length);
@@ -102,6 +86,16 @@ export default function Catalog() {
 
     return () => window.clearInterval(advertisingTimer);
   }, [advertisingProducts.length]);
+
+  const hasFilters = checkedCategories.length > 0 || !availableOnly || searchTerm.trim() !== '';
+
+  const clearFilters = () => {
+    setCheckedCategories([]);
+    setAvailableOnly(true);
+    setSearchTerm('');
+    setCurrentPage(1);
+    setSearchParams({});
+  };
 
   const handleSearchChange = (event) => {
     const value = event.target.value;
@@ -118,7 +112,14 @@ export default function Catalog() {
       <div className="catalog-sidebar">
         <AccountSidebar />
         <div className="catalog-filters card">
-        <div className="eyebrow">Filters</div>
+        <div className="catalog-filters-header">
+          <div className="eyebrow">Filters</div>
+          {hasFilters && (
+            <button type="button" className="catalog-clear-filters mono" onClick={clearFilters}>
+              Clear all
+            </button>
+          )}
+        </div>
         <div className="filter-group">
           <div className="filter-label mono">Category</div>
           {categories.map((cat) => (
@@ -171,15 +172,20 @@ export default function Catalog() {
       <div className="catalog-results">
         {adProduct && (
         <section className="catalog-ad" aria-label="Featured product promotion">
-          <img
-            className="catalog-ad-image"
-            src={adProduct.image}
-            alt={adProduct.name}
-          />
+          {/* Every slide image stays mounted so switching slides can crossfade. */}
+          {advertisingProducts.map((product, index) => (
+            <img
+              key={product.id}
+              className={`catalog-ad-image ${index === adIndex ? 'active' : ''}`}
+              src={product.image}
+              alt={index === adIndex ? product.name : ''}
+              aria-hidden={index === adIndex ? undefined : 'true'}
+            />
+          ))}
           <div className="catalog-ad-overlay" />
-          <div className="catalog-ad-copy">
+          <div className="catalog-ad-copy" key={adProduct.id}>
             <div className="eyebrow">Available for rent</div>
-            <h2>{adProduct.name}</h2>
+            <h2 title={adProduct.name}>{adProduct.name}</h2>
             <p>{adProduct.blurb}</p>
             <Link to={`/product/${adProduct.id}`} className="btn btn-primary">
               View Product
@@ -237,6 +243,9 @@ export default function Catalog() {
           <div className="card catalog-empty">
             <p>No gear matches these filters yet.</p>
             <p className="mono small">Try a different category or include booked items.</p>
+            {hasFilters && (
+              <button type="button" className="btn btn-outline" onClick={clearFilters}>Clear all filters</button>
+            )}
           </div>
         ) : (
           <div className="catalog-grid">
@@ -265,14 +274,22 @@ export default function Catalog() {
 
         <section className="catalog-featured" aria-label="More products">
           <div
-            className="catalog-featured-track"
+            className={`catalog-featured-track ${featuredLoops ? 'is-looping' : ''}`}
             ref={featuredTrackRef}
-            onMouseEnter={() => { featuredPausedRef.current = true; }}
-            onMouseLeave={() => { featuredPausedRef.current = false; }}
           >
-            {catalogProducts.slice(0, 8).map((product) => (
-              <ProductCard key={product.id} product={product} showActions={false} />
-            ))}
+            <div className="catalog-featured-rail" style={featuredLoopStyle}>
+              {featuredProducts.map((product) => (
+                <ProductCard key={product.id} product={product} showActions={false} />
+              ))}
+              {/* Copy for the seamless loop, hidden from screen readers and tabbing. */}
+              {featuredLoops && (
+                <div className="catalog-featured-copy" aria-hidden="true" inert>
+                  {featuredProducts.map((product) => (
+                    <ProductCard key={product.id} product={product} showActions={false} />
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </section>
       </div>

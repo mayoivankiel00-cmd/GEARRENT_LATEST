@@ -4,6 +4,8 @@ import { useCart } from '../context/CartContext';
 import { useNotifications } from '../context/NotificationContext';
 import { formatPeso } from '../lib/pricing';
 import Icon from '../components/Icon';
+import CardFields from '../components/CardFields';
+import { validateCard } from '../lib/cardValidation';
 import './Payment.css';
 
 export default function Payment() {
@@ -20,6 +22,11 @@ export default function Payment() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (submitting) return;
+    const cardError = validateCard(new FormData(event.currentTarget));
+    if (cardError) {
+      setErrorMessage(cardError);
+      return;
+    }
     setSubmitting(true);
     setErrorMessage('');
     const result = await checkout();
@@ -76,15 +83,10 @@ export default function Payment() {
           <div className="eyebrow">Secure checkout</div>
           <h1>Payment</h1>
           <p className="payment-intro">Complete your payment to reserve your rental.</p>
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} noValidate>
             <div className="payment-section">
               <h2>Payment details</h2>
-              <label>Cardholder name<input type="text" name="cardholder" placeholder="Full name" required /></label>
-              <label>Card number<input type="text" name="cardNumber" inputMode="numeric" placeholder="0000 0000 0000 0000" minLength="12" required /></label>
-              <div className="payment-fields-row">
-                <label>Expiry date<input type="text" name="expiry" placeholder="MM / YY" required /></label>
-                <label>Security code<input type="text" name="cvv" inputMode="numeric" placeholder="CVV" minLength="3" required /></label>
-              </div>
+              <CardFields />
             </div>
             {errorMessage && <p className="payment-error" role="alert">{errorMessage}</p>}
             <button type="submit" className="btn btn-primary payment-submit" disabled={submitting}>

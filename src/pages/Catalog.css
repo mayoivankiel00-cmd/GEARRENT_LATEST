@@ -17,6 +17,31 @@
   padding: 1.2rem;
 }
 
+.catalog-filters-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  min-height: 1.5rem;
+}
+
+.catalog-clear-filters {
+  padding: 0.2rem 0;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.catalog-clear-filters:hover {
+  color: var(--text);
+}
+
 .filter-group {
   margin-top: 1.2rem;
 }
@@ -79,7 +104,44 @@
 
 .catalog-ad-image {
   object-fit: cover;
-  transition: opacity 0.25s ease;
+  opacity: 0;
+  transform: scale(1.08);
+  transition: opacity 0.9s ease, transform 6s ease-out;
+}
+
+/* Crossfade in, then a slow zoom out while the slide is showing. */
+.catalog-ad-image.active {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.catalog-ad-copy > * {
+  animation: catalog-ad-copy-in 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.catalog-ad-copy > :nth-child(2) { animation-delay: 0.08s; }
+.catalog-ad-copy > :nth-child(3) { animation-delay: 0.16s; }
+.catalog-ad-copy > :nth-child(4) { animation-delay: 0.24s; }
+
+@keyframes catalog-ad-copy-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .catalog-ad-image,
+  .catalog-ad-image.active {
+    transform: none;
+    transition: opacity 0.3s ease;
+  }
+
+  .catalog-ad-copy > * { animation: none; }
 }
 
 .catalog-ad-overlay {
@@ -102,6 +164,13 @@
   font-size: clamp(1.5rem, 3vw, 2.4rem);
   line-height: 1.05;
   color: var(--on-ink);
+  /* Long names stop at two lines so the button stays inside the banner. */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  overflow-wrap: anywhere;
 }
 
 .catalog-ad-copy p {
@@ -147,6 +216,7 @@
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.55);
   cursor: pointer;
+  transition: background 0.3s ease, transform 0.3s ease;
 }
 
 .catalog-ad-dots button.active {
@@ -164,17 +234,54 @@
 }
 
 .catalog-featured-track {
-  display: flex;
-  gap: 1rem;
   overflow-x: auto;
   padding: 0.2rem 0.1rem 1rem;
-  scroll-snap-type: x mandatory;
   scrollbar-width: thin;
+}
+
+.catalog-featured-rail {
+  display: flex;
+  gap: 1rem;
+  width: max-content;
+}
+
+.catalog-featured-copy {
+  display: contents;
+}
+
+/* Glide left by one full set of cards, then start over on the copy. */
+.catalog-featured-track.is-looping {
+  overflow: hidden;
+}
+
+.catalog-featured-track.is-looping .catalog-featured-rail {
+  animation: catalog-featured-glide var(--loop-duration) linear infinite;
+  will-change: transform;
+}
+
+.catalog-featured-track.is-looping:hover .catalog-featured-rail,
+.catalog-featured-track.is-looping:focus-within .catalog-featured-rail {
+  animation-play-state: paused;
+}
+
+@keyframes catalog-featured-glide {
+  to {
+    transform: translateX(calc(-1 * var(--loop-width)));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .catalog-featured-track.is-looping {
+    overflow-x: auto;
+  }
+
+  .catalog-featured-track.is-looping .catalog-featured-rail {
+    animation: none;
+  }
 }
 
 .catalog-featured-track .product-card {
   flex: 0 0 clamp(210px, 25vw, 260px);
-  scroll-snap-align: start;
 }
 
 .catalog-featured-track .product-card-media {
@@ -249,6 +356,10 @@
   color: var(--text-dim);
 }
 
+.catalog-empty .btn {
+  margin-top: 1.2rem;
+}
+
 .catalog-pagination {
   display: flex;
   justify-content: center;
@@ -283,7 +394,7 @@
 @media (max-width: 560px) {
   .catalog-ad { height: 230px; }
   .catalog-ad-copy { width: 82%; padding: 1.3rem; }
-  .catalog-ad-copy h2 { font-size: 1.5rem; }
+  .catalog-ad-copy h2 { font-size: 1.25rem; -webkit-line-clamp: 3; line-clamp: 3; }
   .catalog-featured { padding: 1rem 0.8rem 0.1rem; }
   .catalog-results-header { align-items: stretch; flex-direction: column; }
   .catalog-search { width: 100%; }

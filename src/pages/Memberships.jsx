@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { formatPeso, getMembershipPrice, membershipTiers, TIER_GUEST } from '../lib/pricing';
 import { getTierLevel } from '../lib/providerAccess';
+import { cardLast4, validateCard } from '../lib/cardValidation';
+import CardFields from '../components/CardFields';
 import './Memberships.css';
 import './Payment.css';
 
@@ -65,14 +67,15 @@ export default function Memberships() {
   const handlePayment = async (event) => {
     event.preventDefault();
     if (paying || !checkoutTier) return;
-    const digits = String(new FormData(event.currentTarget).get('cardNumber') || '').replace(/\D/g, '');
-    if (digits.length < 12) {
-      setPaymentError('Enter a valid card number.');
+    const formData = new FormData(event.currentTarget);
+    const cardError = validateCard(formData);
+    if (cardError) {
+      setPaymentError(cardError);
       return;
     }
     setPaying(true);
     setPaymentError('');
-    const result = await purchaseMembership(checkoutTier.id, digits.slice(-4));
+    const result = await purchaseMembership(checkoutTier.id, cardLast4(formData));
     setPaying(false);
     if (!result.ok) {
       setPaymentError(result.error);
@@ -167,7 +170,7 @@ export default function Memberships() {
       </div>
 
       {checkoutTier && (
-        <form className="card membership-payment" onSubmit={handlePayment}>
+        <form className="card membership-payment" onSubmit={handlePayment} noValidate>
           <div className="payment-section">
             <div className="eyebrow">Upgrade to {checkoutTier.name}</div>
             <h2>{formatPeso(checkoutPrice)} / month</h2>
@@ -176,12 +179,7 @@ export default function Memberships() {
                 Renter upgrade price (normally {formatPeso(checkoutTier.price)}). You keep everything in Gear Rent Renter.
               </p>
             )}
-            <label>Cardholder name<input type="text" name="cardholder" placeholder="Full name" autoComplete="cc-name" required /></label>
-            <label>Card number<input type="text" name="cardNumber" inputMode="numeric" placeholder="0000 0000 0000 0000" autoComplete="cc-number" minLength="12" required /></label>
-            <div className="payment-fields-row">
-              <label>Expiry date<input type="text" name="expiry" placeholder="MM / YY" autoComplete="cc-exp" required /></label>
-              <label>Security code<input type="text" name="cvv" inputMode="numeric" placeholder="CVV" autoComplete="cc-csc" minLength="3" required /></label>
-            </div>
+            <CardFields />
           </div>
           {paymentError && <p className="payment-error" role="alert">{paymentError}</p>}
           <div className="membership-payment-actions">
