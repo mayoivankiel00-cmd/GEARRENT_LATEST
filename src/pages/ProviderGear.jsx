@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { formatPeso } from '../lib/pricing';
 import { useCategories } from '../context/CategoryContext';
 import { useProviderCatalog } from '../context/ProviderContext';
 import { useNotifications } from '../context/NotificationContext';
 import { useAuth } from '../context/AuthContext';
 import AccountSidebar from '../components/AccountSidebar';
+import ConfirmDialog from '../components/ConfirmDialog';
 import Icon from '../components/Icon';
 import ImageDropzone from '../components/ImageDropzone';
 import ReturnInspections from '../components/ReturnInspections';
@@ -13,6 +14,7 @@ import RentalHandovers from '../components/RentalHandovers';
 import {
   blockInvalidNumberKeys, formatQuantity, formatWeight, MAX_QUANTITY, MAX_WEIGHT_KG, validateGearSpecs,
 } from '../lib/gearSpecs';
+import '../components/ProductCard.css';
 import './ProviderGear.css';
 
 const approvalLabels = {
@@ -20,6 +22,49 @@ const approvalLabels = {
   approved: { text: 'Live', cls: 'approved' },
   rejected: { text: 'Not approved', cls: 'rejected' },
 };
+
+// One listing, laid out like the catalog's product cards.
+function ListingCard({ product, categoryName, onRemove }) {
+  const approval = approvalLabels[product.approvalStatus] || approvalLabels.pending;
+  const isLive = product.approvalStatus === 'approved';
+  const specs = ['Quantity', 'Weight']
+    .map((spec) => product.specs?.[spec])
+    .filter((value) => value && value !== 'Not specified');
+  const image = <img src={product.images[0]} alt={product.name} loading="lazy" />;
+
+  return (
+    <article className={`product-card provider-card ${isLive ? '' : 'is-unpublished'}`}>
+      {isLive
+        ? <Link to={`/product/${product.id}`} className="product-card-media">{image}</Link>
+        : <div className="product-card-media">{image}</div>}
+      <span className={`status-badge provider-card-status ${approval.cls}`}>{approval.text}</span>
+
+      <div className="product-card-body">
+        <div className="product-card-top">
+          {isLive
+            ? <Link to={`/product/${product.id}`} className="product-card-name">{product.name}</Link>
+            : <span className="product-card-name">{product.name}</span>}
+          <div className="product-card-price">
+            {formatPeso(product.price)}
+            <span className="unit">/day</span>
+          </div>
+        </div>
+        <span className="provider-card-meta mono">{[categoryName, ...specs].filter(Boolean).join(' · ')}</span>
+        <p className="product-card-blurb small">{product.description || 'No description added.'}</p>
+        {product.approvalStatus === 'pending' && <p className="provider-review-note mono">Waiting for administrator approval. Not visible to renters yet.</p>}
+        {product.approvalStatus === 'rejected' && <p className="provider-review-note rejected"><b>Reviewer note:</b> {product.reviewNote || 'No reason given.'} Remove this listing and submit a corrected one.</p>}
+        <div className="provider-card-actions">
+          {isLive
+            ? <Link to={`/product/${product.id}`} className="btn btn-outline">View in catalog</Link>
+            : <span className="provider-card-hidden mono">Not in the catalog yet</span>}
+          <button type="button" className="provider-delete" onClick={() => onRemove(product)} aria-label={`Remove ${product.name}`} title="Remove listing">
+            <Icon name="trash" />
+          </button>
+        </div>
+      </div>
+    </article>
+  );
+}
 
 const initialForm = {
   name: '',
@@ -33,7 +78,11 @@ const initialForm = {
 };
 
 export default function ProviderGear() {
-  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  // Tabs live in the address (?tab=listings) so links and Back work.
+  const activeTab = searchParams.get('tab') === 'listings' ? 'listings' : 'add';
+  const showTab = (tab) => setSearchParams(tab === 'listings' ? { tab: 'listings' } : {});
+  const [removing, setRemoving] = useState(null);
   const { providerProducts, addProviderProduct, removeProviderProduct } = useProviderCatalog();
   const { addNotification } = useNotifications();
   const { user } = useAuth();
@@ -113,7 +162,33 @@ export default function ProviderGear() {
         {/* Only shows up when a renter has handed back this provider's gear. */}
         <ReturnInspections hideWhenEmpty title="Returned gear to check" />
 
-        <form className="card provider-listing-form" onSubmit={handleSubmit}>
+        <div className="provider-tabs" role="tablist" aria-label="Provider workspace">
+          <button
+            type="button"
+            role="tab"
+            id="provider-tab-add"
+            aria-selected={activeTab === 'add'}
+            aria-controls="provider-panel-add"
+            className={activeTab === 'add' ? 'active' : ''}
+            onClick={() => showTab('add')}
+          >
+            Add gear
+          </button>
+          <button
+            type="button"
+            role="tab"
+            id="provider-tab-listings"
+            aria-selected={activeTab === 'listings'}
+            aria-controls="provider-panel-listings"
+            className={activeTab === 'listings' ? 'active' : ''}
+            onClick={() => showTab('listings')}
+          >
+            Your listings <span className="provider-tab-count">{providerProducts.length}</span>
+          </button>
+        </div>
+
+        {activeTab === 'add' && (
+        <form className="card provider-listing-form provider-tab-panel" id="provider-panel-add" role="tabpanel" aria-labelledby="provider-tab-add" onSubmit={handleSubmit}>
           <div className="provider-form-heading">
             <div><div className="eyebrow">New listing</div><h2>Add your gear</h2></div>
             <span className="provider-form-step mono">01 / 01</span>
@@ -203,49 +278,35 @@ export default function ProviderGear() {
           <div className="provider-form-actions"><button type="submit" className="btn btn-primary" disabled={submitting}>{submitting ? 'Submitting…' : 'Submit for review'}</button><span className="mono">An administrator reviews every listing before it appears in the public catalog.</span></div>
           {message && <p className="provider-message" role="status">{message}</p>}
         </form>
+        )}
 
-        <section className="provider-listings" aria-labelledby="provider-listings-heading">
-          <div className="provider-section-heading"><div><span className="eyebrow">Your inventory</span><h2 id="provider-listings-heading">Your listings</h2></div><span className="mono">{providerProducts.length} listings</span></div>
-          {providerProducts.length === 0 ? <p className="empty-state">No provider gear listed yet.</p> : (
-            <div className="provider-listing-list">
-              {providerProducts.map((product) => {
-                const approval = approvalLabels[product.approvalStatus] || approvalLabels.pending;
-                const isLive = product.approvalStatus === 'approved';
-                const openListing = () => { if (isLive) navigate(`/product/${product.id}`); };
-                return (
-                <article
-                  className={`card provider-listing-row ${isLive ? '' : 'is-unpublished'}`}
-                  key={product.id}
-                  role={isLive ? 'link' : undefined}
-                  tabIndex={isLive ? 0 : undefined}
-                  onClick={openListing}
-                  onKeyDown={(event) => {
-                    if (isLive && (event.key === 'Enter' || event.key === ' ')) {
-                      event.preventDefault();
-                      openListing();
-                    }
-                  }}
-                >
-                  <div className="provider-listing-image"><img src={product.images[0]} alt={product.name} /><span className={`provider-approval ${approval.cls}`}>{approval.text}</span></div>
-                  <div className="provider-listing-copy">
-                    <div className="provider-listing-head"><h3>{product.name}</h3><span className="provider-listing-category">{getCategoryName(product.category)}</span></div>
-                    <strong className="provider-listing-price">{formatPeso(product.price)} <span>/ day</span></strong>
-                    <div className="provider-listing-specs">
-                      {['Quantity', 'Weight'].map((spec) => product.specs?.[spec] && product.specs[spec] !== 'Not specified' && (
-                        <span key={spec}>{product.specs[spec]}</span>
-                      ))}
-                    </div>
-                    <p>{product.description || 'No description added.'}</p>
-                    {product.approvalStatus === 'pending' && <p className="provider-review-note mono">Waiting for administrator approval. Not visible to renters yet.</p>}
-                    {product.approvalStatus === 'rejected' && <p className="provider-review-note rejected"><b>Reviewer note:</b> {product.reviewNote || 'No reason given.'} Remove this listing and submit a corrected one.</p>}
-                  </div>
-                  <button type="button" className="provider-delete" onClick={(event) => { event.stopPropagation(); removeProviderProduct(product.id); }} aria-label={`Remove ${product.name}`} title="Remove listing"><Icon name="trash" /></button>
-                </article>
-                );
-              })}
+        {activeTab === 'listings' && (
+        <section className="provider-listings provider-tab-panel" id="provider-panel-listings" role="tabpanel" aria-labelledby="provider-tab-listings">
+          <div className="provider-section-heading"><div><span className="eyebrow">Your inventory</span><h2>Your listings</h2></div><span className="mono">{providerProducts.length} listing{providerProducts.length === 1 ? '' : 's'}</span></div>
+          {providerProducts.length === 0 ? (
+            <div className="card provider-listings-empty">
+              <strong>No gear listed yet.</strong>
+              <span>Add your first piece of gear and it will show up here.</span>
+              <button type="button" className="btn btn-primary" onClick={() => showTab('add')}>Add gear</button>
+            </div>
+          ) : (
+            <div className="provider-card-grid">
+              {providerProducts.map((product) => (
+                <ListingCard key={product.id} product={product} categoryName={getCategoryName(product.category)} onRemove={setRemoving} />
+              ))}
             </div>
           )}
         </section>
+        )}
+
+        <ConfirmDialog
+          open={Boolean(removing)}
+          title="Remove this listing?"
+          message={removing ? `"${removing.name}" will be taken off Gear Rent. This can't be undone.` : ''}
+          confirmLabel="Remove"
+          onConfirm={() => { removeProviderProduct(removing.id); setRemoving(null); }}
+          onCancel={() => setRemoving(null)}
+        />
       </main>
     </div>
   );

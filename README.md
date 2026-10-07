@@ -40,7 +40,8 @@ All SQL files mentioned below are in the `supabase/` folder.
 13. **Run `gearrent_handover_update.sql`** (after step 9) — the renter's time starts when the owner hands the gear over (**Start rental** in Provider Gear, or Admin → Handovers & Returns for Gear Rent's gear), not at payment.
 14. **Run `gearrent_email_lock_update.sql`** (after step 5) — members can't change the email on their profile; only an admin or the SQL editor can.
 15. **Run `gearrent_notifications_fix.sql`** (after step 7) — database notifications (someone rented your gear, hand it over, approvals, returns…) retry common failures instead of silently disappearing; anything that still fails is logged in `gearrent_notification_errors`, and the admin is told when an approval couldn't be sent to the provider.
-16. `npm install && npm run dev`.
+16. **Run `gearrent_rental_history_fix.sql`** (after step 5) — renters can always see the gear they rented, so past rentals stay in My History even after the owner edits the listing (which sends it back for review).
+17. `npm install && npm run dev`.
 
 ## Returns and deposits
 

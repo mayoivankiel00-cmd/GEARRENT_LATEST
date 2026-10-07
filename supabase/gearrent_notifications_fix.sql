@@ -174,7 +174,7 @@ begin
     end,
     case when p_decision = 'approved' then 'success' else 'warning' end,
     false,
-    '/provider-gear'
+    '/provider-gear?tab=listings'
   );
 end;
 $$;

@@ -22,7 +22,7 @@ function fallbackLink(row) {
     if (/overdue|has not returned/i.test(message)) return '/admin/history';
     return null;
   }
-  if (/approved|not approved|was rejected/i.test(message)) return '/provider-gear';
+  if (/approved|not approved|was rejected/i.test(message)) return '/provider-gear?tab=listings';
   if (/due back|overdue/i.test(message)) return '/my-gears';
   return null;
 }

@@ -55,10 +55,36 @@ function toMillis(value) {
   return value ? new Date(value).getTime() : null;
 }
 
+// Neutral "no photo" tile (a box outline) used when a listing is gone.
+const NO_PHOTO_IMAGE = `data:image/svg+xml,${encodeURIComponent(
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 90"><rect width="120" height="90" fill="#2a2a2a"/>'
+  + '<g fill="none" stroke="#6f6f6f" stroke-width="2.5" stroke-linejoin="round" transform="translate(42 27)">'
+  + '<path d="M36 10L18 1 0 10l18 9 18-9z"/><path d="M0 10v16l18 9 18-9V10"/><path d="M18 19v16"/></g></svg>',
+)}`;
+
+// Stand-in for a rental whose listing the renter can no longer load (for
+// example the owner deleted it), so the rental still shows up instead of
+// vanishing from My Gears and My History.
+function missingProduct(rentalId) {
+  return {
+    id: `missing-${rentalId}`,
+    name: 'Gear no longer listed',
+    price: 0,
+    status: 'unavailable',
+    blurb: '',
+    description: 'The owner has removed this listing.',
+    specs: {},
+    features: [],
+    images: [NO_PHOTO_IMAGE],
+    image: NO_PHOTO_IMAGE,
+    missing: true,
+  };
+}
+
 function mapRentalRow(row) {
   return {
     id: row.id,
-    product: mapProductRow(row.products),
+    product: mapProductRow(row.products) || missingProduct(row.id),
     days: row.days,
     status: row.status,
     statusLabel:
@@ -134,7 +160,7 @@ export function CartProvider({ children }) {
       console.error('Failed to load rentals', error);
       return;
     }
-    const rows = (data || []).filter((row) => row.products).map(mapRentalRow);
+    const rows = (data || []).map(mapRentalRow);
     setRentedItems(rows.filter((r) => r.status === 'active'));
     setRentalHistory(rows.filter((r) => r.status !== 'active'));
     setDeletedRentalHistoryIds((data || []).filter((row) => row.hidden_at).map((row) => row.id));
