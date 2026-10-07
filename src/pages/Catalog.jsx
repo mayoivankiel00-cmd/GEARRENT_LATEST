@@ -4,6 +4,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useCategories } from '../context/CategoryContext';
 import { useProviderCatalog } from '../context/ProviderContext';
 import ProductCard from '../components/ProductCard';
+import Icon from '../components/Icon';
 import AccountSidebar from '../components/AccountSidebar';
 import useLoopingScroll from '../hooks/useLoopingScroll';
 import { transitionName, withViewTransition } from '../lib/viewTransition';
@@ -234,11 +235,12 @@ export default function Catalog() {
           </span>
           <label className="catalog-search">
             <span className="sr-only">Search products</span>
+            <Icon name="search" className="catalog-search-icon" />
             <input
               type="search"
               value={searchTerm}
               onChange={handleSearchChange}
-              placeholder="Search products..."
+              placeholder="Search gear by name or category..."
               aria-label="Search products"
               className={searchTerm.trim() ? 'has-search-term' : ''}
             />

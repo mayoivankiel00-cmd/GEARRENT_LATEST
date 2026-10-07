@@ -321,20 +321,52 @@
   font-size: 0.85rem;
 }
 
+/* Search: big enough, with an icon and a red edge, that it isn't missed. */
 .catalog-search {
-  width: min(280px, 45%);
+  position: relative;
+  flex: 0 1 440px;
+  min-width: 0;
+}
+
+.catalog-search-icon {
+  position: absolute;
+  top: 50%;
+  left: 0.95rem;
+  width: 1.15rem;
+  height: 1.15rem;
+  color: var(--accent);
+  transform: translateY(-50%);
+  pointer-events: none;
 }
 
 .catalog-search input {
-  padding: 0.6rem 0.8rem;
-  font-size: 0.82rem;
+  width: 100%;
+  padding: 0.85rem 1rem 0.85rem 2.85rem;
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--border));
+  border-radius: 6px;
+  background: var(--bg-raised);
+  color: var(--text);
+  font-size: 0.95rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.catalog-search input::placeholder {
+  color: var(--text-muted);
+}
+
+.catalog-search input:hover {
+  border-color: var(--accent);
 }
 
 .catalog-search input:focus,
 .catalog-search input.has-search-term {
   border-color: var(--accent);
   outline: none;
-  box-shadow: 0 0 0 3px rgba(224, 51, 42, 0.14);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .catalog-search input { transition: none; }
 }
 
 .sr-only {
@@ -448,6 +480,6 @@ html.catalog-filtering::view-transition-old(*):only-child {
   .catalog-ad-copy h2 { font-size: 1.25rem; -webkit-line-clamp: 3; line-clamp: 3; }
   .catalog-featured { padding: 1rem 0.8rem 0.1rem; }
   .catalog-results-header { align-items: stretch; flex-direction: column; }
-  .catalog-search { width: 100%; }
+  .catalog-search { flex: none; width: 100%; }
   .catalog-grid { grid-template-columns: 1fr; }
 }
