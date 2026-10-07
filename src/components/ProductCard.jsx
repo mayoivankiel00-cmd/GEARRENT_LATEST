@@ -2,12 +2,12 @@ import { Link, useNavigate } from 'react-router-dom';
 import { formatPeso } from '../lib/pricing';
 import './ProductCard.css';
 
-export default function ProductCard({ product, featured = false, showActions = true, showStatus = true }) {
+export default function ProductCard({ product, featured = false, showActions = true, showStatus = true, style }) {
   const navigate = useNavigate();
   const isAvailable = product.status === 'available';
 
   return (
-    <div className={`product-card ${featured ? 'featured' : ''}`}>
+    <div className={`product-card ${featured ? 'featured' : ''}`} style={style}>
       <Link to={`/product/${product.id}`} className="product-card-media">
         <img src={product.image} alt={product.name} loading="lazy" />
         {showStatus && (

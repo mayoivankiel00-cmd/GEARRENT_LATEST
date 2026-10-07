@@ -54,17 +54,28 @@
   letter-spacing: 0.05em;
 }
 
+/* Side padding gives the checked highlight room around the checkbox and
+   count; the matching negative margin keeps the text lined up with the
+   group labels. */
 .filter-checkbox {
   display: flex;
   align-items: center;
   gap: 0.55rem;
-  padding: 0.3rem 0;
+  margin: 0 -0.6rem;
+  padding: 0.35rem 0.6rem;
+  border-radius: 4px;
   font-size: 0.88rem;
   cursor: pointer;
   color: var(--text);
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.filter-checkbox:hover {
+  background: var(--hover-tint);
 }
 
 .filter-checkbox input {
+  margin: 0;
   accent-color: var(--accent);
 }
 
@@ -342,6 +353,46 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 1.2rem;
+}
+
+/* Filter / page changes (Catalog.jsx, withViewTransition): each grid card
+   has its own view-transition-name, so cards that stay glide to their new
+   spot, removed ones shrink away and new ones rise in. The rest of the
+   page swaps quickly instead of using the slower theme crossfade. */
+html.catalog-filtering::view-transition-old(root),
+html.catalog-filtering::view-transition-new(root) {
+  animation-duration: 0.12s;
+}
+
+html.catalog-filtering::view-transition-group(*) {
+  animation-duration: 0.45s;
+  animation-timing-function: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+html.catalog-filtering::view-transition-group(root) {
+  animation-duration: 0.12s;
+}
+
+html.catalog-filtering::view-transition-new(*):only-child {
+  animation: catalog-card-in 0.4s cubic-bezier(0.2, 0.7, 0.2, 1) 0.08s both;
+}
+
+html.catalog-filtering::view-transition-old(*):only-child {
+  animation: catalog-card-out 0.25s ease both;
+}
+
+@keyframes catalog-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.97);
+  }
+}
+
+@keyframes catalog-card-out {
+  to {
+    opacity: 0;
+    transform: scale(0.94);
+  }
 }
 
 .catalog-empty {

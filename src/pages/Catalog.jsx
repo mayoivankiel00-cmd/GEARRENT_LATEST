@@ -6,6 +6,9 @@ import { useProviderCatalog } from '../context/ProviderContext';
 import ProductCard from '../components/ProductCard';
 import AccountSidebar from '../components/AccountSidebar';
 import useLoopingScroll from '../hooks/useLoopingScroll';
+import { transitionName, withViewTransition } from '../lib/viewTransition';
+
+const animateGrid = (update) => withViewTransition(update, { rootClass: 'catalog-filtering' });
 import './Catalog.css';
 
 export default function Catalog() {
@@ -89,13 +92,16 @@ export default function Catalog() {
 
   const hasFilters = checkedCategories.length > 0 || !availableOnly || searchTerm.trim() !== '';
 
-  const clearFilters = () => {
+  // Filter and page changes animate the grid: cards that stay glide to their
+  // new spot, others fade out or in (see .catalog-grid in Catalog.css).
+  // Typing in search updates instantly so it never lags behind the keyboard.
+  const clearFilters = () => animateGrid(() => {
     setCheckedCategories([]);
     setAvailableOnly(true);
     setSearchTerm('');
     setCurrentPage(1);
     setSearchParams({});
-  };
+  });
 
   const handleSearchChange = (event) => {
     const value = event.target.value;
@@ -127,11 +133,11 @@ export default function Catalog() {
               <input
                 type="checkbox"
                 checked={checkedCategories.includes(cat.id)}
-                onChange={() => {
+                onChange={() => animateGrid(() => {
                   toggleCategory(cat.id);
                   setCurrentPage(1);
                   setSearchParams(cat.id === activeCategory ? {} : { category: cat.id });
-                }}
+                })}
               />
               <span>{cat.name}</span>
               <span className="filter-count mono">{categoryCounts[cat.id]}</span>
@@ -146,10 +152,10 @@ export default function Catalog() {
               type="radio"
               name="status"
               checked={availableOnly}
-              onChange={() => {
+              onChange={() => animateGrid(() => {
                 setAvailableOnly(true);
                 setCurrentPage(1);
-              }}
+              })}
             />
             <span>Available Now</span>
           </label>
@@ -158,10 +164,10 @@ export default function Catalog() {
               type="radio"
               name="status"
               checked={!availableOnly}
-              onChange={() => {
+              onChange={() => animateGrid(() => {
                 setAvailableOnly(false);
                 setCurrentPage(1);
-              }}
+              })}
             />
             <span>Include Booked</span>
           </label>
@@ -250,7 +256,7 @@ export default function Catalog() {
         ) : (
           <div className="catalog-grid">
             {paginatedProducts.map((p) => (
-              <ProductCard key={p.id} product={p} />
+              <ProductCard key={p.id} product={p} style={{ viewTransitionName: transitionName('catalog-card', p.id) }} />
             ))}
           </div>
         )}
@@ -262,7 +268,7 @@ export default function Catalog() {
                 type="button"
                 className={`catalog-page-number ${currentPage === page ? 'active' : ''}`}
                 key={page}
-                onClick={() => setCurrentPage(page)}
+                onClick={() => animateGrid(() => setCurrentPage(page))}
                 aria-label={`Go to product page ${page}`}
                 aria-current={currentPage === page ? 'page' : undefined}
               >
