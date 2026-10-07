@@ -8,10 +8,24 @@ const ProviderContext = createContext(null);
 
 const PRODUCT_SELECT =
   'id, name, price, status, blurb, description, specs, features, images, category_id, provider_id, '
-  + 'approval_status, review_note, reviewed_at, submitted_at, provider:profiles(email, name), '
-  // Other people's profiles are private (gearrent_profile_privacy_update.sql);
-  // profile_names exposes just the display name for the cards.
-  + 'provider_public:profile_names(name)';
+  + 'approval_status, review_note, reviewed_at, submitted_at, provider:profiles(email, name)';
+
+// Other people's profiles are private (gearrent_profile_privacy_update.sql),
+// so provider:profiles is only filled in for your own listings or for an
+// admin. provider_names holds just the display names of people who list
+// gear; the catalog reads them from there for "Listed by <name>". Missing
+// names (e.g. before that SQL has been run) just leave the generic blurb.
+async function withProviderNames(rows) {
+  const ids = [...new Set(rows.filter((row) => row.provider_id && !row.provider?.name).map((row) => row.provider_id))];
+  if (ids.length === 0) return rows;
+  const { data, error } = await supabase.from('provider_names').select('id, name').in('id', ids);
+  if (error) {
+    console.warn('Could not load provider names', error);
+    return rows;
+  }
+  const names = new Map((data || []).map((entry) => [entry.id, entry.name]));
+  return rows.map((row) => (names.has(row.provider_id) ? { ...row, provider_public: { name: names.get(row.provider_id) } } : row));
+}
 
 // Supabase / Postgres error → short message a person can act on.
 export function describeProductError(error) {
@@ -119,7 +133,7 @@ export function ProviderProvider({ children }) {
       console.error('Failed to load catalog', error);
       return;
     }
-    setCatalogProducts((data || []).map(mapProductRow));
+    setCatalogProducts((await withProviderNames(data || [])).map(mapProductRow));
   }, []);
 
   const refreshPendingProducts = useCallback(async () => {

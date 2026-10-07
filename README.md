@@ -42,7 +42,7 @@ All SQL files mentioned below are in the `supabase/` folder.
 15. **Run `gearrent_notifications_fix.sql`** (after step 7) — database notifications (someone rented your gear, hand it over, approvals, returns…) retry common failures instead of silently disappearing; anything that still fails is logged in `gearrent_notification_errors`, and the admin is told when an approval couldn't be sent to the provider.
 16. **Run `gearrent_rental_history_fix.sql`** (after step 5) — renters can always see the gear they rented, so past rentals stay in My History even after the owner edits the listing (which sends it back for review).
 17. **Run `gearrent_notification_inbox_update.sql`** (after step 5) — the bell's "Remove all" and read state are saved by the database, so cleared notifications stay cleared and the unread count is accurate.
-18. **Run `gearrent_profile_privacy_update.sql`** (after step 5) — profiles are private: people read only their own (admins read all), and product cards get provider names from the `profile_names` view. Without it, anyone with the public key can list every account's email, phone and address.
+18. **Run `gearrent_profile_privacy_update.sql`** (after step 5) — profiles are private: people read only their own (admins read all), and product cards get provider names from the `provider_names` table. Without it, anyone with the public key can list every account's email, phone and address.
 19. `npm install && npm run dev`.
 
 ## Returns and deposits
