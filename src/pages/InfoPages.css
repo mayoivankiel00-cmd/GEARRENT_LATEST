@@ -79,13 +79,44 @@
 }
 
 .info-toc a {
+  position: relative;
+  display: block;
   color: var(--text-muted);
   font-size: 0.88rem;
   line-height: 1.35;
+  transition: color 0.25s ease;
 }
 
 .info-toc a:hover {
   color: var(--accent);
+}
+
+/* The section being read (InfoPage.jsx, useActiveSection): white text and
+   a red bar over the list's left rule. */
+.info-toc a.active {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.info-toc a::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(-1.1rem - 1px);
+  width: 2px;
+  background: var(--accent);
+  transform: scaleY(0);
+  transition: transform 0.25s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.info-toc a.active::before {
+  transform: scaleY(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .info-toc a,
+  .info-toc a::before { transition: none; }
 }
 
 .info-sections {

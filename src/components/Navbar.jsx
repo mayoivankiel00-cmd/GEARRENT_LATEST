@@ -17,7 +17,25 @@ export default function Navbar() {
   const navigate = useNavigate();
   const { isLightTheme, toggleTheme } = useTheme();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  // Ids that were unread when the panel opened. They are marked read on the
+  // server straight away but stay highlighted until the panel closes.
+  const [newNotificationIds, setNewNotificationIds] = useState([]);
   const [confirmingSignOut, setConfirmingSignOut] = useState(false);
+
+  const openNotifications = () => {
+    setNewNotificationIds(notifications.filter((n) => !n.read).map((n) => n.id));
+    setNotificationsOpen(true);
+    if (unreadCount > 0) markAllRead();
+  };
+
+  const closeNotifications = () => {
+    setNotificationsOpen(false);
+    setNewNotificationIds([]);
+    // Anything that arrived while the panel was open has now been seen too.
+    if (unreadCount > 0) markAllRead();
+  };
+
+  const isNewNotification = (notification) => !notification.read || newNotificationIds.includes(notification.id);
 
   const userName = typeof user?.name === 'string' && user.name.trim() ? user.name.trim() : 'Member';
   const userInitials = userName
@@ -70,19 +88,23 @@ export default function Navbar() {
                 className="navbar-notification-toggle"
                 aria-label={unreadCount ? `${unreadCount} unread notifications` : 'Notifications'}
                 title="Notifications"
-                onClick={() => {
-                  setNotificationsOpen((open) => !open);
-                  markAllRead();
-                }}
+                aria-expanded={notificationsOpen}
+                onClick={() => (notificationsOpen ? closeNotifications() : openNotifications())}
               >
                 <span className="navbar-notification-glyph" aria-hidden="true" />
-                {unreadCount > 0 && <span className="navbar-notification-ping" aria-hidden="true" />}
+                {unreadCount > 0 && (
+                  <span className="navbar-cart-badge navbar-notification-badge" key={unreadCount} aria-hidden="true">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
               </button>
               {notificationsOpen && (
                 <div className="navbar-notification-panel" role="dialog" aria-label="Notifications">
                   <div className="navbar-notification-heading">
                     <strong>Notifications</strong>
-                    <span className="mono">{notifications.length}</span>
+                    <span className="mono">
+                      {newNotificationIds.length > 0 ? `${newNotificationIds.length} new · ${notifications.length}` : notifications.length}
+                    </span>
                     {notifications.length > 0 && (
                       <button type="button" className="navbar-notification-clear" onClick={clearAllNotifications}>
                         Remove all
@@ -91,20 +113,28 @@ export default function Navbar() {
                   </div>
                   {notifications.length === 0 ? <p className="navbar-notification-empty">No notifications yet.</p> : (
                     <div className="navbar-notification-list">
-                      {notifications.map((notification) => (
-                        notification.link ? (
+                      {notifications.map((notification) => {
+                        const isNew = isNewNotification(notification);
+                        const body = (
+                          <>
+                            <span className={`navbar-notification-dot ${notification.type}`} />
+                            <p>{notification.message}</p>
+                            {isNew && <span className="navbar-notification-new mono">New</span>}
+                          </>
+                        );
+                        return notification.link ? (
                           <button
                             type="button"
-                            className="navbar-notification-item is-link"
+                            className={`navbar-notification-item is-link ${isNew ? 'is-new' : ''}`}
                             key={notification.id}
-                            onClick={() => { setNotificationsOpen(false); navigate(notification.link); }}
+                            onClick={() => { closeNotifications(); navigate(notification.link); }}
                           >
-                            <span className={`navbar-notification-dot ${notification.type}`} /><p>{notification.message}</p>
+                            {body}
                           </button>
                         ) : (
-                          <div className="navbar-notification-item" key={notification.id}><span className={`navbar-notification-dot ${notification.type}`} /><p>{notification.message}</p></div>
-                        )
-                      ))}
+                          <div className={`navbar-notification-item ${isNew ? 'is-new' : ''}`} key={notification.id}>{body}</div>
+                        );
+                      })}
                     </div>
                   )}
                 </div>

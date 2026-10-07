@@ -41,7 +41,8 @@ All SQL files mentioned below are in the `supabase/` folder.
 14. **Run `gearrent_email_lock_update.sql`** (after step 5) — members can't change the email on their profile; only an admin or the SQL editor can.
 15. **Run `gearrent_notifications_fix.sql`** (after step 7) — database notifications (someone rented your gear, hand it over, approvals, returns…) retry common failures instead of silently disappearing; anything that still fails is logged in `gearrent_notification_errors`, and the admin is told when an approval couldn't be sent to the provider.
 16. **Run `gearrent_rental_history_fix.sql`** (after step 5) — renters can always see the gear they rented, so past rentals stay in My History even after the owner edits the listing (which sends it back for review).
-17. `npm install && npm run dev`.
+17. **Run `gearrent_notification_inbox_update.sql`** (after step 5) — the bell's "Remove all" and read state are saved by the database, so cleared notifications stay cleared and the unread count is accurate.
+18. `npm install && npm run dev`.
 
 ## Returns and deposits
 

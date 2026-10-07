@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { formatPeso, getMembershipPrice, membershipTiers, TIER_GUEST } from '../lib/pricing';
 import { getTierLevel } from '../lib/providerAccess';
 import { cardLast4, validateCard } from '../lib/cardValidation';
-import CardFields from '../components/CardFields';
+import MembershipCheckout from '../components/MembershipCheckout';
 import './Memberships.css';
 import './Payment.css';
 
@@ -169,27 +169,14 @@ export default function Memberships() {
         })}
       </div>
 
-      {checkoutTier && (
-        <form className="card membership-payment" onSubmit={handlePayment} noValidate>
-          <div className="payment-section">
-            <div className="eyebrow">Upgrade to {checkoutTier.name}</div>
-            <h2>{formatPeso(checkoutPrice)} / month</h2>
-            {checkoutPrice < checkoutTier.price && (
-              <p className="membership-payment-note">
-                Renter upgrade price (normally {formatPeso(checkoutTier.price)}). You keep everything in Gear Rent Renter.
-              </p>
-            )}
-            <CardFields />
-          </div>
-          {paymentError && <p className="payment-error" role="alert">{paymentError}</p>}
-          <div className="membership-payment-actions">
-            <button type="button" className="btn btn-outline" onClick={() => setCheckoutTier(null)} disabled={paying}>Cancel</button>
-            <button type="submit" className="btn btn-primary payment-submit" disabled={paying}>
-              {paying ? 'Processing payment…' : `Pay ${formatPeso(checkoutPrice)}`}
-            </button>
-          </div>
-        </form>
-      )}
+      <MembershipCheckout
+        tier={checkoutTier}
+        price={checkoutPrice}
+        paying={paying}
+        error={paymentError}
+        onPay={handlePayment}
+        onClose={() => setCheckoutTier(null)}
+      />
     </div>
   );
 }

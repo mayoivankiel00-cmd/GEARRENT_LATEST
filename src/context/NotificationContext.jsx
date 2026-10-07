@@ -14,6 +14,23 @@ const POLL_INTERVAL_MS = 15000;
 const INITIAL_TOAST_WINDOW_MS = 10 * 60 * 1000;
 const MAX_TOASTS = 4;
 
+// The bell's database functions (gearrent_notification_inbox_update.sql).
+// Until that file has been run, fall back to working on the table directly.
+function isMissingFunction(error) {
+  return error?.code === 'PGRST202' || /could not find the function/i.test(error?.message || '');
+}
+
+async function callInboxFunction(name, fallback) {
+  const { error } = await supabase.rpc(name);
+  if (!error) return;
+  if (isMissingFunction(error)) {
+    const { error: fallbackError } = await fallback();
+    if (fallbackError) console.error(`${name} fallback failed`, fallbackError);
+    return;
+  }
+  console.error(`${name} failed`, error);
+}
+
 // Rows created before the `link` column existed get a sensible destination.
 function fallbackLink(row) {
   const message = row.message || '';
@@ -102,13 +119,16 @@ export function NotificationProvider({ children }) {
       setNotifications([]);
       return;
     }
-    const { data, error } = await supabase
-      .from('notifications')
-      .select('*')
-      .eq('is_admin_channel', false)
-      .or(`recipient_user_id.eq.${userId},recipient_user_id.is.null`)
-      .order('created_at', { ascending: false })
-      .limit(30);
+    let { data, error } = await supabase.rpc('list_my_notifications', { p_limit: 30 });
+    if (isMissingFunction(error)) {
+      ({ data, error } = await supabase
+        .from('notifications')
+        .select('*')
+        .eq('is_admin_channel', false)
+        .or(`recipient_user_id.eq.${userId},recipient_user_id.is.null`)
+        .order('created_at', { ascending: false })
+        .limit(30));
+    }
     if (error) {
       console.error('Failed to load notifications', error);
       return;
@@ -204,35 +224,33 @@ export function NotificationProvider({ children }) {
   const markAllRead = useCallback(async () => {
     if (!userId) return;
     setNotifications((current) => current.map((n) => ({ ...n, read: true })));
-    const { error } = await supabase
+    await callInboxFunction('mark_my_notifications_read', () => supabase
       .from('notifications')
       .update({ read: true })
       .eq('is_admin_channel', false)
-      .eq('recipient_user_id', userId);
-    if (error) console.error('markAllRead failed', error);
+      .eq('recipient_user_id', userId));
   }, [userId]);
 
   const clearAllNotifications = useCallback(async () => {
     if (!userId) return;
     setNotifications([]);
-    const { error } = await supabase
+    await callInboxFunction('clear_my_notifications', () => supabase
       .from('notifications')
       .delete()
       .eq('is_admin_channel', false)
-      .eq('recipient_user_id', userId);
-    if (error) console.error('clearAllNotifications failed', error);
+      .eq('recipient_user_id', userId));
   }, [userId]);
 
   const markAdminNotificationsRead = useCallback(async () => {
     setAdminNotifications((current) => current.map((n) => ({ ...n, read: true })));
-    const { error } = await supabase.from('notifications').update({ read: true }).eq('is_admin_channel', true);
-    if (error) console.error('markAdminNotificationsRead failed', error);
+    await callInboxFunction('admin_mark_notifications_read', () => supabase
+      .from('notifications').update({ read: true }).eq('is_admin_channel', true));
   }, []);
 
   const clearAdminNotifications = useCallback(async () => {
     setAdminNotifications([]);
-    const { error } = await supabase.from('notifications').delete().eq('is_admin_channel', true);
-    if (error) console.error('clearAdminNotifications failed', error);
+    await callInboxFunction('admin_clear_notifications', () => supabase
+      .from('notifications').delete().eq('is_admin_channel', true));
   }, []);
 
   const value = useMemo(() => ({

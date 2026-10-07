@@ -35,7 +35,22 @@ export default function AdminLayout({ children }) {
   } = useNotifications();
   const { isLightTheme, toggleTheme } = useTheme();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  // Unread when the panel opened: marked read right away, highlighted until
+  // the panel closes.
+  const [newNotificationIds, setNewNotificationIds] = useState([]);
   const [confirmingSignOut, setConfirmingSignOut] = useState(false);
+
+  const openNotifications = () => {
+    setNewNotificationIds(adminNotifications.filter((n) => !n.read).map((n) => n.id));
+    setNotificationsOpen(true);
+    if (adminUnreadCount > 0) markAdminNotificationsRead();
+  };
+
+  const closeNotifications = () => {
+    setNotificationsOpen(false);
+    setNewNotificationIds([]);
+    if (adminUnreadCount > 0) markAdminNotificationsRead();
+  };
 
   const handleSignOut = () => {
     setConfirmingSignOut(false);
@@ -64,13 +79,15 @@ export default function AdminLayout({ children }) {
               className="admin-icon-btn admin-notification-btn"
               aria-label={adminUnreadCount ? `${adminUnreadCount} unread notifications` : 'Notifications'}
               title="Notifications"
-              onClick={() => {
-                setNotificationsOpen((open) => !open);
-                markAdminNotificationsRead();
-              }}
+              aria-expanded={notificationsOpen}
+              onClick={() => (notificationsOpen ? closeNotifications() : openNotifications())}
             >
               <span className="admin-notification-glyph" aria-hidden="true" />
-              {adminUnreadCount > 0 && <span className="admin-notif-dot" />}
+              {adminUnreadCount > 0 && (
+                <span className="admin-notif-count" key={adminUnreadCount} aria-hidden="true">
+                  {adminUnreadCount > 9 ? '9+' : adminUnreadCount}
+                </span>
+              )}
             </button>
             {notificationsOpen && (
               <div className="admin-notification-panel" role="dialog" aria-label="Admin notifications">
@@ -87,19 +104,19 @@ export default function AdminLayout({ children }) {
                   <div className="admin-notification-list">
                     {adminNotifications.map((notification) => (
                       <div
-                        className={`admin-notification-item ${notification.link ? 'is-link' : ''}`}
+                        className={`admin-notification-item ${notification.link ? 'is-link' : ''} ${!notification.read || newNotificationIds.includes(notification.id) ? 'is-new' : ''}`}
                         key={notification.id}
                         role={notification.link ? 'link' : undefined}
                         tabIndex={notification.link ? 0 : undefined}
                         onClick={() => {
                           if (!notification.link) return;
-                          setNotificationsOpen(false);
+                          closeNotifications();
                           navigate(notification.link);
                         }}
                         onKeyDown={(event) => {
                           if (notification.link && (event.key === 'Enter' || event.key === ' ')) {
                             event.preventDefault();
-                            setNotificationsOpen(false);
+                            closeNotifications();
                             navigate(notification.link);
                           }
                         }}

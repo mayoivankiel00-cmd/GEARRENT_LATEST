@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
   contactChannels, contactChecklist, contactTopics, LAST_UPDATED, legalPages, pickupSteps, returnSteps, SUPPORT_EMAIL,
@@ -9,11 +9,69 @@ import './InfoPages.css';
 // the link can be shared. Instant for people who prefer reduced motion.
 function scrollToSection(event, id) {
   const target = document.getElementById(id);
-  if (!target) return;
+  if (!target) return false;
   event.preventDefault();
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   target.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
   window.history.replaceState(window.history.state, '', `#${id}`);
+  return true;
+}
+
+// Which section is being read: the last one whose top has scrolled up past
+// the sticky navbar (plus a little room). At the very bottom of the page the
+// last section wins even if it's short. `select(id)` highlights a clicked
+// entry right away and holds it while the page glides there, so the list
+// doesn't flicker through every section in between.
+const READING_LINE_PX = 140;
+
+function useActiveSection(ids) {
+  const [activeId, setActiveId] = useState(ids[0] || null);
+  const heldUntil = useRef(0);
+
+  useEffect(() => {
+    if (ids.length === 0) return undefined;
+    // A handful of sections, so measuring on every scroll event is cheap.
+    const update = () => {
+      if (Date.now() < heldUntil.current) return;
+      const atBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4;
+      let current = ids[0];
+      ids.forEach((id) => {
+        const section = document.getElementById(id);
+        if (section && section.getBoundingClientRect().top <= READING_LINE_PX) current = id;
+      });
+      if (atBottom) current = ids[ids.length - 1];
+      setActiveId(current);
+    };
+    // Smooth scrolling has finished: let the scroll position decide again.
+    const onScrollEnd = () => {
+      heldUntil.current = 0;
+      update();
+    };
+    update();
+    window.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('scrollend', onScrollEnd);
+    window.addEventListener('resize', update);
+    return () => {
+      window.removeEventListener('scroll', update);
+      window.removeEventListener('scrollend', onScrollEnd);
+      window.removeEventListener('resize', update);
+    };
+  }, [ids]);
+
+  const select = useCallback((id) => {
+    // Browsers without a scrollend event fall back to this timeout.
+    heldUntil.current = Date.now() + 1200;
+    setActiveId(id);
+  }, []);
+
+  return [activeId, select];
+}
+
+// Keeps the same array between renders while its contents are unchanged.
+function useStableIds(ids) {
+  const ref = useRef(ids);
+  if (ref.current.join('|') !== ids.join('|')) ref.current = ids;
+  return ref.current;
 }
 
 // Links like /rental-agreement#returns land on that section.
@@ -65,6 +123,9 @@ function SectionBody({ body }) {
 }
 
 function LegalPage({ content }) {
+  const sectionIds = useStableIds(content.sections.map((section) => section.id));
+  const [activeId, selectSection] = useActiveSection(sectionIds);
+
   return (
     <>
       <InfoHero eyebrow={content.eyebrow} title={content.title} intro={content.intro} meta={`Last updated ${LAST_UPDATED}`} />
@@ -73,7 +134,16 @@ function LegalPage({ content }) {
           <span className="mono info-toc-title">On this page</span>
           <ol>
             {content.sections.map((section) => (
-              <li key={section.id}><a href={`#${section.id}`} onClick={(event) => scrollToSection(event, section.id)}>{section.heading}</a></li>
+              <li key={section.id}>
+                <a
+                  href={`#${section.id}`}
+                  className={activeId === section.id ? 'active' : ''}
+                  aria-current={activeId === section.id ? 'location' : undefined}
+                  onClick={(event) => { if (scrollToSection(event, section.id)) selectSection(section.id); }}
+                >
+                  {section.heading}
+                </a>
+              </li>
             ))}
           </ol>
         </nav>
