@@ -8,7 +8,10 @@ const ProviderContext = createContext(null);
 
 const PRODUCT_SELECT =
   'id, name, price, status, blurb, description, specs, features, images, category_id, provider_id, '
-  + 'approval_status, review_note, reviewed_at, submitted_at, provider:profiles(email, name)';
+  + 'approval_status, review_note, reviewed_at, submitted_at, provider:profiles(email, name), '
+  // Other people's profiles are private (gearrent_profile_privacy_update.sql);
+  // profile_names exposes just the display name for the cards.
+  + 'provider_public:profile_names(name)';
 
 // Supabase / Postgres error → short message a person can act on.
 export function describeProductError(error) {
@@ -47,7 +50,7 @@ const GENERIC_BLURB = 'Provider listed gear';
 
 function productBlurb(row) {
   const blurb = String(row.blurb || '').trim();
-  const providerName = String(row.provider?.name || '').trim();
+  const providerName = String(row.provider?.name || row.provider_public?.name || '').trim();
   if (row.provider_id && providerName && (!blurb || blurb === GENERIC_BLURB)) return `Listed by ${providerName}`;
   return blurb;
 }
@@ -73,7 +76,7 @@ function mapProductRow(row) {
     reviewedAt: row.reviewed_at ? new Date(row.reviewed_at).getTime() : null,
     submittedAt: row.submitted_at ? new Date(row.submitted_at).getTime() : null,
     providerEmail: row.provider?.email || '',
-    providerName: row.provider?.name || '',
+    providerName: row.provider?.name || row.provider_public?.name || '',
   };
 }
 

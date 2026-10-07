@@ -27,7 +27,7 @@ function describeMoneyError(error, fallback) {
 // Every read joins the owning provider's profile so `providerEmail`/
 // `providerName` keep working exactly like they did against mockData.js.
 const PRODUCT_SELECT =
-  'id, name, price, status, blurb, description, specs, features, images, category_id, provider_id, provider:profiles(email, name)';
+  'id, name, price, status, blurb, description, specs, features, images, category_id, provider_id, provider:profiles(email, name), provider_public:profile_names(name)';
 
 // Added by gearrent_returns_update.sql.
 const RETURN_COLUMNS = 'return_requested_at, late_days, late_fee, damage_charge, return_note, ';
@@ -47,7 +47,7 @@ function mapProductRow(row) {
     category: row.category_id,
     providerListed: Boolean(row.provider_id),
     providerEmail: row.provider?.email || '',
-    providerName: row.provider?.name || '',
+    providerName: row.provider?.name || row.provider_public?.name || '',
   };
 }
 
