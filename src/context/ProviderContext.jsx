@@ -41,13 +41,24 @@ function makeProductId(name) {
   return `${slug}-${suffix}`;
 }
 
+// Listings from providers are saved with this generic blurb; the cards show
+// who listed the gear in its place.
+const GENERIC_BLURB = 'Provider listed gear';
+
+function productBlurb(row) {
+  const blurb = String(row.blurb || '').trim();
+  const providerName = String(row.provider?.name || '').trim();
+  if (row.provider_id && providerName && (!blurb || blurb === GENERIC_BLURB)) return `Listed by ${providerName}`;
+  return blurb;
+}
+
 function mapProductRow(row) {
   return {
     id: row.id,
     name: row.name,
     price: Number(row.price),
     status: row.status,
-    blurb: row.blurb,
+    blurb: productBlurb(row),
     description: row.description,
     specs: row.specs || {},
     features: row.features || [],
@@ -154,7 +165,7 @@ export function ProviderProvider({ children }) {
       price: Number(productDetails.price) || 0,
       status: 'available',
       approval_status: isAdmin ? 'approved' : 'pending', // enforced server-side regardless
-      blurb: 'Provider listed gear',
+      blurb: GENERIC_BLURB,
       description: productDetails.description || 'Provider listed gear available for your next project.',
       images: productDetails.images?.length ? productDetails.images : [productDetails.image].filter(Boolean),
       specs: {

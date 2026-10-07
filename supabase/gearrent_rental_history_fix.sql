@@ -25,8 +25,12 @@ as $$
   );
 $$;
 
-revoke all on function public.gearrent_has_rented(text) from public, anon;
-grant execute on function public.gearrent_has_rented(text) to authenticated;
+-- Signed-out visitors need to run it too: the products policy below applies
+-- to them, and Postgres doesn't always skip the check once the listing is
+-- approved. Without this the catalog failed with "permission denied for
+-- function gearrent_has_rented". It returns false when nobody is signed in.
+revoke all on function public.gearrent_has_rented(text) from public;
+grant execute on function public.gearrent_has_rented(text) to anon, authenticated;
 
 create index if not exists rentals_user_product_idx on public.rentals (user_id, product_id);
 
