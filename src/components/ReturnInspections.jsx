@@ -17,6 +17,19 @@ function toLocalInput(value) {
   return new Date(date.getTime() - offset).toISOString().slice(0, 16);
 }
 
+// The time box only keeps whole minutes and this computer's clock can be a
+// little behind the server's, so a quick test rental could look like it came
+// back before it started. Times up to a few minutes early are moved to the
+// start; anything earlier is a real mistake and is left for the check below.
+const CLOCK_SLACK_MS = 5 * 60 * 1000;
+
+function clampToRentalStart(date, rentedAt) {
+  if (!rentedAt) return date;
+  const start = new Date(rentedAt);
+  if (Number.isNaN(start.getTime()) || date >= start) return date;
+  return start - date <= CLOCK_SLACK_MS ? start : date;
+}
+
 function describeError(error, fallback) {
   if (!error) return fallback;
   if (['P0001', 'P0002', '22023', '42501'].includes(error.code)) return error.message;
@@ -70,8 +83,9 @@ function ReturnCard({ item, onConfirmed }) {
 
   const changeHandedAt = async (value) => {
     setHandedAt(value);
-    const when = new Date(value);
-    if (!value || Number.isNaN(when.getTime())) return;
+    const picked = new Date(value);
+    if (!value || Number.isNaN(picked.getTime())) return;
+    const when = clampToRentalStart(picked, item.rented_at);
     const { data, error: rpcError } = await supabase.rpc('gearrent_return_quote', {
       p_rented_at: item.rented_at,
       p_return_at: item.return_at,
@@ -87,9 +101,14 @@ function ReturnCard({ item, onConfirmed }) {
   };
 
   const confirm = async () => {
-    const handed = new Date(handedAt);
-    if (!handedAt || Number.isNaN(handed.getTime())) {
+    const picked = new Date(handedAt);
+    if (!handedAt || Number.isNaN(picked.getTime())) {
       setError('Enter when you got the gear back.');
+      return;
+    }
+    const handed = clampToRentalStart(picked, item.rented_at);
+    if (item.rented_at && handed < new Date(item.rented_at)) {
+      setError(`The return time cannot be before the rental started (${formatDateTime(item.rented_at)}).`);
       return;
     }
     const damageAmount = damaging ? Number(damage) || 0 : 0;
