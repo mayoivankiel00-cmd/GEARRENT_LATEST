@@ -56,7 +56,7 @@
 
 .info-toc {
   position: sticky;
-  top: calc(68px + 2rem);
+  top: calc(76px + 2rem);
   border-left: 1px solid var(--border);
   padding-left: 1.1rem;
 }
@@ -93,7 +93,7 @@
 }
 
 .info-section {
-  scroll-margin-top: calc(68px + 1.5rem);
+  scroll-margin-top: calc(76px + 1.5rem);
   padding: 2rem 0;
   border-bottom: 1px solid var(--border);
 }

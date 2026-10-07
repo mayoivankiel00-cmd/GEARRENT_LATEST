@@ -5,6 +5,17 @@ import {
 } from './infoContent';
 import './InfoPages.css';
 
+// Glide to a section on this page, keeping its #hash in the address bar so
+// the link can be shared. Instant for people who prefer reduced motion.
+function scrollToSection(event, id) {
+  const target = document.getElementById(id);
+  if (!target) return;
+  event.preventDefault();
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  target.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
+  window.history.replaceState(window.history.state, '', `#${id}`);
+}
+
 // Links like /rental-agreement#returns land on that section.
 function useScrollToHash() {
   const { hash, pathname } = useLocation();
@@ -62,7 +73,7 @@ function LegalPage({ content }) {
           <span className="mono info-toc-title">On this page</span>
           <ol>
             {content.sections.map((section) => (
-              <li key={section.id}><a href={`#${section.id}`}>{section.heading}</a></li>
+              <li key={section.id}><a href={`#${section.id}`} onClick={(event) => scrollToSection(event, section.id)}>{section.heading}</a></li>
             ))}
           </ol>
         </nav>

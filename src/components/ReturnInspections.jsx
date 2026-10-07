@@ -119,7 +119,7 @@ function ReturnCard({ item, onConfirmed }) {
   };
 
   return (
-    <article className="card review-card">
+    <article className="card review-card return-card">
       <div className="review-media">
         <div className="review-media-main">
           {image ? <img src={image} alt={item.product_name} /> : <span>No photo</span>}
@@ -146,22 +146,23 @@ function ReturnCard({ item, onConfirmed }) {
           {quote.unused_days > 0 && <span><b>Early</b>{quote.unused_days} unused day{quote.unused_days === 1 ? '' : 's'} refunded</span>}
         </div>
 
-        <div className="moderation-grid">
-          <label className="moderation-field">When did you get the gear back?
-            <input
-              type="datetime-local"
-              value={handedAt}
-              min={item.rented_at ? toLocalInput(item.rented_at) : undefined}
-              max={toLocalInput(Date.now())}
-              onChange={(event) => changeHandedAt(event.target.value)}
-            />
-          </label>
+        {/* Date, renter's-time shortcut and the two actions share one
+            two-column grid so every control lines up. */}
+        <div className="return-form">
+          <label className="return-form-label" htmlFor={`handed-at-${item.rental_id}`}>When did you get the gear back?</label>
+          <input
+            id={`handed-at-${item.rental_id}`}
+            className="return-form-input"
+            type="datetime-local"
+            value={handedAt}
+            min={item.rented_at ? toLocalInput(item.rented_at) : undefined}
+            max={toLocalInput(Date.now())}
+            onChange={(event) => changeHandedAt(event.target.value)}
+          />
           {!item.not_requested && (
-            <div className="moderation-field">
-              <button type="button" className="btn btn-outline" disabled={busy} onClick={() => changeHandedAt(toLocalInput(item.return_requested_at))}>
-                Same time the renter says
-              </button>
-            </div>
+            <button type="button" className="btn btn-outline return-form-btn" disabled={busy} onClick={() => changeHandedAt(toLocalInput(item.return_requested_at))}>
+              Use the renter&apos;s time
+            </button>
           )}
         </div>
 
@@ -177,11 +178,11 @@ function ReturnCard({ item, onConfirmed }) {
         )}
         {error && <p className="moderation-status error" role="alert">{error}</p>}
 
-        <div className="moderation-actions">
-          <button type="button" className="btn btn-primary" disabled={busy} onClick={confirm}>
+        <div className="return-form return-form-actions">
+          <button type="button" className="btn btn-primary return-form-btn" disabled={busy} onClick={confirm}>
             {busy ? 'Saving…' : damaging ? 'Confirm return with damage' : 'Gear is fine, confirm return'}
           </button>
-          <button type="button" className="btn btn-outline" disabled={busy} onClick={() => { setDamaging((value) => !value); setError(''); }}>
+          <button type="button" className="btn btn-outline return-form-btn" disabled={busy} onClick={() => { setDamaging((value) => !value); setError(''); }}>
             {damaging ? 'No damage' : 'Report damage…'}
           </button>
         </div>

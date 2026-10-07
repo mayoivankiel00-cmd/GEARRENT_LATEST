@@ -223,6 +223,73 @@
 
 .review-empty strong { color: var(--text); }
 
+/* Return card form: the date, the renter's-time shortcut and both actions
+   sit on one two-column grid with a shared control height, so the left
+   column (date / confirm) and right column (shortcut / damage) line up. */
+.return-card {
+  --return-control-height: 2.75rem;
+}
+
+.return-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem 1rem;
+  align-items: end;
+}
+
+.return-form-label {
+  grid-column: 1 / -1;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+}
+
+.return-form-input,
+.return-form-btn {
+  height: var(--return-control-height);
+  box-sizing: border-box;
+}
+
+.return-form-input {
+  width: 100%;
+  padding: 0 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg-raised);
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: 0.88rem;
+  color-scheme: dark;
+}
+
+:root[data-theme='light'] .return-form-input { color-scheme: light; }
+
+.return-form-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.return-form-btn {
+  width: 100%;
+  padding: 0 1rem;
+  font-size: 0.75rem;
+}
+
+.return-form-actions {
+  margin-top: 0.4rem;
+}
+
+/* The damage fields use the same columns and gap. */
+.return-card .moderation-grid {
+  gap: 1rem;
+  margin: 0;
+}
+
+@media (max-width: 560px) {
+  .return-form { grid-template-columns: 1fr; }
+}
+
 @media (max-width: 860px) {
   .moderation-grid { grid-template-columns: 1fr; }
   .review-card { grid-template-columns: 1fr; }
