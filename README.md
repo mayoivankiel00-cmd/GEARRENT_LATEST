@@ -38,7 +38,9 @@ All SQL files mentioned below are in the `supabase/` folder.
 11. **Run `gearrent_categories_update.sql`** (after step 5) — categories (name, tagline, cover image, order) are read from `public.categories` and managed on **Admin → Categories**; a category with products can't be deleted.
 12. **Run `gearrent_membership_tiers_update.sql`** (after step 8) — three tiers: Gear Rent Guest (free, browse only), Gear Rent Renter (₱499) and Gear Rent Provider (₱699, or ₱199 for Renters). Existing providers become Gear Rent Provider; everyone else becomes Gear Rent Guest. See *Memberships and bookings*.
 13. **Run `gearrent_handover_update.sql`** (after step 9) — the renter's time starts when the owner hands the gear over (**Start rental** in Provider Gear, or Admin → Handovers & Returns for Gear Rent's gear), not at payment.
-14. `npm install && npm run dev`.
+14. **Run `gearrent_email_lock_update.sql`** (after step 5) — members can't change the email on their profile; only an admin or the SQL editor can.
+15. **Run `gearrent_notifications_fix.sql`** (after step 7) — database notifications (someone rented your gear, hand it over, approvals, returns…) retry common failures instead of silently disappearing; anything that still fails is logged in `gearrent_notification_errors`, and the admin is told when an approval couldn't be sent to the provider.
+16. `npm install && npm run dev`.
 
 ## Returns and deposits
 

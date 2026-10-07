@@ -6,6 +6,7 @@ import { useAdminData } from './adminData';
 import { formatPeso, membershipTiers } from '../lib/pricing';
 import { getTierLevel } from '../lib/providerAccess';
 import { setUserTier } from './adminAccounts';
+import ConfirmDialog from '../components/ConfirmDialog';
 import './AdminRenterDetails.css';
 
 const statusLabels = {
@@ -20,11 +21,13 @@ function MembershipControl({ account, onChanged }) {
   const [selected, setSelected] = useState(currentId);
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState({ type: '', text: '' });
+  const [confirming, setConfirming] = useState(false);
+  const selectedTier = membershipTiers.find((item) => item.id === selected);
 
   const save = async () => {
+    setConfirming(false);
     if (selected === currentId || busy) return;
-    const tier = membershipTiers.find((item) => item.id === selected);
-    if (!window.confirm(`Change ${account.name}'s membership to ${tier.name}? No payment is recorded for this change.`)) return;
+    const tier = selectedTier;
     setBusy(true);
     setStatus({ type: '', text: '' });
     const result = await setUserTier(account.id, selected);
@@ -48,11 +51,19 @@ function MembershipControl({ account, onChanged }) {
         <select className="admin-select" value={selected} onChange={(event) => setSelected(event.target.value)} disabled={busy} aria-label="Membership tier">
           {membershipTiers.map((tier) => <option key={tier.id} value={tier.id}>{tier.name}</option>)}
         </select>
-        <button type="button" className="btn btn-primary" onClick={save} disabled={busy || selected === currentId}>
+        <button type="button" className="btn btn-primary" onClick={() => setConfirming(true)} disabled={busy || selected === currentId}>
           {busy ? 'Saving…' : 'Save'}
         </button>
       </div>
       {status.text && <p className={`admin-detail-membership-status ${status.type}`} role="status">{status.text}</p>}
+      <ConfirmDialog
+        open={confirming}
+        title="Change membership?"
+        message={`${account.name}'s membership changes to ${selectedTier?.name}. No payment is recorded for this change.`}
+        confirmLabel="Change Tier"
+        onConfirm={save}
+        onCancel={() => setConfirming(false)}
+      />
     </section>
   );
 }

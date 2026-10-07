@@ -175,9 +175,11 @@ export function ProviderProvider({ children }) {
     return { product: mapProductRow(data), error: null };
   }, [user, isAdmin, refreshProviderProducts, refreshCatalog, refreshPendingProducts]);
 
-  // Admin decision on a pending listing. Returns { ok, error }.
+  // Admin decision on a pending listing. Returns { ok, error, notifyError }.
+  // notifyError is set when the decision saved but the provider couldn't be
+  // notified (admin_review_product returns the database's reason).
   const reviewProduct = useCallback(async (productId, decision, note = '') => {
-    const { error } = await supabase.rpc('admin_review_product', {
+    const { data, error } = await supabase.rpc('admin_review_product', {
       p_product_id: String(productId),
       p_decision: decision,
       p_note: note || null,
@@ -187,7 +189,9 @@ export function ProviderProvider({ children }) {
       return { ok: false, error: error.message || 'Could not save the review.' };
     }
     await Promise.all([refreshPendingProducts(), refreshCatalog()]);
-    return { ok: true, error: null };
+    const notifyError = typeof data === 'string' && data ? data : null;
+    if (notifyError) console.error('Provider notification failed', notifyError);
+    return { ok: true, error: null, notifyError };
   }, [refreshPendingProducts, refreshCatalog]);
 
   const removeProviderProduct = useCallback(async (productId) => {

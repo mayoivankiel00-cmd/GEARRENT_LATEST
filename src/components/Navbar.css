@@ -10,8 +10,8 @@
 .navbar-inner {
   display: flex;
   align-items: center;
-  gap: 2.5rem;
-  height: 68px;
+  gap: 3rem;
+  height: 76px;
 }
 
 .navbar-logo {
@@ -25,7 +25,7 @@
 
 .navbar-links {
   display: flex;
-  gap: 1.6rem;
+  gap: 2.1rem;
   font-family: var(--font-mono);
   font-size: 0.85rem;
   flex: 1;
@@ -35,6 +35,7 @@
   position: relative;
   color: var(--text-muted);
   padding-bottom: 4px;
+  white-space: nowrap;
   transition: color 0.2s ease;
 }
 
@@ -70,12 +71,33 @@
 .navbar-actions {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 1.4rem;
   font-family: var(--font-mono);
   font-size: 0.85rem;
 }
 
-.navbar-cart,
+/* Round icon buttons (notifications, cart, theme) on the left, the account
+   (name, tier, sign out) on the right, with a thin divider between. */
+.navbar-icons,
+.navbar-account {
+  display: flex;
+  align-items: center;
+}
+
+.navbar-icons {
+  gap: 0.6rem;
+}
+
+.navbar-account {
+  gap: 1.1rem;
+}
+
+.navbar-divider {
+  width: 1px;
+  height: 1.6rem;
+  background: var(--border);
+}
+
 .navbar-login {
   color: var(--text-muted);
   white-space: nowrap;
@@ -85,7 +107,20 @@
   position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  color: var(--text-muted);
+  font-size: 1.05rem;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.navbar-cart:hover,
+.navbar-cart.active {
+  border-color: var(--accent);
+  color: var(--text);
 }
 
 /* Membership badge beside Cart: Guest = outline, Renter = red outline,
@@ -122,8 +157,13 @@
 }
 
 .navbar-cart-badge {
-  min-width: 1.25rem;
-  height: 1.25rem;
+  position: absolute;
+  top: -0.35rem;
+  right: -0.4rem;
+  min-width: 1.15rem;
+  height: 1.15rem;
+  border: 2px solid var(--bg);
+  box-sizing: content-box;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -132,7 +172,7 @@
   background: var(--accent);
   color: var(--on-accent, #fff);
   font-family: var(--font-display);
-  font-size: 0.68rem;
+  font-size: 0.62rem;
   font-weight: 800;
   line-height: 1;
   animation: navbar-badge-pop 0.4s cubic-bezier(0.3, 1.6, 0.5, 1);
@@ -185,32 +225,22 @@
   color: var(--text);
 }
 
-.navbar-cart:hover,
 .navbar-login:hover {
   color: var(--text);
 }
 
+/* Same red button as Sign Up (.btn .btn-primary). */
 .navbar-signout {
-  background: none;
-  border: none;
-  font-family: var(--font-mono);
-  font-size: 0.85rem;
-  color: var(--text-muted);
-  cursor: pointer;
-  padding: 0;
+  line-height: inherit;
   white-space: nowrap;
-}
-
-.navbar-signout:hover {
-  color: var(--accent);
 }
 
 .navbar-theme-toggle {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2rem;
-  height: 2rem;
+  width: 2.25rem;
+  height: 2.25rem;
   padding: 0;
   border: 1px solid var(--border);
   border-radius: 50%;
@@ -230,8 +260,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2rem;
-  height: 2rem;
+  width: 2.25rem;
+  height: 2.25rem;
   padding: 0;
   border: 1px solid var(--border);
   border-radius: 50%;
@@ -338,17 +368,39 @@
   color: var(--text);
 }
 
-@media (max-width: 860px) {
+/* Medium windows: tighten the spacing and drop the name before anything wraps. */
+@media (max-width: 1320px) {
+  .navbar-inner { gap: 1.6rem; }
+  .navbar-links { gap: 1.3rem; }
+  .navbar-actions { gap: 1rem; }
+  .navbar-account { gap: 0.8rem; }
+  .navbar-user-name { display: none; }
+  .navbar-user { padding-right: 0.4rem; }
+  .navbar-signout { padding: 0.65rem 1rem; }
+}
+
+@media (max-width: 1080px) {
+  .navbar-tier { display: none; }
+}
+
+@media (max-width: 980px) {
   .navbar-links { display: none; }
   .navbar-login { display: none; }
 }
 
 @media (max-width: 560px) {
-  .navbar-inner { gap: 1rem; }
-  .navbar-actions { gap: 0.7rem; }
-  .navbar-user { padding-right: 0.4rem; }
+  .navbar-inner { gap: 0.75rem; }
+  .navbar-actions { gap: 0.5rem; }
+  .navbar-icons { gap: 0.4rem; }
+  .navbar-account { gap: 0.6rem; }
+  .navbar-divider { display: none; }
+  .navbar-user { padding: 0.25rem; border: 0; background: none; }
   .navbar-user-name { display: none; }
-  .navbar-signout { font-size: 0.72rem; }
+  .navbar-signout { padding: 0.5rem 0.65rem; font-size: 0.68rem; }
+  .navbar-logo { font-size: 1.05rem; }
+  .navbar-cart,
+  .navbar-theme-toggle,
+  .navbar-notification-toggle { width: 2rem; height: 2rem; }
 }
 .navbar-notification-dot.info { background: var(--text-muted); }
 .navbar-notification-dot.warning { background: var(--warn); }

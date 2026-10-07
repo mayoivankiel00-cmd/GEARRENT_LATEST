@@ -88,7 +88,6 @@ export default function Profile() {
     const formData = new FormData(event.currentTarget);
     updateUser({
       name: formData.get('name').trim(),
-      email: formData.get('email').trim(),
       phone: formData.get('phone').trim(),
       address: formData.get('address').trim(),
       city: formData.get('city').trim(),
@@ -175,7 +174,11 @@ export default function Profile() {
             </div>
             <div className="profile-edit-grid">
               <label className="field">Full Name<input name="name" type="text" defaultValue={displayName} required /></label>
-              <label className="field">Email Address<input name="email" type="email" defaultValue={displayEmail} required /></label>
+              <label className="field">
+                Email Address
+                <input type="email" value={displayEmail} readOnly aria-describedby="profile-email-note" className="field-locked" />
+                <span id="profile-email-note" className="field-note">Your sign-in email can&apos;t be changed here. Contact support if you need to update it.</span>
+              </label>
               <label className="field">Phone Number<input name="phone" type="tel" defaultValue={profileUser.phone || ''} placeholder="0917 123 4567" /></label>
               <label className="field profile-edit-wide">Address<input name="address" type="text" defaultValue={profileUser.address || ''} placeholder="House number and street" /></label>
               <label className="field">City<input name="city" type="text" defaultValue={profileUser.city || ''} placeholder="City or municipality" /></label>

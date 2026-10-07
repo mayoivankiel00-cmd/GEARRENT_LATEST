@@ -3,6 +3,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useNotifications } from '../context/NotificationContext';
 import { useProviderCatalog } from '../context/ProviderContext';
+import ConfirmDialog from '../components/ConfirmDialog';
 import Icon from '../components/Icon';
 import useTheme from '../hooks/useTheme';
 import './AdminLayout.css';
@@ -34,6 +35,12 @@ export default function AdminLayout({ children }) {
   } = useNotifications();
   const { isLightTheme, toggleTheme } = useTheme();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [confirmingSignOut, setConfirmingSignOut] = useState(false);
+
+  const handleSignOut = () => {
+    setConfirmingSignOut(false);
+    signOut();
+  };
 
   return (
     <div className="admin-shell">
@@ -150,7 +157,7 @@ export default function AdminLayout({ children }) {
           <div className="admin-sidebar-divider" />
           <nav className="admin-nav">
             {/* Revokes every session of this account and returns to sign-in. */}
-            <button type="button" className="admin-nav-link" onClick={() => signOut()}>
+            <button type="button" className="admin-nav-link" onClick={() => setConfirmingSignOut(true)}>
               <span className="admin-nav-icon"><Icon name="logout" /></span> Logout
             </button>
           </nav>
@@ -158,6 +165,14 @@ export default function AdminLayout({ children }) {
 
         <main className="admin-main">{children}</main>
       </div>
+      <ConfirmDialog
+        open={confirmingSignOut}
+        title="Sign out?"
+        message="You'll be signed out of Gear Rent on all your devices."
+        confirmLabel="Sign Out"
+        onConfirm={handleSignOut}
+        onCancel={() => setConfirmingSignOut(false)}
+      />
     </div>
   );
 }

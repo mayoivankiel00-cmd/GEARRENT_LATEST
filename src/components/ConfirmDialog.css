@@ -1,0 +1,62 @@
+.confirm-dialog {
+  width: min(400px, calc(100vw - 2rem));
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg-card);
+  color: var(--text);
+  box-shadow: 0 1.5rem 4rem rgba(0, 0, 0, 0.35);
+}
+
+.confirm-dialog[open] {
+  animation: confirm-dialog-in 0.22s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.confirm-dialog::backdrop {
+  background: rgba(5, 5, 5, 0.6);
+  animation: confirm-dialog-fade 0.2s ease;
+}
+
+.confirm-dialog-body {
+  padding: 1.6rem 1.6rem 1.4rem;
+}
+
+.confirm-dialog h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.25rem;
+  font-weight: 800;
+}
+
+.confirm-dialog p {
+  margin: 0;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.confirm-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+@keyframes confirm-dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.97);
+  }
+}
+
+@keyframes confirm-dialog-fade {
+  from { opacity: 0; }
+}
+
+@media (max-width: 420px) {
+  .confirm-dialog-actions { flex-direction: column-reverse; }
+  .confirm-dialog-actions .btn { width: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .confirm-dialog[open],
+  .confirm-dialog::backdrop { animation: none; }
+}

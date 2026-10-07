@@ -494,9 +494,11 @@ export function AuthProvider({ children }) {
   // Applies the change to local state immediately (optimistic update) and
   // writes it to Supabase in the background. `balance`, `role` and `tier`
   // are not writable from here and the database rejects them: tiers change
-  // only through purchaseMembership or an administrator.
+  // only through purchaseMembership or an administrator. `email` is the
+  // sign-in address and is locked too (gearrent_email_lock_update.sql).
   const updateUser = useCallback(async (rawUpdates) => {
     const updates = { ...(rawUpdates || {}) };
+    delete updates.email;
     delete updates.balance;
     delete updates.role;
     delete updates.tier;

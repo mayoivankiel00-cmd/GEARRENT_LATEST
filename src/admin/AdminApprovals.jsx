@@ -92,6 +92,7 @@ function ReviewCard({ product, onReview }) {
 export default function AdminApprovals() {
   const { pendingProducts, reviewProduct, refreshPendingProducts } = useProviderCatalog();
   const [flash, setFlash] = useState('');
+  const [flashWarning, setFlashWarning] = useState('');
 
   useEffect(() => {
     refreshPendingProducts();
@@ -101,9 +102,14 @@ export default function AdminApprovals() {
     const product = pendingProducts.find((item) => item.id === productId);
     const result = await reviewProduct(productId, decision, note);
     if (result.ok) {
+      const name = product?.name || 'Listing';
+      const notified = result.notifyError ? '' : ' The provider has been notified.';
       setFlash(decision === 'approved'
-        ? `${product?.name || 'Listing'} approved. It is now live in the catalog.`
-        : `${product?.name || 'Listing'} rejected. The provider has been notified.`);
+        ? `${name} approved. It is now live in the catalog.${notified}`
+        : `${name} rejected.${notified}`);
+      setFlashWarning(result.notifyError
+        ? `The provider couldn't be notified: ${result.notifyError}`
+        : '');
     }
     return result;
   };
@@ -120,6 +126,7 @@ export default function AdminApprovals() {
       </div>
 
       {flash && <p className="moderation-status success moderation-flash" role="status">{flash}</p>}
+      {flashWarning && <p className="moderation-status error moderation-flash" role="alert">{flashWarning}</p>}
 
       <div className="review-toolbar">
         <span className="mono">{pendingProducts.length} awaiting review · oldest first</span>

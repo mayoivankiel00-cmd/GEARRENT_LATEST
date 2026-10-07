@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { formatPeso } from '../lib/pricing';
+import ConfirmDialog from './ConfirmDialog';
 import '../admin/AdminModeration.css';
 
 const REFRESH_INTERVAL_MS = 30 * 1000;
@@ -51,11 +52,12 @@ function usePendingHandovers() {
 function HandoverCard({ item, onStarted }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [confirming, setConfirming] = useState(false);
   const image = Array.isArray(item.images) ? item.images[0] : null;
 
   const start = async () => {
+    setConfirming(false);
     if (busy) return;
-    if (!window.confirm(`Start ${item.renter_name}'s ${item.days}-day rental of ${item.product_name} now? Only do this once they have the gear. Their rental time starts immediately.`)) return;
     setBusy(true);
     setError('');
     const { data, error: rpcError } = await supabase.rpc('start_rental', { p_rental_id: String(item.rental_id) });
@@ -92,11 +94,20 @@ function HandoverCard({ item, onStarted }) {
         </div>
         {error && <p className="moderation-status error" role="alert">{error}</p>}
         <div className="moderation-actions">
-          <button type="button" className="btn btn-primary" disabled={busy} onClick={start}>
+          <button type="button" className="btn btn-primary" disabled={busy} onClick={() => setConfirming(true)}>
             {busy ? 'Starting…' : 'Gear handed over, start rental'}
           </button>
         </div>
       </div>
+      <ConfirmDialog
+        open={confirming}
+        title="Start this rental?"
+        message={`${item.renter_name}'s ${item.days}-day rental of ${item.product_name} starts now. Only do this once they have the gear in hand.`}
+        confirmLabel="Start Rental"
+        cancelLabel="Not Yet"
+        onConfirm={start}
+        onCancel={() => setConfirming(false)}
+      />
     </article>
   );
 }
